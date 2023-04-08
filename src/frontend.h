@@ -15,8 +15,9 @@ struct FrontendOptions {
 class Frontend {
 
 public:
-	Frontend() = default;
-    virtual ~Frontend() = default;
+	Frontend() = delete;
+    Frontend(const uint32_t image_rows, const uint32_t image_cols);
+    virtual ~Frontend();
     Frontend(const Frontend &frontend) = delete;
 
 public:
@@ -31,6 +32,7 @@ private:
     FrontendOptions options_;
 
     // Buffer allocated for visual frontend.
+    uint8_t *stored_buff_ = nullptr;
     ImagePyramid stored_pyramids_[4];
     std::vector<uint32_t> stored_ids_[2] = {};
     std::vector<Vec2> stored_points_[2] = {};
