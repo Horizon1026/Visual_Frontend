@@ -16,6 +16,9 @@ if ( NOT TARGET lib_visual_frontend )
     add_subdirectory( src ${PROJECT_SOURCE_DIR}/build/lib_visual_frontend )
 endif()
 
+# Add opencv.
+find_package( OpenCV REQUIRED )
+
 # Add test_euroc
 add_executable( test_euroc
     test/test_euroc.cpp
@@ -23,4 +26,5 @@ add_executable( test_euroc
 target_link_libraries( test_euroc
     lib_slam_utility
     lib_visual_frontend
+    ${OpenCV_LIBS}
 )
