@@ -14,6 +14,11 @@ public:
     virtual ~Frontend() = default;
     Frontend(const Frontend &frontend) = delete;
 
+public:
+    // Frontend is driven by mono image pyramid or stereo image pyramids.
+    bool RunOnce(const ImagePyramid &pyramid);
+    bool RunOnce(const ImagePyramid &pyramid_left, const ImagePyramid &pyramid_right);
+
 };
 
 }
