@@ -57,15 +57,16 @@ int main() {
     // Config feature detector.
     frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeatureDetector::HARRIS;
     frontend.feature_detector()->options().kMinValidResponse = 20.0f;
-    frontend.feature_detector()->options().kMinFeatureDistance = 30;
+    frontend.feature_detector()->options().kMinFeatureDistance = 25;
 
     // Config optical flow tracker.
     frontend.feature_tracker()->options().kMethod = OPTICAL_FLOW::LkMethod::LK_FAST;
-    frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
-    frontend.feature_tracker()->options().kPatchColHalfSize = 6;
+    frontend.feature_tracker()->options().kPatchRowHalfSize = 8;
+    frontend.feature_tracker()->options().kPatchColHalfSize = 8;
 
     // Config epipolar solver.
     frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::EPIPOLAR_RANSAC;
+    frontend.epipolar_solver()->options().kMaxEpipolarResidual = 1e-6f;
 
     for (const auto &filename : cam0_filenames) {
         cv::Mat cv_image = cv::imread(filename, 0);
