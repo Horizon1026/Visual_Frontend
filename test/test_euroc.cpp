@@ -43,8 +43,6 @@ int main() {
         Image image;
         image.SetImage(cv_image.data, cv_image.rows, cv_image.cols);
         frontend.RunOnce(image);
-
-        break;
     }
 
 

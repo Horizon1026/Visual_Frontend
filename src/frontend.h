@@ -13,8 +13,9 @@ namespace VisualFrontend {
 struct FrontendOptions {
     uint32_t kImageRows = 0;
     uint32_t kImageCols = 0;
-    uint32_t kMaxStoredFeaturePointsNumber = 200;
+    uint32_t kMaxStoredFeaturePointsNumber = 120;
     bool kSelectKeyframe = true;
+    uint32_t kMinDetectedFeaturePointsNumberInCurrentImage = 60;
 };
 
 class Frontend {
@@ -31,6 +32,14 @@ public:
     bool RunOnce(const Image &image_left, const Image &image_right);
 
     FrontendOptions &options() { return options_; }
+
+private:
+    template<typename T>
+    void ExchangePointer(T **ptr1, T** ptr2);
+
+    template<typename T>
+    void AdjustVectorByStatus(const std::vector<OPTICAL_FLOW::TrackStatus> &status,
+                              std::vector<T> &v);
 
 private:
     // Options.
@@ -60,6 +69,12 @@ private:
     std::vector<uint32_t> *cur_ids_ = &stored_ids_[1];
     std::vector<Vec2> *cur_points_ = &stored_points_[1];
     std::vector<OPTICAL_FLOW::TrackStatus> *cur_status_ = &stored_status_[1];
+
+    // Feature index count;
+    uint32_t feature_id_cnt_ = 1;
+
+    // Keyframe flag.
+    bool is_cur_image_keyframe_ = false;
 
 };
 

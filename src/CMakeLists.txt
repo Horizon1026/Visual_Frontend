@@ -18,16 +18,28 @@ if ( NOT TARGET lib_slam_utility_memory )
     add_subdirectory( ${SLAM_UTILITY_PATH}/src/memory ${PROJECT_SOURCE_DIR}/build/lib_slam_utility_memory )
 endif()
 
-# Add feature detector
+# Add feature detector.
 set( FEATURE_DETECTOR_PATH ${PROJECT_SOURCE_DIR}/../Feature_Detector )
 if ( NOT TARGET lib_feature_detector )
     add_subdirectory( ${FEATURE_DETECTOR_PATH}/src ${PROJECT_SOURCE_DIR}/build/lib_feature_detector )
 endif()
 
-# Add optical flow tracker
+# Add optical flow tracker.
 set( OPTICAL_FLOW_TRACKER_PATH ${PROJECT_SOURCE_DIR}/../Optical_Flow_Tracker )
 if ( NOT TARGET lib_optical_flow_tracker )
     add_subdirectory( ${OPTICAL_FLOW_TRACKER_PATH}/src ${PROJECT_SOURCE_DIR}/build/lib_optical_flow_tracker )
+endif()
+
+# Add vision geometry.
+set( VISION_GEOMETRY_PATH ${PROJECT_SOURCE_DIR}/../Vision_Geometry )
+if ( NOT TARGET lib_vision_geometry )
+    add_subdirectory( ${VISION_GEOMETRY_PATH}/src ${PROJECT_SOURCE_DIR}/build/lib_vision_geometry )
+endif()
+
+# Add camera model.
+set( SENSOR_CAMERA_MODEL_PATH ${PROJECT_SOURCE_DIR}/../Sensor_Model )
+if ( NOT TARGET lib_camera_model )
+    add_subdirectory( ${SENSOR_CAMERA_MODEL_PATH}/src/camera ${PROJECT_SOURCE_DIR}/build/lib_camera_model )
 endif()
 
 # Add opencv for debug.
@@ -44,6 +56,8 @@ target_link_libraries( lib_visual_frontend
 
     lib_feature_detector
     lib_optical_flow_tracker
+    lib_vision_geometry
+    lib_camera_model
 
     ${OpenCV_LIBS}
 )
