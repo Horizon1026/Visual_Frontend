@@ -61,8 +61,8 @@ int main() {
 
     // Config optical flow tracker.
     frontend.feature_tracker()->options().kMethod = OPTICAL_FLOW::LkMethod::LK_FAST;
-    frontend.feature_tracker()->options().kPatchRowHalfSize = 10;
-    frontend.feature_tracker()->options().kPatchColHalfSize = 10;
+    frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
+    frontend.feature_tracker()->options().kPatchColHalfSize = 6;
 
     // Config epipolar solver.
     frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::EPIPOLAR_RANSAC;

@@ -18,7 +18,7 @@ struct FrontendOptions {
     uint32_t kImageRows = 0;
     uint32_t kImageCols = 0;
     uint32_t kMaxStoredFeaturePointsNumber = 120;
-    bool kSelectKeyframe = true;
+    bool kSelfSelectKeyframe = true;
     uint32_t kMinDetectedFeaturePointsNumberInCurrentImage = 60;
 };
 
