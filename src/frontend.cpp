@@ -61,16 +61,19 @@ bool Frontend::RunOnce(const Image &cur_image) {
         tracked_status_.clear();
         feature_tracker_->TrackMultipleLevel(*ref_pyramid_left_, *cur_pyramid_left_, *ref_points_, *cur_points_, tracked_status_);
 
-        // Adjust result.
-        AdjustVectorByStatus(tracked_status_, *cur_points_);
-        AdjustVectorByStatus(tracked_status_, *cur_ids_);
-        tracked_status_.resize(cur_points_->size(), static_cast<OPTICAL_FLOW::TrackStatus>(1));
-
         // Reject outliers by essential/fundemantal matrix.
-        cur_norm_xy_->clear();
+        cur_norm_xy_->resize(cur_points_->size());
         for (uint32_t i = 0; i < cur_points_->size(); ++i) {
             camera_model_->LiftToNormalizedPlaneAndUndistort((*cur_points_)[i], (*cur_norm_xy_)[i]);
         }
+        Mat3 essential;
+        epipolar_solver_->EstimateEssential(*ref_norm_xy_, *cur_norm_xy_, essential, tracked_status_);
+
+        // Adjust result.
+        AdjustVectorByStatus(tracked_status_, *cur_points_);
+        AdjustVectorByStatus(tracked_status_, *cur_ids_);
+        AdjustVectorByStatus(tracked_status_, *cur_norm_xy_);
+        tracked_status_.resize(cur_points_->size(), static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED));
     }
 
     // Check if cur_pyarmid should be keyframe.
@@ -92,6 +95,7 @@ bool Frontend::RunOnce(const Image &cur_image) {
         ExchangePointer(&ref_pyramid_left_, &cur_pyramid_left_);
         ExchangePointer(&ref_points_, &cur_points_);
         ExchangePointer(&ref_ids_, &cur_ids_);
+        ExchangePointer(&ref_norm_xy_, &cur_norm_xy_);
     } else {
         // Maintain ref to be keyframe.
         is_cur_image_keyframe_ = false;

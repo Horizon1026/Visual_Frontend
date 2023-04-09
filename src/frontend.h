@@ -39,6 +39,7 @@ public:
     std::unique_ptr<FEATURE_DETECTOR::FeatureDetector> &feature_detector() { return feature_detector_; }
     std::unique_ptr<OPTICAL_FLOW::OpticalFlowLk> &feature_tracker() { return feature_tracker_; }
     std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() { return camera_model_; }
+    std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() { return epipolar_solver_; }
 
 private:
     template<typename T>
@@ -56,6 +57,7 @@ private:
     std::unique_ptr<FEATURE_DETECTOR::FeatureDetector> feature_detector_ = std::make_unique<FEATURE_DETECTOR::FeatureDetector>();
     std::unique_ptr<OPTICAL_FLOW::OpticalFlowLk> feature_tracker_ = std::make_unique<OPTICAL_FLOW::OpticalFlowLk>();
     std::unique_ptr<SENSOR_MODEL::CameraBasic> camera_model_;
+    std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> epipolar_solver_ = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
 
     // Buffer allocated for visual frontend.
     uint8_t *stored_buff_ = nullptr;
@@ -64,8 +66,7 @@ private:
     std::vector<Vec2> stored_points_[4] = {};
     std::vector<Vec2> stored_velocity_[2] = {};
     std::vector<uint32_t> stored_tracked_cnt_[2] = {};
-    std::vector<OPTICAL_FLOW::TrackStatus> tracked_status_ = {};
-    std::vector<VISION_GEOMETRY::EpipolarSolver> epipolar_status_ = {};
+    std::vector<uint8_t> tracked_status_ = {};
 
     // Reference frame.
     ImagePyramid *ref_pyramid_left_ = &stored_pyramids_[0];

@@ -61,8 +61,11 @@ int main() {
 
     // Config optical flow tracker.
     frontend.feature_tracker()->options().kMethod = OPTICAL_FLOW::LkMethod::LK_FAST;
-    frontend.feature_tracker()->options().kPatchRowHalfSize = 4;
-    frontend.feature_tracker()->options().kPatchColHalfSize = 4;
+    frontend.feature_tracker()->options().kPatchRowHalfSize = 10;
+    frontend.feature_tracker()->options().kPatchColHalfSize = 10;
+
+    // Config epipolar solver.
+    frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::EPIPOLAR_RANSAC;
 
     for (const auto &filename : cam0_filenames) {
         cv::Mat cv_image = cv::imread(filename, 0);
