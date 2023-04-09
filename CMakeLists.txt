@@ -13,7 +13,7 @@ endif()
 
 # Add visual frontend
 if ( NOT TARGET lib_visual_frontend )
-    add_subdirectory( src ${PROJECT_SOURCE_DIR}/build/lib_visual_frontend )
+    add_subdirectory( ./src ${PROJECT_SOURCE_DIR}/build/lib_visual_frontend )
 endif()
 
 # Add opencv.

@@ -15,6 +15,17 @@ Frontend::Frontend(const uint32_t image_rows, const uint32_t image_cols) {
         stored_pyramids_[i].SetPyramidBuff(buf);
         buf += size;
     }
+
+    // Config feature detector.
+    feature_detector_.options().kMethod = FEATURE_DETECTOR::FeatureDetector::HARRIS;
+    feature_detector_.options().kMinValidResponse = 20.0f;
+    feature_detector_.options().kMinFeatureDistance = 20;
+
+    // Config optical flow tracker.
+    feature_tracker_.options().kPatchRowHalfSize = 6;
+    feature_tracker_.options().kPatchColHalfSize = 6;
+    feature_tracker_.options().kMethod = OPTICAL_FLOW::LkMethod::LK_FAST;
+
 }
 
 Frontend::~Frontend() {
