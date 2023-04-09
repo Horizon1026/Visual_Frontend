@@ -1,6 +1,9 @@
 #include "frontend.h"
 #include "slam_memory.h"
 
+// Debug.
+#include "opencv2/opencv.hpp"
+
 namespace VisualFrontend {
 
 Frontend::Frontend(const uint32_t image_rows, const uint32_t image_cols) {
@@ -37,8 +40,26 @@ bool Frontend::RunOnce(const Image &cur_image) {
         return false;
     }
 
+    // Image process.
+    std::copy_n(cur_image.data(), cur_image.rows() * cur_image.cols(), cur_pyramid_left_->GetImage(0).data());
+    cur_pyramid_left_->CreateImagePyramid(4);
+
+    for (uint32_t i = 0; i < cur_pyramid_left_->level(); ++i) {
+        Image one_level = cur_pyramid_left_->GetImage(i);
+        cv::Mat image(one_level.rows(), one_level.cols(), CV_8UC1, one_level.data());
+        cv::imshow(std::to_string(i), image);
+        cv::waitKey(1);
+    }
+    cv::waitKey(0);
+
     if (ref_points_->size() != 0) {
         // Track features from ref pyramid to cur pyramid.
+        cur_points_->clear();
+        cur_ids_->clear();
+        cur_status_->clear();
+
+        feature_tracker_.TrackMultipleLevel(*ref_pyramid_left_, *cur_pyramid_left_, *ref_points_, *cur_points_, *cur_status_);
+
     }
 
     // Check if cur_pyarmid should be keyframe.

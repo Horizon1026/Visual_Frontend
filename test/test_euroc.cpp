@@ -34,14 +34,19 @@ int main() {
     GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames);
     std::sort(cam0_filenames.begin(), cam0_filenames.end());
 
+    cv::Mat image = cv::imread(cam0_filenames.front());
+    VisualFrontend::Frontend frontend(image.rows, image.cols);
+    LogDebug("Frontend config image size is " << image.rows << ", " << image.cols);
+
     for (const auto &filename : cam0_filenames) {
-        LogInfo("Find file " << filename);
-        cv::Mat image = cv::imread(filename);
-        cv::imshow("cam0", image);
-        cv::waitKey(1);
+        cv::Mat cv_image = cv::imread(filename, 0);
+        Image image;
+        image.SetImage(cv_image.data, cv_image.rows, cv_image.cols);
+        frontend.RunOnce(image);
+
+        break;
     }
 
-    cv::waitKey();
 
     return 0;
 }

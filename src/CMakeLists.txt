@@ -30,6 +30,9 @@ if ( NOT TARGET lib_optical_flow_tracker )
     add_subdirectory( ${OPTICAL_FLOW_TRACKER_PATH}/src ${PROJECT_SOURCE_DIR}/build/lib_optical_flow_tracker )
 endif()
 
+# Add opencv for debug.
+find_package( OpenCV REQUIRED )
+
 add_library( lib_visual_frontend ${AUX_SRC_FRONTEND} )
 target_include_directories( lib_visual_frontend PUBLIC . )
 target_link_libraries( lib_visual_frontend
@@ -41,4 +44,6 @@ target_link_libraries( lib_visual_frontend
 
     lib_feature_detector
     lib_optical_flow_tracker
+
+    ${OpenCV_LIBS}
 )
