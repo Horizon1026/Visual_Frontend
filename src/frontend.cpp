@@ -92,7 +92,7 @@ bool Frontend::RunOnce(const Image &cur_image) {
         ExchangePointer(&ref_pyramid_left_, &cur_pyramid_left_);
         ExchangePointer(&ref_points_, &cur_points_);
         ExchangePointer(&ref_status_, &cur_status_);
-        ExchangePointer(&ref_ids_, &ref_ids_);
+        ExchangePointer(&ref_ids_, &cur_ids_);
     } else {
         // Maintain ref to be keyframe.
         is_cur_image_keyframe_ = false;
