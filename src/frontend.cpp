@@ -1,10 +1,11 @@
 #include "frontend.h"
 #include "slam_memory.h"
+#include "log_api.h"
 
 // Debug.
 #include "opencv2/opencv.hpp"
 
-namespace VisualFrontend {
+namespace VISUAL_FRONTEND {
 
 // Debug.
 void DrawImageWithFeatures(const std::string title, const Image &image, const std::vector<Vec2> &features) {
@@ -32,16 +33,6 @@ Frontend::Frontend(const uint32_t image_rows, const uint32_t image_cols) {
         buf += size;
     }
 
-    // Config feature detector.
-    feature_detector_.options().kMethod = FEATURE_DETECTOR::FeatureDetector::HARRIS;
-    feature_detector_.options().kMinValidResponse = 20.0f;
-    feature_detector_.options().kMinFeatureDistance = 30;
-
-    // Config optical flow tracker.
-    feature_tracker_.options().kMethod = OPTICAL_FLOW::LkMethod::LK_FAST;
-    feature_tracker_.options().kPatchRowHalfSize = 4;
-    feature_tracker_.options().kPatchColHalfSize = 4;
-
 }
 
 Frontend::~Frontend() {
@@ -50,6 +41,11 @@ Frontend::~Frontend() {
 
 bool Frontend::RunOnce(const Image &cur_image) {
     if (cur_image.data() == nullptr) {
+        return false;
+    }
+
+    if (camera_model_ == nullptr) {
+        LogError("Camera model is nullptr, please set it to be pinhole or fisheye.");
         return false;
     }
 
@@ -62,15 +58,19 @@ bool Frontend::RunOnce(const Image &cur_image) {
         // Track features from ref pyramid to cur pyramid.
         *cur_points_ = *ref_points_;
         *cur_ids_ = *ref_ids_;
-        cur_status_->clear();
-        feature_tracker_.TrackMultipleLevel(*ref_pyramid_left_, *cur_pyramid_left_, *ref_points_, *cur_points_, *cur_status_);
-
-        // Reject outliers by essential/fundemantal matrix.
+        tracked_status_.clear();
+        feature_tracker_->TrackMultipleLevel(*ref_pyramid_left_, *cur_pyramid_left_, *ref_points_, *cur_points_, tracked_status_);
 
         // Adjust result.
-        AdjustVectorByStatus(*cur_status_, *cur_points_);
-        AdjustVectorByStatus(*cur_status_, *cur_ids_);
-        cur_status_->resize(cur_points_->size(), OPTICAL_FLOW::TRACKED);
+        AdjustVectorByStatus(tracked_status_, *cur_points_);
+        AdjustVectorByStatus(tracked_status_, *cur_ids_);
+        tracked_status_.resize(cur_points_->size(), static_cast<OPTICAL_FLOW::TrackStatus>(1));
+
+        // Reject outliers by essential/fundemantal matrix.
+        cur_norm_xy_->clear();
+        for (uint32_t i = 0; i < cur_points_->size(); ++i) {
+            camera_model_->LiftToNormalizedPlaneAndUndistort((*cur_points_)[i], (*cur_norm_xy_)[i]);
+        }
     }
 
     // Check if cur_pyarmid should be keyframe.
@@ -79,7 +79,7 @@ bool Frontend::RunOnce(const Image &cur_image) {
         is_cur_image_keyframe_ = true;
 
         // Detect new features in cur.
-        feature_detector_.DetectGoodFeatures(cur_pyramid_left_->GetImage(0),
+        feature_detector_->DetectGoodFeatures(cur_pyramid_left_->GetImage(0),
                                              options_.kMaxStoredFeaturePointsNumber,
                                              *cur_points_);
         const uint32_t new_features_num = cur_points_->size() - cur_ids_->size();
@@ -91,7 +91,6 @@ bool Frontend::RunOnce(const Image &cur_image) {
         // Replace ref with cur.
         ExchangePointer(&ref_pyramid_left_, &cur_pyramid_left_);
         ExchangePointer(&ref_points_, &cur_points_);
-        ExchangePointer(&ref_status_, &cur_status_);
         ExchangePointer(&ref_ids_, &cur_ids_);
     } else {
         // Maintain ref to be keyframe.
@@ -112,6 +111,16 @@ bool Frontend::RunOnce(const Image &cur_image) {
 }
 
 bool Frontend::RunOnce(const Image &image_left, const Image &image_right) {
+    if (image_left.data() == nullptr || image_right.data() == nullptr) {
+        return false;
+    }
+
+    if (camera_model_ == nullptr) {
+        LogError("Camera model is nullptr, please set it to be pinhole or fisheye.");
+        return false;
+    }
+
+    // TODO:
 
     return true;
 }
@@ -123,12 +132,12 @@ void Frontend::ExchangePointer(T **ptr1, T** ptr2) {
     *ptr2 = ptr_tmp;
 }
 
-template<typename T>
-void Frontend::AdjustVectorByStatus(const std::vector<OPTICAL_FLOW::TrackStatus> &status,
+template<typename T, typename StatusType>
+void Frontend::AdjustVectorByStatus(const std::vector<StatusType> &status,
                                     std::vector<T> &v)  {
     uint32_t j = 0;
     for (uint32_t i = 0; i < status.size(); ++i) {
-        if (status[i] == OPTICAL_FLOW::TrackStatus::TRACKED) {
+        if (status[i] == static_cast<StatusType>(1)) {
             v[j] = v[i];
             ++j;
         }
