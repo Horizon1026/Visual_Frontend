@@ -18,15 +18,15 @@ void DrawReferenceResultsPrediction(const std::string title,
     cv::Mat cv_cur_image(cur_image.rows(), cur_image.cols(), CV_8UC1, cur_image.data());
 
     // Merge three images.
-    cv::Mat merged_image(cv_cur_image.rows * 3, cv_cur_image.cols, CV_8UC1);
+    cv::Mat merged_image(cv_cur_image.rows * 2, cv_cur_image.cols * 2, CV_8UC1);
     for (int32_t v = 0; v < merged_image.rows; ++v) {
         for (int32_t u = 0; u < merged_image.cols; ++u) {
-            if (v < cv_ref_image.rows) {
+            if (v < cv_ref_image.rows && u < cv_ref_image.cols) {
                 merged_image.at<uchar>(v, u) = cv_ref_image.at<uchar>(v, u);
-            } else if (v < cv_ref_image.rows * 2) {
+            } else if (v < cv_ref_image.rows && u < cv_ref_image.cols * 2) {
+                merged_image.at<uchar>(v, u) = cv_cur_image.at<uchar>(v, u - cv_cur_image.cols);
+            } else if (v < cv_ref_image.rows * 2 && u < cv_ref_image.cols) {
                 merged_image.at<uchar>(v, u) = cv_cur_image.at<uchar>(v - cv_cur_image.rows, u);
-            } else {
-                merged_image.at<uchar>(v, u) = cv_cur_image.at<uchar>(v - cv_cur_image.rows * 2, u);
             }
         }
     }
@@ -35,19 +35,19 @@ void DrawReferenceResultsPrediction(const std::string title,
     cv::Mat show_image(merged_image.rows, merged_image.cols, CV_8UC3);
     cv::cvtColor(merged_image, show_image, cv::COLOR_GRAY2BGR);
 
-    // Draw reference points.
+    // [Top left] Draw reference points.
     for (uint32_t i = 0; i < ref_points.size(); ++i) {
         cv::circle(show_image, cv::Point2f(ref_points[i].x(), ref_points[i].y()), 2, cv::Scalar(0, 0, 255), 3);
     }
 
-    // Draw result points.
+    // [Top right] Draw result points.
     for (uint32_t i = 0; i < ref_points.size(); ++i) {
-        cv::circle(show_image, cv::Point2f(cur_points[i].x(), cur_points[i].y() + cv_cur_image.rows), 2, cv::Scalar(255, 0, 0), 3);
+        cv::circle(show_image, cv::Point2f(cur_points[i].x() + cv_cur_image.cols, cur_points[i].y()), 2, cv::Scalar(255, 0, 0), 3);
     }
 
-    // Draw prediction points.
+    // [Bottom left] Draw prediction points.
     for (uint32_t i = 0; i < ref_points.size(); ++i) {
-        cv::circle(show_image, cv::Point2f(ref_points[i].x() + ref_vel[i].x(), ref_points[i].y() + ref_vel[i].y() + cv_cur_image.rows * 2), 2, cv::Scalar(0, 255, 0), 3);
+        cv::circle(show_image, cv::Point2f(ref_points[i].x() + ref_vel[i].x(), ref_points[i].y() + ref_vel[i].y() + cv_cur_image.rows), 2, cv::Scalar(0, 255, 0), 3);
     }
 
     cv::imshow(title, show_image);
@@ -85,15 +85,15 @@ bool Frontend::RunOnce(const Image &cur_image) {
 
     // Image process.
     std::copy_n(cur_image.data(), cur_image.rows() * cur_image.cols(), cur_pyramid_left_->GetImage(0).data());
-    cur_pyramid_left_->CreateImagePyramid(4);
+    cur_pyramid_left_->CreateImagePyramid(5);
 
     // Track features if ref frame is ok.
     if (ref_points_->size() != 0) {
         // Predict pixel location on current image by optical flow velocity.
         *cur_points_ = *ref_points_;    // Deep copy.
-        // for (uint32_t i = 0; i < ref_vel_->size(); ++i) {
-        //     (*cur_points_)[i] += (*ref_vel_)[i];
-        // }
+        for (uint32_t i = 0; i < ref_vel_->size(); ++i) {
+            (*cur_points_)[i] += (*ref_vel_)[i];
+        }
 
         // Track features from ref pyramid to cur pyramid.
         *cur_ids_ = *ref_ids_;
@@ -114,6 +114,9 @@ bool Frontend::RunOnce(const Image &cur_image) {
         Mat3 essential;
         epipolar_solver_->EstimateEssential(*ref_norm_xy_, *cur_norm_xy_, essential, tracked_status_);
 
+        // Grid filter to make points sparsely.
+        // TODO:
+
         // Reject outliers' optical flow velocity. It means do not predict them at next tracking.
         for (uint32_t i = 0; i < tracked_status_.size(); ++i) {
             if (tracked_status_[i] != static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
@@ -131,7 +134,7 @@ bool Frontend::RunOnce(const Image &cur_image) {
     }
 
     // Debug.
-    DrawReferenceResultsPrediction("reference - predict - result",
+    DrawReferenceResultsPrediction("reference - result - predict",
                                    ref_pyramid_left_->GetImage(0),
                                    cur_pyramid_left_->GetImage(0),
                                    *ref_points_,
