@@ -85,15 +85,15 @@ bool Frontend::RunOnce(const Image &cur_image) {
 
     // Image process.
     std::copy_n(cur_image.data(), cur_image.rows() * cur_image.cols(), cur_pyramid_left_->GetImage(0).data());
-    cur_pyramid_left_->CreateImagePyramid(5);
+    cur_pyramid_left_->CreateImagePyramid(4);
 
     // Track features if ref frame is ok.
     if (ref_points_->size() != 0) {
         // Predict pixel location on current image by optical flow velocity.
         *cur_points_ = *ref_points_;    // Deep copy.
-        for (uint32_t i = 0; i < ref_vel_->size(); ++i) {
-            (*cur_points_)[i] += (*ref_vel_)[i];
-        }
+        // for (uint32_t i = 0; i < ref_vel_->size(); ++i) {
+        //     (*cur_points_)[i] += (*ref_vel_)[i];
+        // }
 
         // Track features from ref pyramid to cur pyramid.
         *cur_ids_ = *ref_ids_;
@@ -101,10 +101,17 @@ bool Frontend::RunOnce(const Image &cur_image) {
         feature_tracker_->TrackMultipleLevel(*ref_pyramid_left_, *cur_pyramid_left_, *ref_points_, *cur_points_, tracked_status_);
 
         // Compute optical flow velocity. It is useful for feature prediction.
+        int32_t cnt = 0;
         cur_vel_->resize(ref_points_->size());
         for (uint32_t i = 0; i < ref_points_->size(); ++i) {
-            (*cur_vel_)[i] = (*cur_points_)[i] - (*ref_points_)[i];
+            if (tracked_status_[i] == static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
+                (*cur_vel_)[i] = (*cur_points_)[i] - (*ref_points_)[i];
+                ++cnt;
+            } else {
+                (*cur_vel_)[i].setZero();
+            }
         }
+        LogInfo("Feature tracked " << ref_points_->size() << " / " << cnt << ".");
 
         // Reject outliers by essential/fundemantal matrix.
         cur_norm_xy_->resize(cur_points_->size());
@@ -114,16 +121,41 @@ bool Frontend::RunOnce(const Image &cur_image) {
         Mat3 essential;
         epipolar_solver_->EstimateEssential(*ref_norm_xy_, *cur_norm_xy_, essential, tracked_status_);
 
-        // Grid filter to make points sparsely.
-        // TODO:
-
         // Reject outliers' optical flow velocity. It means do not predict them at next tracking.
+        cnt = 0;
         for (uint32_t i = 0; i < tracked_status_.size(); ++i) {
             if (tracked_status_[i] != static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
                 (*cur_vel_)[i].setZero();
+            } else {
+                ++cnt;
             }
         }
         *ref_vel_ = *cur_vel_;
+        LogInfo("Essential reject outliers " << ref_norm_xy_->size() << " / " << cnt << ".");
+
+        // Grid filter to make points sparsely.
+        MatInt grid;
+        int32_t grid_rows = 15;
+        int32_t grid_cols = 15;
+        float grid_row_step = cur_image.rows() / grid_rows;
+        float grid_col_step = cur_image.cols() / grid_cols;
+        grid.setZero(grid_rows, grid_cols);
+        for (uint32_t i = 0; i < tracked_status_.size(); ++i) {
+            const int32_t row = static_cast<int32_t>((*cur_points_)[i].y() / grid_row_step);
+            const int32_t col = static_cast<int32_t>((*cur_points_)[i].x() / grid_col_step);
+            if (grid(row, col) && tracked_status_[i] == static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
+                tracked_status_[i] = static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::NOT_TRACKED);
+            } else {
+                grid(row, col) = 1;
+            }
+        }
+        cnt = 0;
+        for (uint32_t i = 0; i < tracked_status_.size(); ++i) {
+            if (tracked_status_[i] == static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
+                ++cnt;
+            }
+        }
+        LogInfo("Grid filter reject outliers " << ref_norm_xy_->size() << " / " << cnt << ".");
 
         // Adjust result.
         AdjustVectorByStatus(tracked_status_, *cur_points_);
@@ -134,7 +166,7 @@ bool Frontend::RunOnce(const Image &cur_image) {
     }
 
     // Debug.
-    DrawReferenceResultsPrediction("reference - result - predict",
+    DrawReferenceResultsPrediction("reference - result - predict - none",
                                    ref_pyramid_left_->GetImage(0),
                                    cur_pyramid_left_->GetImage(0),
                                    *ref_points_,
@@ -154,6 +186,7 @@ bool Frontend::RunOnce(const Image &cur_image) {
         const uint32_t new_features_num = cur_points_->size() - cur_ids_->size();
         for (uint32_t i = 0; i < new_features_num; ++i) {
             cur_ids_->emplace_back(feature_id_cnt_);
+            cur_norm_xy_->emplace_back(Vec2::Zero());
             ++feature_id_cnt_;
         }
 
