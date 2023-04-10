@@ -137,8 +137,8 @@ bool Frontend::RunOnce(const Image &cur_image) {
         MatInt grid;
         int32_t grid_rows = 15;
         int32_t grid_cols = 15;
-        float grid_row_step = cur_image.rows() / grid_rows;
-        float grid_col_step = cur_image.cols() / grid_cols;
+        float grid_row_step = cur_image.rows() / (grid_rows - 1);
+        float grid_col_step = cur_image.cols() / (grid_cols - 1);
         grid.setZero(grid_rows, grid_cols);
         for (uint32_t i = 0; i < tracked_status_.size(); ++i) {
             const int32_t row = static_cast<int32_t>((*cur_points_)[i].y() / grid_row_step);
