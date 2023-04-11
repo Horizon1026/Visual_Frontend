@@ -39,14 +39,14 @@ void DrawReferenceResultsPrediction(const std::string title,
     for (uint32_t i = 0; i < ref_points.size(); ++i) {
         cv::circle(show_image, cv::Point2f(ref_points[i].x(), ref_points[i].y()), 1, cv::Scalar(0, 0, 255), 3);
         cv::putText(show_image, std::to_string(ref_ids[i]), cv::Point2f(ref_points[i].x(), ref_points[i].y()),
-            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.5, cv::Scalar(0, 0, 255));
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.7, cv::Scalar(0, 0, 255));
     }
 
     // [right] Draw result points.
     for (uint32_t i = 0; i < cur_points.size(); ++i) {
         cv::circle(show_image, cv::Point2f(cur_points[i].x() + cv_cur_image.cols, cur_points[i].y()), 1, cv::Scalar(255, 255, 0), 3);
         cv::putText(show_image, std::to_string(cur_ids[i]), cv::Point2f(cur_points[i].x() + cv_cur_image.cols, cur_points[i].y()),
-            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.5, cv::Scalar(255, 255, 0));
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.7, cv::Scalar(255, 255, 0));
     }
 
     cv::imshow(title, show_image);
@@ -100,9 +100,9 @@ bool Frontend::RunOnce(const Image &cur_image) {
     if (ref_points_->size() != 0) {
         // Predict pixel location on current image by optical flow velocity.
         *cur_points_ = *ref_points_;    // Deep copy.
-        // for (uint32_t i = 0; i < ref_vel_->size(); ++i) {
-        //     (*cur_points_)[i] += (*ref_vel_)[i];
-        // }
+        for (uint32_t i = 0; i < ref_vel_->size(); ++i) {
+            (*cur_points_)[i] += (*ref_vel_)[i];
+        }
 
         // Track features from ref pyramid to cur pyramid.
         *cur_ids_ = *ref_ids_;
