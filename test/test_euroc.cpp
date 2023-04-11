@@ -38,6 +38,7 @@ int main() {
     // Config frontend.
     cv::Mat image = cv::imread(cam0_filenames.front());
     VISUAL_FRONTEND::Frontend frontend(image.rows, image.cols);
+    frontend.options().kSelfSelectKeyframe = false;
     LogDebug("Frontend config image size is " << image.rows << ", " << image.cols);
 
     // Config camera model.
@@ -61,12 +62,12 @@ int main() {
 
     // Config optical flow tracker.
     frontend.feature_tracker()->options().kMethod = OPTICAL_FLOW::LkMethod::LK_FAST;
-    frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
-    frontend.feature_tracker()->options().kPatchColHalfSize = 6;
+    frontend.feature_tracker()->options().kPatchRowHalfSize = 8;
+    frontend.feature_tracker()->options().kPatchColHalfSize = 8;
 
     // Config epipolar solver.
     frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::EPIPOLAR_RANSAC;
-    frontend.epipolar_solver()->options().kMaxEpipolarResidual = 1e-6f;
+    frontend.epipolar_solver()->options().kMaxEpipolarResidual = 1e-1f;
 
     for (const auto &filename : cam0_filenames) {
         cv::Mat cv_image = cv::imread(filename, 0);
