@@ -6,7 +6,7 @@
 #include "datatype_image_pyramid.h"
 
 #include "feature_detector.h"
-#include "optical_flow_lk.h"
+#include "optical_flow.h"
 #include "camera_basic.h"
 #include "geometry_epipolar.h"
 
@@ -37,7 +37,7 @@ public:
 
     FrontendOptions &options() { return options_; }
     std::unique_ptr<FEATURE_DETECTOR::FeatureDetector> &feature_detector() { return feature_detector_; }
-    std::unique_ptr<OPTICAL_FLOW::OpticalFlowLk> &feature_tracker() { return feature_tracker_; }
+    std::unique_ptr<OPTICAL_FLOW::OpticalFlow> &feature_tracker() { return feature_tracker_; }
     std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() { return camera_model_; }
     std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() { return epipolar_solver_; }
 
@@ -55,7 +55,7 @@ private:
 
     // Components.
     std::unique_ptr<FEATURE_DETECTOR::FeatureDetector> feature_detector_ = std::make_unique<FEATURE_DETECTOR::FeatureDetector>();
-    std::unique_ptr<OPTICAL_FLOW::OpticalFlowLk> feature_tracker_ = std::make_unique<OPTICAL_FLOW::OpticalFlowLk>();
+    std::unique_ptr<OPTICAL_FLOW::OpticalFlow> feature_tracker_;
     std::unique_ptr<SENSOR_MODEL::CameraBasic> camera_model_;
     std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> epipolar_solver_ = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
 

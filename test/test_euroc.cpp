@@ -1,5 +1,7 @@
 #include "frontend.h"
 #include "pinhole.h"
+#include "optical_flow_lk.h"
+#include "optical_flow_klt.h"
 #include "log_api.h"
 
 #include "iostream"
@@ -62,10 +64,11 @@ int main() {
     frontend.feature_detector()->options().kMinFeatureDistance = 25;
 
     // Config optical flow tracker.
-    frontend.feature_tracker()->options().kMethod = OPTICAL_FLOW::LkMethod::LK_FAST;
+    frontend.feature_tracker() = std::make_unique<OPTICAL_FLOW::OpticalFlowLk>();
+    frontend.feature_tracker()->options().kMethod = OPTICAL_FLOW::Method::LK_FAST;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 10;
     frontend.feature_tracker()->options().kPatchColHalfSize = 10;
-    frontend.feature_tracker()->options().kMaxIteration = 10;
+    frontend.feature_tracker()->options().kMaxIteration = 15;
     frontend.feature_tracker()->options().kMaxConvergeResidual = 1.0f;
 
     // Config epipolar solver.
