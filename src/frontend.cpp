@@ -144,21 +144,12 @@ bool Frontend::RunOnce(const Image &cur_image) {
         DebugStatus("After essential checking, ", tracked_status_);
 
         // Grid filter to make points sparsely.
-        MatInt grid;
-        int32_t grid_rows = 12;
-        int32_t grid_cols = 12;
-        float grid_row_step = cur_image.rows() / (grid_rows - 1);
-        float grid_col_step = cur_image.cols() / (grid_cols - 1);
-        grid.setZero(grid_rows, grid_cols);
-        for (uint32_t i = 0; i < tracked_status_.size(); ++i) {
-            const int32_t row = static_cast<int32_t>((*cur_points_)[i].y() / grid_row_step);
-            const int32_t col = static_cast<int32_t>((*cur_points_)[i].x() / grid_col_step);
-            if (grid(row, col) && tracked_status_[i] == static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
-                tracked_status_[i] = static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::NOT_TRACKED);
-            } else {
-                grid(row, col) = 1;
-            }
-        }
+        feature_detector_->SparsifyFeatures(*cur_points_,
+        									cur_pyramid_left_->GetImage(0).rows(),
+                                            cur_pyramid_left_->GetImage(0).cols(),
+                                            static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED),
+                                            static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::NOT_TRACKED),
+                                            tracked_status_);
         DebugStatus("After grid filtering, ", tracked_status_);
 
         // Adjust result.

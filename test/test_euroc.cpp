@@ -54,14 +54,19 @@ int main() {
     const float k3 = 0.0f;
     const float p1 = 0.00019359f;
     const float p2 = 1.76187114e-05f;
+    Vec5 params;
+    params << k1, k2, k3, p1, p2;
     frontend.camera_model() = std::make_unique<SENSOR_MODEL::Pinhole>();
     frontend.camera_model()->SetIntrinsicParameter(fx, fy, cx, cy);
-    frontend.camera_model()->SetDistortionParameter(Vec5(k1, k2, k3, p1, p2));
+    frontend.camera_model()->SetDistortionParameter(params);
 
     // Config feature detector.
+    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeatureDetector>();
     frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeatureDetector::HARRIS;
     frontend.feature_detector()->options().kMinValidResponse = 20.0f;
     frontend.feature_detector()->options().kMinFeatureDistance = 25;
+    frontend.feature_detector()->options().kGridFilterRowDivideNumber = 12;
+    frontend.feature_detector()->options().kGridFilterColDivideNumber = 12;
 
     // Config optical flow tracker.
     frontend.feature_tracker() = std::make_unique<OPTICAL_FLOW::OpticalFlowLk>();
@@ -72,6 +77,7 @@ int main() {
     frontend.feature_tracker()->options().kMaxConvergeResidual = 1.0f;
 
     // Config epipolar solver.
+    frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
     frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::EPIPOLAR_RANSAC;
     frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 

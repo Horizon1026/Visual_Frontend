@@ -54,10 +54,10 @@ private:
     FrontendOptions options_;
 
     // Components.
-    std::unique_ptr<FEATURE_DETECTOR::FeatureDetector> feature_detector_ = std::make_unique<FEATURE_DETECTOR::FeatureDetector>();
-    std::unique_ptr<OPTICAL_FLOW::OpticalFlow> feature_tracker_;
-    std::unique_ptr<SENSOR_MODEL::CameraBasic> camera_model_;
-    std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> epipolar_solver_ = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
+    std::unique_ptr<FEATURE_DETECTOR::FeatureDetector> feature_detector_ = nullptr;
+    std::unique_ptr<OPTICAL_FLOW::OpticalFlow> feature_tracker_ = nullptr;
+    std::unique_ptr<SENSOR_MODEL::CameraBasic> camera_model_ = nullptr;
+    std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> epipolar_solver_ = nullptr;
 
     // Buffer allocated for visual frontend.
     uint8_t *stored_buff_ = nullptr;
