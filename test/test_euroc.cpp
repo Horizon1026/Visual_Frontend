@@ -1,4 +1,4 @@
-#include "frontend.h"
+#include "frontend_mono.h"
 #include "pinhole.h"
 #include "optical_flow_lk.h"
 #include "optical_flow_klt.h"
@@ -39,10 +39,10 @@ int main() {
 
     // Config frontend.
     cv::Mat image = cv::imread(cam0_filenames.front());
-    VISUAL_FRONTEND::Frontend frontend(image.rows, image.cols);
+    VISUAL_FRONTEND::FrontendMono frontend(image.rows, image.cols);
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
-    frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 50;
+    frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 70;
 
     // Config camera model.
     const float fx = 458.654f;
@@ -54,11 +54,9 @@ int main() {
     const float k3 = 0.0f;
     const float p1 = 0.00019359f;
     const float p2 = 1.76187114e-05f;
-    Vec5 params;
-    params << k1, k2, k3, p1, p2;
     frontend.camera_model() = std::make_unique<SENSOR_MODEL::Pinhole>();
     frontend.camera_model()->SetIntrinsicParameter(fx, fy, cx, cy);
-    frontend.camera_model()->SetDistortionParameter(params);
+    frontend.camera_model()->SetDistortionParameter(Vec5(k1, k2, k3, p1, p2));
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeatureDetector>();
