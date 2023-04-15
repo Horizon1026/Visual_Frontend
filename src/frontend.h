@@ -22,6 +22,15 @@ struct FrontendOptions {
     uint32_t kMinDetectedFeaturePointsNumberInCurrentImage = 60;
 };
 
+typedef void (*FrontendMonoVisualizeFunctionPtr)(const std::string,                 // title.
+                                                 const Image &, const Image &,      // ref_image, cur_image.
+                                                 const std::vector<Vec2> &,         // ref_pixel_uv.
+                                                 const std::vector<Vec2> &,         // cur_pixel_uv.
+                                                 const std::vector<uint32_t> &,
+                                                 const std::vector<uint32_t> &,
+                                                 const std::vector<uint32_t> &,
+                                                 const std::vector<Vec2> &);
+
 class Frontend {
 
 public:

@@ -16,6 +16,9 @@ public:
 public:
     // Frontend is driven by mono image or stereo images.
     virtual bool RunOnce(const Image &image) override;
+
+    // Visualize API.
+    FrontendMonoVisualizeFunctionPtr VisualizeResult = nullptr;
 };
 
 }

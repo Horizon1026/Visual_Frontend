@@ -11,6 +11,56 @@
 
 #include "opencv2/opencv.hpp"
 
+void DrawReferenceResults(const std::string title,
+                          const Image &ref_image,
+                          const Image &cur_image,
+                          const std::vector<Vec2> &ref_points,
+                          const std::vector<Vec2> &cur_points,
+                          const std::vector<uint32_t> &ref_ids,
+                          const std::vector<uint32_t> &cur_ids,
+                          const std::vector<uint32_t> &ref_tracked_cnt,
+                          const std::vector<Vec2> &ref_vel) {
+    cv::Mat cv_ref_image(ref_image.rows(), ref_image.cols(), CV_8UC1, ref_image.data());
+    cv::Mat cv_cur_image(cur_image.rows(), cur_image.cols(), CV_8UC1, cur_image.data());
+
+    // Merge three images.
+    cv::Mat merged_image(cv_cur_image.rows, cv_cur_image.cols * 2, CV_8UC1);
+    for (int32_t v = 0; v < merged_image.rows; ++v) {
+        for (int32_t u = 0; u < merged_image.cols; ++u) {
+            if (u < cv_ref_image.cols) {
+                merged_image.at<uchar>(v, u) = cv_ref_image.at<uchar>(v, u);
+            } else {
+                merged_image.at<uchar>(v, u) = cv_cur_image.at<uchar>(v, u - cv_cur_image.cols);
+            }
+        }
+    }
+
+    // Construct image to show.
+    cv::Mat show_image(merged_image.rows, merged_image.cols, CV_8UC3);
+    cv::cvtColor(merged_image, show_image, cv::COLOR_GRAY2BGR);
+
+    // [left] Draw reference points.
+    for (uint32_t i = 0; i < ref_points.size(); ++i) {
+        int32_t color = 255 - ref_tracked_cnt[i] * 50;
+        if (color < 0) {
+            color = 0;
+        }
+        cv::circle(show_image, cv::Point2f(ref_points[i].x(), ref_points[i].y()), 1, cv::Scalar(0, 255 - color, 255), 3);
+        cv::putText(show_image, std::to_string(ref_ids[i]), cv::Point2f(ref_points[i].x(), ref_points[i].y()),
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(0, 255 - color, 255));
+    }
+
+    // [right] Draw result points.
+    for (uint32_t i = 0; i < cur_points.size(); ++i) {
+        cv::circle(show_image, cv::Point2f(cur_points[i].x() + cv_cur_image.cols, cur_points[i].y()), 1, cv::Scalar(255, 255, 0), 3);
+        cv::putText(show_image, std::to_string(cur_ids[i]), cv::Point2f(cur_points[i].x() + cv_cur_image.cols, cur_points[i].y()),
+            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(255, 255, 0));
+    }
+
+    cv::imshow(title, show_image);
+    cv::waitKey(0);
+}
+
 void GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
     DIR *ptr_dir;
     struct dirent *ptr;
@@ -43,6 +93,7 @@ int main() {
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 70;
+    frontend.VisualizeResult = DrawReferenceResults;
 
     // Config camera model.
     const float fx = 458.654f;

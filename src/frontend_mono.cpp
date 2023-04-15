@@ -2,56 +2,7 @@
 #include "slam_operations.h"
 #include "log_api.h"
 
-// Debug.
-#include "opencv2/opencv.hpp"
-
 namespace VISUAL_FRONTEND {
-
-// Debug.
-void DrawReferenceResultsPrediction(const std::string title,
-                                    const Image &ref_image,
-                                    const Image &cur_image,
-                                    const std::vector<Vec2> &ref_points,
-                                    const std::vector<Vec2> &cur_points,
-                                    const std::vector<uint32_t> &ref_ids,
-                                    const std::vector<uint32_t> &cur_ids,
-                                    const std::vector<Vec2> &ref_vel) {
-    cv::Mat cv_ref_image(ref_image.rows(), ref_image.cols(), CV_8UC1, ref_image.data());
-    cv::Mat cv_cur_image(cur_image.rows(), cur_image.cols(), CV_8UC1, cur_image.data());
-
-    // Merge three images.
-    cv::Mat merged_image(cv_cur_image.rows, cv_cur_image.cols * 2, CV_8UC1);
-    for (int32_t v = 0; v < merged_image.rows; ++v) {
-        for (int32_t u = 0; u < merged_image.cols; ++u) {
-            if (u < cv_ref_image.cols) {
-                merged_image.at<uchar>(v, u) = cv_ref_image.at<uchar>(v, u);
-            } else {
-                merged_image.at<uchar>(v, u) = cv_cur_image.at<uchar>(v, u - cv_cur_image.cols);
-            }
-        }
-    }
-
-    // Construct image to show.
-    cv::Mat show_image(merged_image.rows, merged_image.cols, CV_8UC3);
-    cv::cvtColor(merged_image, show_image, cv::COLOR_GRAY2BGR);
-
-    // [left] Draw reference points.
-    for (uint32_t i = 0; i < ref_points.size(); ++i) {
-        cv::circle(show_image, cv::Point2f(ref_points[i].x(), ref_points[i].y()), 1, cv::Scalar(0, 0, 255), 3);
-        cv::putText(show_image, std::to_string(ref_ids[i]), cv::Point2f(ref_points[i].x(), ref_points[i].y()),
-            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.7, cv::Scalar(0, 0, 255));
-    }
-
-    // [right] Draw result points.
-    for (uint32_t i = 0; i < cur_points.size(); ++i) {
-        cv::circle(show_image, cv::Point2f(cur_points[i].x() + cv_cur_image.cols, cur_points[i].y()), 1, cv::Scalar(255, 255, 0), 3);
-        cv::putText(show_image, std::to_string(cur_ids[i]), cv::Point2f(cur_points[i].x() + cv_cur_image.cols, cur_points[i].y()),
-            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.7, cv::Scalar(255, 255, 0));
-    }
-
-    cv::imshow(title, show_image);
-    cv::waitKey(0);
-}
 
 bool FrontendMono::RunOnce(const Image &cur_image) {
     if (cur_image.data() == nullptr) {
@@ -136,23 +87,31 @@ bool FrontendMono::RunOnce(const Image &cur_image) {
         LogInfo("Current frame is keyframe.");
     }
 
-    // Debug.
-    DrawReferenceResultsPrediction("Tracking result",
-                                   ref_pyramid_left_->GetImage(0),
-                                   cur_pyramid_left_->GetImage(0),
-                                   *ref_pixel_uv_left_,
-                                   *cur_pixel_uv_left_,
-                                   *ref_ids_,
-                                   *cur_ids_,
-                                   *ref_vel_);
+    // Visualize result when this API is defined.
+    if (VisualizeResult != nullptr) {
+        VisualizeResult("Tracking result",
+                        ref_pyramid_left_->GetImage(0), cur_pyramid_left_->GetImage(0),
+                        *ref_pixel_uv_left_, *cur_pixel_uv_left_,
+                        *ref_ids_, *cur_ids_,
+                        *ref_tracked_cnt_,
+                        *ref_vel_);
+    }
 
     // If frontend is configured to select keyframe by itself, frontend will track features from fixed keyframe to current frame.
     if (is_cur_image_keyframe_) {
+        // Update tracked statis result.
+        for (uint32_t i = 0; i < tracked_status_.size(); ++i) {
+            if (tracked_status_[i] == static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
+                ++(*ref_tracked_cnt_)[i];
+            }
+        }
+
         // Adjust result.
         SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_pixel_uv_left_);
         SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_ids_);
         SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_norm_xy_left_);
         SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_vel_);
+        SlamOperation::ReduceVectorByStatus(tracked_status_, *ref_tracked_cnt_);
         tracked_status_.resize(cur_pixel_uv_left_->size(), static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED));
 
         // Detect new features in cur.
@@ -163,6 +122,7 @@ bool FrontendMono::RunOnce(const Image &cur_image) {
         for (uint32_t i = 0; i < new_features_num; ++i) {
             cur_ids_->emplace_back(feature_id_cnt_);
             cur_norm_xy_left_->emplace_back(Vec2::Zero());
+            ref_tracked_cnt_->emplace_back(1);
             ++feature_id_cnt_;
         }
 
