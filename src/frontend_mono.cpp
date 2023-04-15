@@ -103,7 +103,8 @@ bool FrontendMono::RunOnce(const Image &cur_image) {
                 (*cur_vel_)[i].setZero();
             }
         }
-        DebugStatus("After optical flow tracking, ", tracked_status_);
+        LogInfo("After optical flow tracking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED))
+            << " / " << tracked_status_.size());
 
         // Reject outliers by essential/fundemantal matrix.
         cur_norm_xy_left_->resize(cur_pixel_uv_left_->size());
@@ -123,7 +124,8 @@ bool FrontendMono::RunOnce(const Image &cur_image) {
             }
         }
         *ref_vel_ = *cur_vel_;
-        DebugStatus("After essential checking, ", tracked_status_);
+        LogInfo("After essential checking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED))
+            << " / " << tracked_status_.size());
 
         // Grid filter to make points sparsely.
         feature_detector_->SparsifyFeatures(*cur_pixel_uv_left_,
@@ -132,25 +134,20 @@ bool FrontendMono::RunOnce(const Image &cur_image) {
                                             static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED),
                                             static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::NOT_TRACKED),
                                             tracked_status_);
-        DebugStatus("After grid filtering, ", tracked_status_);
-
-        // Adjust result.
-        SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_pixel_uv_left_);
-        SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_ids_);
-        SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_norm_xy_left_);
-        SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_vel_);
-        tracked_status_.resize(cur_pixel_uv_left_->size(), static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED));
+        LogInfo("After grid filtering, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED))
+            << " / " << tracked_status_.size());
     }
 
     // Check if cur_pyarmid should be keyframe.
-    is_cur_image_keyframe_ = cur_pixel_uv_left_->size() < options_.kMinDetectedFeaturePointsNumberInCurrentImage
+    const uint32_t tracked_num = SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED));
+    is_cur_image_keyframe_ = tracked_num < options_.kMinDetectedFeaturePointsNumberInCurrentImage
                           || !options_.kSelfSelectKeyframe;
     if (is_cur_image_keyframe_) {
-        LogInfo("This is keyframe.");
+        LogInfo("Current frame is keyframe.");
     }
 
     // Debug.
-    DrawReferenceResultsPrediction("reference - result - predict - none",
+    DrawReferenceResultsPrediction("Tracking result",
                                    ref_pyramid_left_->GetImage(0),
                                    cur_pyramid_left_->GetImage(0),
                                    *ref_pixel_uv_left_,
@@ -161,6 +158,13 @@ bool FrontendMono::RunOnce(const Image &cur_image) {
 
     // If frontend is configured to select keyframe by itself, frontend will track features from fixed keyframe to current frame.
     if (is_cur_image_keyframe_) {
+        // Adjust result.
+        SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_pixel_uv_left_);
+        SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_ids_);
+        SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_norm_xy_left_);
+        SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_vel_);
+        tracked_status_.resize(cur_pixel_uv_left_->size(), static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED));
+
         // Detect new features in cur.
         feature_detector_->DetectGoodFeatures(cur_pyramid_left_->GetImage(0),
                                               options_.kMaxStoredFeaturePointsNumber,
