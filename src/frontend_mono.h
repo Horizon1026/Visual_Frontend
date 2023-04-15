@@ -13,12 +13,24 @@ public:
     virtual ~FrontendMono() = default;
     FrontendMono(const FrontendMono &frontend_mono) = delete;
 
-public:
     // Frontend is driven by mono image or stereo images.
     virtual bool RunOnce(const Image &image) override;
 
     // Visualize API.
     FrontendMonoVisualizeFunctionPtr VisualizeResult = nullptr;
+
+private:
+    bool ProcessSourceImage(const Image &cur_image);
+    bool PredictPixelLocation();
+    bool TrackFeatures();
+    bool ComputeOpticalFlowVelocity();
+    bool RejectOutliersByEpipolarConstrain();
+    bool ClearOutliersOpticalFlowVelocity();
+    bool SparsifyTrackedFeatures();
+    bool SelectKeyframe();
+    bool AdjustTrackingResultByStatus();
+    bool SupplementNewFeatures();
+    bool MakeCurrentFrameKeyframe();
 };
 
 }
