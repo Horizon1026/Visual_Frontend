@@ -16,7 +16,6 @@ public:
 public:
     // Frontend is driven by mono image or stereo images.
     virtual bool RunOnce(const Image &image) override;
-    virtual bool RunOnce(const Image &image_left, const Image &image_right) override;
 };
 
 }

@@ -53,16 +53,6 @@ void DrawReferenceResultsPrediction(const std::string title,
     cv::waitKey(0);
 }
 
-void DebugStatus(const std::string title, const std::vector<uint8_t> &status) {
-    int32_t cnt = 0;
-    for (const auto &item : status) {
-        if (item == 1) {
-            ++cnt;
-        }
-    }
-    LogInfo(title << status.size() << " / " << cnt << ".");
-}
-
 bool FrontendMono::RunOnce(const Image &cur_image) {
     if (cur_image.data() == nullptr) {
         return false;
@@ -187,10 +177,6 @@ bool FrontendMono::RunOnce(const Image &cur_image) {
         SlamOperation::ExchangePointer(&ref_vel_, &cur_vel_);
     }
 
-    return true;
-}
-
-bool FrontendMono::RunOnce(const Image &image_left, const Image &image_right) {
     return true;
 }
 

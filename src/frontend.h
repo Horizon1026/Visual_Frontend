@@ -32,8 +32,8 @@ public:
 
 public:
     // Frontend is driven by mono image or stereo images.
-    virtual bool RunOnce(const Image &image) = 0;
-    virtual bool RunOnce(const Image &image_left, const Image &image_right) = 0;
+    virtual bool RunOnce(const Image &image) { return false; }
+    virtual bool RunOnce(const Image &image_left, const Image &image_right) { return false; }
 
     // Draw tracking results.
     virtual void DrawTrackingResults(const std::string title) {};
