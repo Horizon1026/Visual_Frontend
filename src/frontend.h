@@ -22,6 +22,7 @@ struct FrontendOptions {
     uint32_t kMinDetectedFeaturePointsNumberInCurrentImage = 60;
 };
 
+// Visualize api for mono frontend.
 typedef void (*FrontendMonoVisualizeFunctionPtr)(const std::string,                 // title.
                                                  const Image &, const Image &,      // ref_image, cur_image.
                                                  const std::vector<Vec2> &,         // ref_pixel_uv.
@@ -30,6 +31,9 @@ typedef void (*FrontendMonoVisualizeFunctionPtr)(const std::string,             
                                                  const std::vector<uint32_t> &,     // cur_ids.
                                                  const std::vector<uint32_t> &,     // ref_features_tracked_times.
                                                  const std::vector<Vec2> &);        // ref_features_optical_flow_velocity.
+
+// Visualize api for stereo frontend.
+typedef void (*FrontendStereoVisualizeFunctionPtr)();
 
 class Frontend {
 

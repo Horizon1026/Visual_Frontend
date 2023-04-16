@@ -5,9 +5,7 @@
 namespace VISUAL_FRONTEND {
 
 bool FrontendMono::ProcessSourceImage(const Image &cur_image) {
-    if (cur_image.data() == nullptr) {
-        return false;
-    }
+    RETURN_FALSE_IF(cur_image.data() == nullptr);
 
     std::copy_n(cur_image.data(), cur_image.rows() * cur_image.cols(), cur_pyramid_left_->GetImage(0).data());
     cur_pyramid_left_->CreateImagePyramid(4);
@@ -201,7 +199,7 @@ bool FrontendMono::RunOnce(const Image &cur_image) {
         RETURN_FALSE_IF_FALSE(SupplementNewFeatures());
 
         // Current frame becomes keyframe.
-        RETURN_FALSE_IF_FALSE(MakeCurrentFrameKeyframe())
+        RETURN_FALSE_IF_FALSE(MakeCurrentFrameKeyframe());
     }
 
     return true;

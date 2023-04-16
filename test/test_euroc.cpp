@@ -80,12 +80,8 @@ void GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
     closedir(ptr_dir);
 }
 
-int main() {
-    LogInfo(YELLOW ">> Test visual frontend on euroc dataset." RESET_COLOR);
-
-    std::vector<std::string> cam0_filenames;
-    GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames);
-    std::sort(cam0_filenames.begin(), cam0_filenames.end());
+void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
+    LogInfo(">> Test frontend mono.");
 
     // Config frontend.
     cv::Mat image = cv::imread(cam0_filenames.front());
@@ -118,8 +114,8 @@ int main() {
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 12;
 
     // Config optical flow tracker.
-    frontend.feature_tracker() = std::make_unique<OPTICAL_FLOW::OpticalFlowKlt>();
-    frontend.feature_tracker()->options().kMethod = OPTICAL_FLOW::Method::KLT_INVERSE;
+    frontend.feature_tracker() = std::make_unique<OPTICAL_FLOW::OpticalFlowLk>();
+    frontend.feature_tracker()->options().kMethod = OPTICAL_FLOW::Method::LK_FAST;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 10;
     frontend.feature_tracker()->options().kPatchColHalfSize = 10;
     frontend.feature_tracker()->options().kMaxIteration = 15;
@@ -136,7 +132,20 @@ int main() {
         image.SetImage(cv_image.data, cv_image.rows, cv_image.cols);
         frontend.RunOnce(image);
     }
+}
 
+int main() {
+    LogInfo(YELLOW ">> Test visual frontend on euroc dataset." RESET_COLOR);
+
+    std::vector<std::string> cam0_filenames;
+    GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames);
+    std::sort(cam0_filenames.begin(), cam0_filenames.end());
+
+    std::vector<std::string> cam1_filenames;
+    GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames);
+    std::sort(cam1_filenames.begin(), cam1_filenames.end());
+
+    TestFrontendMono(cam0_filenames);
 
     return 0;
 }
