@@ -5,6 +5,16 @@
 
 namespace VISUAL_FRONTEND {
 
+// Visualize api for mono frontend.
+typedef void (*FrontendMonoVisualizeFunctionPtr)(const std::string,                 // title.
+                                                 const Image &, const Image &,      // ref_image, cur_image.
+                                                 const std::vector<Vec2> &,         // ref_pixel_uv.
+                                                 const std::vector<Vec2> &,         // cur_pixel_uv.
+                                                 const std::vector<uint32_t> &,     // ref_ids.
+                                                 const std::vector<uint32_t> &,     // cur_ids.
+                                                 const std::vector<uint32_t> &,     // ref_features_tracked_times.
+                                                 const std::vector<Vec2> &);        // ref_features_optical_flow_velocity.
+
 class FrontendMono : public Frontend {
 
 public:

@@ -5,6 +5,21 @@
 
 namespace VISUAL_FRONTEND {
 
+// Visualize api for stereo frontend.
+typedef void (*FrontendStereoVisualizeFunctionPtr)(const std::string,               // title
+                                                   const Image &,                   // ref_image_left
+                                                   const Image &,                   // ref_image_right
+                                                   const Image &,                   // cur_image_left
+                                                   const Image &,                   // cur_image_right
+                                                   const std::vector<Vec2> &,       // ref_points_left
+                                                   const std::vector<Vec2> &,       // ref_points_right
+                                                   const std::vector<Vec2> &,       // cur_points_left
+                                                   const std::vector<Vec2> &,       // cur_points_right
+                                                   const std::vector<uint32_t> &,   // ref_ids
+                                                   const std::vector<uint32_t> &,   // cur_ids
+                                                   const std::vector<uint32_t> &,   // ref_tracked_cnt
+                                                   const std::vector<Vec2> &);      // ref_vel
+
 class FrontendStereo : public Frontend {
 
 public:

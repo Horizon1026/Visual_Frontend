@@ -182,7 +182,7 @@ bool FrontendMono::RunOnce(const Image &cur_image) {
 
     // Visualize result when this API is defined.
     if (VisualizeResult != nullptr) {
-        VisualizeResult("Tracking result",
+        VisualizeResult("Frontend Mono Tracking Result",
                         ref_pyramid_left_->GetImage(0), cur_pyramid_left_->GetImage(0),
                         *ref_pixel_uv_left_, *cur_pixel_uv_left_,
                         *ref_ids_, *cur_ids_,

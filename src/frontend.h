@@ -22,19 +22,6 @@ struct FrontendOptions {
     uint32_t kMinDetectedFeaturePointsNumberInCurrentImage = 60;
 };
 
-// Visualize api for mono frontend.
-typedef void (*FrontendMonoVisualizeFunctionPtr)(const std::string,                 // title.
-                                                 const Image &, const Image &,      // ref_image, cur_image.
-                                                 const std::vector<Vec2> &,         // ref_pixel_uv.
-                                                 const std::vector<Vec2> &,         // cur_pixel_uv.
-                                                 const std::vector<uint32_t> &,     // ref_ids.
-                                                 const std::vector<uint32_t> &,     // cur_ids.
-                                                 const std::vector<uint32_t> &,     // ref_features_tracked_times.
-                                                 const std::vector<Vec2> &);        // ref_features_optical_flow_velocity.
-
-// Visualize api for stereo frontend.
-typedef void (*FrontendStereoVisualizeFunctionPtr)();
-
 class Frontend {
 
 public:
@@ -102,9 +89,9 @@ public:
     std::vector<Vec2> *cur_norm_xy_left_ = &stored_points_2d_[5];
     std::vector<Vec2> *cur_pixel_uv_right_ = &stored_points_2d_[6];
     std::vector<Vec2> *cur_norm_xy_right_ = &stored_points_2d_[7];
-    std::vector<Vec3> *cur_points_xyz_ = &stored_points_3d_[0];
+    std::vector<Vec3> *cur_points_xyz_ = &stored_points_3d_[1];
     std::vector<Vec2> *cur_vel_ = &stored_velocity_[1];
-    std::vector<uint32_t> *cur_tracked_cnt_ = &stored_tracked_cnt_[0];
+    std::vector<uint32_t> *cur_tracked_cnt_ = &stored_tracked_cnt_[1];
 
     // Feature index count;
     uint32_t feature_id_cnt_ = 1;

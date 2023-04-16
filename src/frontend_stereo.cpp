@@ -36,9 +36,24 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
         *cur_ids_ = *ref_ids_;
         tracked_status_.clear();
         if (!feature_tracker_->TrackMultipleLevel(*ref_pyramid_left_, *cur_pyramid_left_, *ref_pixel_uv_left_, *cur_pixel_uv_left_, tracked_status_)) {
-            LogError("feature_tracker_->TrackMultipleLevel error.");
+            LogError("feature_tracker_->TrackMultipleLevel track from ref_left to cur_left error.");
             return false;
         }
+        LogInfo("After optical flow tracking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED))
+            << " / " << tracked_status_.size());
+
+        // Reject outliers by essential/fundemantal matrix.
+        Mat3 essential;
+        cur_norm_xy_left_->resize(cur_pixel_uv_left_->size());
+        for (uint32_t i = 0; i < cur_pixel_uv_left_->size(); ++i) {
+            camera_model_->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_left_)[i], (*cur_norm_xy_left_)[i]);
+        }
+        if (!epipolar_solver_->EstimateEssential(*ref_norm_xy_left_, *cur_norm_xy_left_, essential, tracked_status_)) {
+            LogError("epipolar_solver_->EstimateEssential error");
+            return false;
+        }
+        LogInfo("After essential checking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED))
+            << " / " << tracked_status_.size());
 
         // Compute optical flow velocity. It is useful for feature prediction.
         cur_vel_->resize(ref_pixel_uv_left_->size());
@@ -49,35 +64,24 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
                 (*cur_vel_)[i].setZero();
             }
         }
+        *ref_vel_ = *cur_vel_;
 
-        LogInfo("After optical flow tracking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED))
-            << " / " << tracked_status_.size());
-
-        // Reject outliers by essential/fundemantal matrix.
-        cur_norm_xy_left_->resize(cur_pixel_uv_left_->size());
-        for (uint32_t i = 0; i < cur_pixel_uv_left_->size(); ++i) {
-            camera_model_->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_left_)[i], (*cur_norm_xy_left_)[i]);
-        }
-
-        Mat3 essential;
-        if (!epipolar_solver_->EstimateEssential(*ref_norm_xy_left_, *cur_norm_xy_left_, essential, tracked_status_)) {
-            LogError("epipolar_solver_->EstimateEssential error");
+        // Track features from cur pyramid left to cur pyramid right.
+        *cur_pixel_uv_right_ = *cur_pixel_uv_left_;
+        if (!feature_tracker_->TrackMultipleLevel(*cur_pyramid_left_, *cur_pyramid_right_, *cur_pixel_uv_left_, *cur_pixel_uv_right_, tracked_status_)) {
+            LogError("feature_tracker_->TrackMultipleLevel track from cur_left to cur_right error.");
             return false;
         }
 
-        // Reject outliers' optical flow velocity. It means do not predict them at next tracking.
-        for (uint32_t i = 0; i < tracked_status_.size(); ++i) {
-            if (tracked_status_[i] != static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
-                (*cur_vel_)[i].setZero();
-            }
+        // Reject outliers by essential/fundemantal matrix.
+        cur_norm_xy_right_->resize(cur_pixel_uv_right_->size());
+        for (uint32_t i = 0; i < cur_pixel_uv_right_->size(); ++i) {
+            camera_model_->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_right_)[i], (*cur_norm_xy_right_)[i]);
         }
-
-        *ref_vel_ = *cur_vel_;
-        LogInfo("After essential checking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED))
-            << " / " << tracked_status_.size());
-
-        // Track features from cur pyramid left to cur pyramid right.
-        // TODO:
+        if (!epipolar_solver_->EstimateEssential(*cur_norm_xy_left_, *cur_norm_xy_right_, essential, tracked_status_)) {
+            LogError("epipolar_solver_->EstimateEssential error");
+            return false;
+        }
 
         // Grid filter to make points sparsely.
         feature_detector_->SparsifyFeatures(*cur_pixel_uv_left_,
@@ -100,7 +104,14 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
 
     // Visualize result when this API is defined.
     if (VisualizeResult != nullptr) {
-        VisualizeResult();
+        VisualizeResult("Frontend Mono Tracking Result",
+                        ref_pyramid_left_->GetImage(0), ref_pyramid_right_->GetImage(0),
+                        cur_pyramid_left_->GetImage(0), cur_pyramid_right_->GetImage(0),
+                        *ref_pixel_uv_left_, *ref_pixel_uv_right_,
+                        *cur_pixel_uv_left_, *cur_pixel_uv_right_,
+                        *ref_ids_, *cur_ids_,
+                        *ref_tracked_cnt_,
+                        *ref_vel_);
     }
 
     // If frontend is configured to select keyframe by itself, frontend will track features from fixed keyframe to current frame.
@@ -115,8 +126,10 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
 
         // Adjust result.
         SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_pixel_uv_left_);
+        SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_pixel_uv_right_);
         SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_ids_);
         SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_norm_xy_left_);
+        SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_norm_xy_right_);
         SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_vel_);
         SlamOperation::ReduceVectorByStatus(tracked_status_, *ref_tracked_cnt_);
         tracked_status_.resize(cur_pixel_uv_left_->size(), static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED));
@@ -129,6 +142,7 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
         for (uint32_t i = 0; i < new_features_num; ++i) {
             cur_ids_->emplace_back(feature_id_cnt_);
             cur_norm_xy_left_->emplace_back(Vec2::Zero());
+            cur_norm_xy_right_->emplace_back(Vec2::Zero());
             ref_tracked_cnt_->emplace_back(1);
             ++feature_id_cnt_;
         }
@@ -139,9 +153,12 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
 
         // Replace ref with cur.
         SlamOperation::ExchangePointer(&ref_pyramid_left_, &cur_pyramid_left_);
+        SlamOperation::ExchangePointer(&ref_pyramid_right_, &cur_pyramid_right_);
         SlamOperation::ExchangePointer(&ref_pixel_uv_left_, &cur_pixel_uv_left_);
+        SlamOperation::ExchangePointer(&ref_pixel_uv_right_, &cur_pixel_uv_right_);
         SlamOperation::ExchangePointer(&ref_ids_, &cur_ids_);
         SlamOperation::ExchangePointer(&ref_norm_xy_left_, &cur_norm_xy_left_);
+        SlamOperation::ExchangePointer(&ref_norm_xy_right_, &cur_norm_xy_right_);
         SlamOperation::ExchangePointer(&ref_vel_, &cur_vel_);
     }
 
