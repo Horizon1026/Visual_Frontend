@@ -152,10 +152,8 @@ bool FrontendMono::MakeCurrentFrameKeyframe() {
 bool FrontendMono::RunOnce(const Image &cur_image) {
     LogInfo("---------------------------------------------------------");
 
-    if (camera_model_ == nullptr) {
-        LogError("Camera model is nullptr, please set it to be pinhole or fisheye.");
-        return false;
-    }
+    // If components is not valid, return false.
+    RETURN_FALSE_IF_FALSE(CheckAllComponents());
 
     // Image process.
     RETURN_FALSE_IF_FALSE(ProcessSourceImage(cur_image));

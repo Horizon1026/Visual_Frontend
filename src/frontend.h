@@ -26,10 +26,10 @@ typedef void (*FrontendMonoVisualizeFunctionPtr)(const std::string,             
                                                  const Image &, const Image &,      // ref_image, cur_image.
                                                  const std::vector<Vec2> &,         // ref_pixel_uv.
                                                  const std::vector<Vec2> &,         // cur_pixel_uv.
-                                                 const std::vector<uint32_t> &,
-                                                 const std::vector<uint32_t> &,
-                                                 const std::vector<uint32_t> &,
-                                                 const std::vector<Vec2> &);
+                                                 const std::vector<uint32_t> &,     // ref_ids.
+                                                 const std::vector<uint32_t> &,     // cur_ids.
+                                                 const std::vector<uint32_t> &,     // ref_features_tracked_times.
+                                                 const std::vector<Vec2> &);        // ref_features_optical_flow_velocity.
 
 class Frontend {
 
@@ -54,6 +54,9 @@ public:
     std::unique_ptr<OPTICAL_FLOW::OpticalFlow> &feature_tracker() { return feature_tracker_; }
     std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() { return camera_model_; }
     std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() { return epipolar_solver_; }
+
+    // Check every components.
+    virtual bool CheckAllComponents();
 
 public:
     // Options.

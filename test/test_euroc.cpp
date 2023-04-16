@@ -23,7 +23,7 @@ void DrawReferenceResults(const std::string title,
     cv::Mat cv_ref_image(ref_image.rows(), ref_image.cols(), CV_8UC1, ref_image.data());
     cv::Mat cv_cur_image(cur_image.rows(), cur_image.cols(), CV_8UC1, cur_image.data());
 
-    // Merge three images.
+    // Merge images.
     cv::Mat merged_image(cv_cur_image.rows, cv_cur_image.cols * 2, CV_8UC1);
     for (int32_t v = 0; v < merged_image.rows; ++v) {
         for (int32_t u = 0; u < merged_image.cols; ++u) {
@@ -118,8 +118,8 @@ int main() {
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 12;
 
     // Config optical flow tracker.
-    frontend.feature_tracker() = std::make_unique<OPTICAL_FLOW::OpticalFlowLk>();
-    frontend.feature_tracker()->options().kMethod = OPTICAL_FLOW::Method::LK_FAST;
+    frontend.feature_tracker() = std::make_unique<OPTICAL_FLOW::OpticalFlowKlt>();
+    frontend.feature_tracker()->options().kMethod = OPTICAL_FLOW::Method::KLT_INVERSE;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 10;
     frontend.feature_tracker()->options().kPatchColHalfSize = 10;
     frontend.feature_tracker()->options().kMaxIteration = 15;

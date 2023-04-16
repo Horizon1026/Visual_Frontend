@@ -1,5 +1,6 @@
 #include "frontend.h"
 #include "slam_memory.h"
+#include "slam_operations.h"
 
 namespace VISUAL_FRONTEND {
 
@@ -19,6 +20,14 @@ Frontend::Frontend(const uint32_t image_rows, const uint32_t image_cols) {
 
 Frontend::~Frontend() {
     SlamMemory::Free(stored_buff_);
+}
+
+bool Frontend::CheckAllComponents() {
+    RETURN_FALSE_IF(feature_tracker_ == nullptr);
+    RETURN_FALSE_IF(feature_detector_ == nullptr);
+    RETURN_FALSE_IF(epipolar_solver_ == nullptr);
+    RETURN_FALSE_IF(camera_model_ == nullptr);
+    return true;
 }
 
 }
