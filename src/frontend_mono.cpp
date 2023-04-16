@@ -28,19 +28,6 @@ bool FrontendMono::TrackFeatures() {
         return false;
     }
 
-    return true;
-}
-
-bool FrontendMono::ComputeOpticalFlowVelocity() {
-    cur_vel_->resize(ref_pixel_uv_left_->size());
-    for (uint32_t i = 0; i < ref_pixel_uv_left_->size(); ++i) {
-        if (tracked_status_[i] == static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
-            (*cur_vel_)[i] = (*cur_pixel_uv_left_)[i] - (*ref_pixel_uv_left_)[i];
-        } else {
-            (*cur_vel_)[i].setZero();
-        }
-    }
-
     LogInfo("After optical flow tracking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED))
         << " / " << tracked_status_.size());
 
@@ -62,9 +49,12 @@ bool FrontendMono::RejectOutliersByEpipolarConstrain() {
     return true;
 }
 
-bool FrontendMono::ClearOutliersOpticalFlowVelocity() {
-    for (uint32_t i = 0; i < tracked_status_.size(); ++i) {
-        if (tracked_status_[i] != static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
+bool FrontendMono::ComputeOpticalFlowVelocity() {
+    cur_vel_->resize(ref_pixel_uv_left_->size());
+    for (uint32_t i = 0; i < ref_pixel_uv_left_->size(); ++i) {
+        if (tracked_status_[i] == static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
+            (*cur_vel_)[i] = (*cur_pixel_uv_left_)[i] - (*ref_pixel_uv_left_)[i];
+        } else {
             (*cur_vel_)[i].setZero();
         }
     }
@@ -164,14 +154,11 @@ bool FrontendMono::RunOnce(const Image &cur_image) {
         // Track features from ref pyramid to cur pyramid.
         RETURN_FALSE_IF_FALSE(TrackFeatures());
 
-        // Compute optical flow velocity. It is useful for feature prediction.
-        RETURN_FALSE_IF_FALSE(ComputeOpticalFlowVelocity());
-
         // Reject outliers by essential/fundemantal matrix.
         RETURN_FALSE_IF_FALSE(RejectOutliersByEpipolarConstrain());
 
-        // Reject outliers' optical flow velocity. It means do not predict them at next tracking.
-        RETURN_FALSE_IF_FALSE(ClearOutliersOpticalFlowVelocity());
+        // Compute optical flow velocity. It is useful for feature prediction.
+        RETURN_FALSE_IF_FALSE(ComputeOpticalFlowVelocity());
 
         // Grid filter to make points sparsely.
         RETURN_FALSE_IF_FALSE(SparsifyTrackedFeatures());

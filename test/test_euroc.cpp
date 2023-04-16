@@ -328,12 +328,14 @@ int main() {
     std::vector<std::string> cam0_filenames;
     GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames);
     std::sort(cam0_filenames.begin(), cam0_filenames.end());
+    cam0_filenames.resize(20);
 
     std::vector<std::string> cam1_filenames;
     GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames);
     std::sort(cam1_filenames.begin(), cam1_filenames.end());
+    cam1_filenames.resize(20);
 
-    // TestFrontendMono(cam0_filenames);
+    TestFrontendMono(cam0_filenames);
     TestFrontendStereo(cam0_filenames, cam1_filenames);
 
     return 0;

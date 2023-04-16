@@ -35,7 +35,6 @@ private:
     bool TrackFeatures();
     bool ComputeOpticalFlowVelocity();
     bool RejectOutliersByEpipolarConstrain();
-    bool ClearOutliersOpticalFlowVelocity();
     bool SparsifyTrackedFeatures();
     bool SelectKeyframe();
     bool AdjustTrackingResultByStatus();
