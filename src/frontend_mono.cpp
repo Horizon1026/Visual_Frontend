@@ -28,7 +28,7 @@ bool FrontendMono::TrackFeatures() {
         return false;
     }
 
-    LogInfo("After optical flow tracking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED))
+    LogInfo("After optical flow tracking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
         << " / " << tracked_status_.size());
 
     return true;
@@ -52,7 +52,7 @@ bool FrontendMono::RejectOutliersByEpipolarConstrain() {
 bool FrontendMono::ComputeOpticalFlowVelocity() {
     cur_vel_->resize(ref_pixel_uv_left_->size());
     for (uint32_t i = 0; i < ref_pixel_uv_left_->size(); ++i) {
-        if (tracked_status_[i] == static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
+        if (tracked_status_[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED)) {
             (*cur_vel_)[i] = (*cur_pixel_uv_left_)[i] - (*ref_pixel_uv_left_)[i];
         } else {
             (*cur_vel_)[i].setZero();
@@ -60,7 +60,7 @@ bool FrontendMono::ComputeOpticalFlowVelocity() {
     }
 
     *ref_vel_ = *cur_vel_;
-    LogInfo("After essential checking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED))
+    LogInfo("After essential checking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
         << " / " << tracked_status_.size());
 
     return true;
@@ -70,17 +70,17 @@ bool FrontendMono::SparsifyTrackedFeatures() {
     feature_detector_->SparsifyFeatures(*cur_pixel_uv_left_,
                                         cur_pyramid_left_->GetImage(0).rows(),
                                         cur_pyramid_left_->GetImage(0).cols(),
-                                        static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED),
-                                        static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::NOT_TRACKED),
+                                        static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED),
+                                        static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::NOT_TRACKED),
                                         tracked_status_);
-    LogInfo("After grid filtering, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED))
+    LogInfo("After grid filtering, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
         << " / " << tracked_status_.size());
 
     return true;
 }
 
 bool FrontendMono::SelectKeyframe() {
-    const uint32_t tracked_num = SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED));
+    const uint32_t tracked_num = SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED));
     is_cur_image_keyframe_ = tracked_num < options_.kMinDetectedFeaturePointsNumberInCurrentImage
                           || !options_.kSelfSelectKeyframe;
     if (is_cur_image_keyframe_) {
@@ -92,7 +92,7 @@ bool FrontendMono::SelectKeyframe() {
 bool FrontendMono::AdjustTrackingResultByStatus() {
     // Update tracked statis result.
     for (uint32_t i = 0; i < tracked_status_.size(); ++i) {
-        if (tracked_status_[i] == static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED)) {
+        if (tracked_status_[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED)) {
             ++(*ref_tracked_cnt_)[i];
         }
     }
@@ -103,7 +103,7 @@ bool FrontendMono::AdjustTrackingResultByStatus() {
     SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_norm_xy_left_);
     SlamOperation::ReduceVectorByStatus(tracked_status_, *cur_vel_);
     SlamOperation::ReduceVectorByStatus(tracked_status_, *ref_tracked_cnt_);
-    tracked_status_.resize(cur_pixel_uv_left_->size(), static_cast<uint8_t>(OPTICAL_FLOW::TrackStatus::TRACKED));
+    tracked_status_.resize(cur_pixel_uv_left_->size(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED));
 
     return true;
 }

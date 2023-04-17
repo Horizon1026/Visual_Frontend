@@ -25,9 +25,9 @@ if ( NOT TARGET lib_feature_detector )
 endif()
 
 # Add optical flow tracker.
-set( OPTICAL_FLOW_TRACKER_PATH ${PROJECT_SOURCE_DIR}/../Optical_Flow_Tracker )
+set( OPTICAL_FLOW_TRACKER_PATH ${PROJECT_SOURCE_DIR}/../Feature_Tracker )
 if ( NOT TARGET lib_optical_flow_tracker )
-    add_subdirectory( ${OPTICAL_FLOW_TRACKER_PATH}/src ${PROJECT_SOURCE_DIR}/build/lib_optical_flow_tracker )
+    add_subdirectory( ${OPTICAL_FLOW_TRACKER_PATH}/src/optical_flow_tracker ${PROJECT_SOURCE_DIR}/build/lib_optical_flow_tracker )
 endif()
 
 # Add vision geometry.

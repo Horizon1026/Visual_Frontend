@@ -42,7 +42,7 @@ public:
 
     // Reference for components.
     std::unique_ptr<FEATURE_DETECTOR::FeatureDetector> &feature_detector() { return feature_detector_; }
-    std::unique_ptr<OPTICAL_FLOW::OpticalFlow> &feature_tracker() { return feature_tracker_; }
+    std::unique_ptr<FEATURE_TRACKER::OpticalFlow> &feature_tracker() { return feature_tracker_; }
     std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() { return camera_model_; }
     std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() { return epipolar_solver_; }
 
@@ -55,7 +55,7 @@ public:
 
     // Components.
     std::unique_ptr<FEATURE_DETECTOR::FeatureDetector> feature_detector_ = nullptr;
-    std::unique_ptr<OPTICAL_FLOW::OpticalFlow> feature_tracker_ = nullptr;
+    std::unique_ptr<FEATURE_TRACKER::OpticalFlow> feature_tracker_ = nullptr;
     std::unique_ptr<SENSOR_MODEL::CameraBasic> camera_model_ = nullptr;
     std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> epipolar_solver_ = nullptr;
 
