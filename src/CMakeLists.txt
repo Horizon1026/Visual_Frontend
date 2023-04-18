@@ -20,8 +20,8 @@ endif()
 
 # Add feature detector.
 set( FEATURE_DETECTOR_PATH ${PROJECT_SOURCE_DIR}/../Feature_Detector )
-if ( NOT TARGET lib_feature_detector )
-    add_subdirectory( ${FEATURE_DETECTOR_PATH}/src ${PROJECT_SOURCE_DIR}/build/lib_feature_detector )
+if ( NOT TARGET lib_feature_point_detector )
+    add_subdirectory( ${FEATURE_DETECTOR_PATH}/src/feature_point_detector ${PROJECT_SOURCE_DIR}/build/lib_feature_point_detector )
 endif()
 
 # Add optical flow tracker.
@@ -51,7 +51,7 @@ target_link_libraries( lib_visual_frontend
     lib_slam_utility_log
     lib_slam_utility_memory
 
-    lib_feature_detector
+    lib_feature_point_detector
     lib_optical_flow_tracker
     lib_vision_geometry
     lib_camera_model

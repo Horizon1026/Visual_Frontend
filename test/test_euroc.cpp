@@ -237,8 +237,8 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.camera_model()->SetDistortionParameter(Vec5(k1, k2, k3, p1, p2));
 
     // Config feature detector.
-    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeatureDetector>();
-    frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeatureDetector::HARRIS;
+    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector>();
+    frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeaturePointDetector::HARRIS;
     frontend.feature_detector()->options().kMinValidResponse = 20.0f;
     frontend.feature_detector()->options().kMinFeatureDistance = 25;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 12;
@@ -291,8 +291,8 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     frontend.camera_model()->SetDistortionParameter(Vec5(k1, k2, k3, p1, p2));
 
     // Config feature detector.
-    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeatureDetector>();
-    frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeatureDetector::HARRIS;
+    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector>();
+    frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeaturePointDetector::HARRIS;
     frontend.feature_detector()->options().kMinValidResponse = 20.0f;
     frontend.feature_detector()->options().kMinFeatureDistance = 25;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 12;
