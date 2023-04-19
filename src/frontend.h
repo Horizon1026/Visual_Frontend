@@ -9,6 +9,7 @@
 #include "optical_flow.h"
 #include "camera_basic.h"
 #include "geometry_epipolar.h"
+#include "image_processor.h"
 
 #include "memory"
 
@@ -45,6 +46,7 @@ public:
     std::unique_ptr<FEATURE_TRACKER::OpticalFlow> &feature_tracker() { return feature_tracker_; }
     std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() { return camera_model_; }
     std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() { return epipolar_solver_; }
+    std::unique_ptr<IMAGE_PROCESSOR::ImageProcessor> &image_processor() { return image_processor_; }
 
     // Check every components.
     virtual bool CheckAllComponents();
@@ -58,6 +60,7 @@ public:
     std::unique_ptr<FEATURE_TRACKER::OpticalFlow> feature_tracker_ = nullptr;
     std::unique_ptr<SENSOR_MODEL::CameraBasic> camera_model_ = nullptr;
     std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> epipolar_solver_ = nullptr;
+    std::unique_ptr<IMAGE_PROCESSOR::ImageProcessor> image_processor_ = nullptr;
 
     // Buffer allocated for visual frontend.
     uint8_t *stored_buff_ = nullptr;

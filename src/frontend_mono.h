@@ -38,7 +38,7 @@ private:
     bool SparsifyTrackedFeatures();
     bool SelectKeyframe();
     bool AdjustTrackingResultByStatus();
-    bool SupplementNewFeatures();
+    bool SupplementNewFeatures(const Image &cur_image_left);
     bool MakeCurrentFrameKeyframe();
 };
 

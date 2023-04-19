@@ -7,7 +7,12 @@ namespace VISUAL_FRONTEND {
 bool FrontendMono::ProcessSourceImage(const Image &cur_image) {
     RETURN_FALSE_IF(cur_image.data() == nullptr);
 
-    std::copy_n(cur_image.data(), cur_image.rows() * cur_image.cols(), cur_pyramid_left_->GetImage(0).data());
+    if (image_processor_ == nullptr) {
+        std::copy_n(cur_image.data(), cur_image.rows() * cur_image.cols(), cur_pyramid_left_->GetImage(0).data());
+    } else {
+        image_processor_->Process(cur_image, cur_pyramid_left_->GetImage(0));
+    }
+
     cur_pyramid_left_->CreateImagePyramid(4);
     return true;
 }
@@ -108,10 +113,10 @@ bool FrontendMono::AdjustTrackingResultByStatus() {
     return true;
 }
 
-bool FrontendMono::SupplementNewFeatures() {
-    feature_detector_->DetectGoodFeatures(cur_pyramid_left_->GetImage(0),
-                                            options_.kMaxStoredFeaturePointsNumber,
-                                            *cur_pixel_uv_left_);
+bool FrontendMono::SupplementNewFeatures(const Image &cur_image_left) {
+    feature_detector_->DetectGoodFeatures(cur_image_left,
+                                          options_.kMaxStoredFeaturePointsNumber,
+                                          *cur_pixel_uv_left_);
     const uint32_t new_features_num = cur_pixel_uv_left_->size() - cur_ids_->size();
     for (uint32_t i = 0; i < new_features_num; ++i) {
         cur_ids_->emplace_back(feature_id_cnt_);
@@ -183,7 +188,7 @@ bool FrontendMono::RunOnce(const Image &cur_image) {
         RETURN_FALSE_IF_FALSE(AdjustTrackingResultByStatus());
 
         // Detect new features in cur.
-        RETURN_FALSE_IF_FALSE(SupplementNewFeatures());
+        RETURN_FALSE_IF_FALSE(SupplementNewFeatures(cur_image));
 
         // Current frame becomes keyframe.
         RETURN_FALSE_IF_FALSE(MakeCurrentFrameKeyframe());

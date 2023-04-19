@@ -42,6 +42,12 @@ if ( NOT TARGET lib_camera_model )
     add_subdirectory( ${SENSOR_CAMERA_MODEL_PATH}/src/camera ${PROJECT_SOURCE_DIR}/build/lib_camera_model )
 endif()
 
+# Add image processor.
+set( IMAGE_PROCESSOR_PATH ${PROJECT_SOURCE_DIR}/../Image_Processor )
+if ( NOT TARGET lib_image_processor )
+    add_subdirectory( ${IMAGE_PROCESSOR_PATH}/src ${PROJECT_SOURCE_DIR}/build/lib_image_processor )
+endif()
+
 add_library( lib_visual_frontend ${AUX_SRC_FRONTEND} )
 target_include_directories( lib_visual_frontend PUBLIC . )
 target_link_libraries( lib_visual_frontend
@@ -55,4 +61,5 @@ target_link_libraries( lib_visual_frontend
     lib_optical_flow_tracker
     lib_vision_geometry
     lib_camera_model
+    lib_image_processor
 )

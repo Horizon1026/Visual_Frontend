@@ -3,6 +3,7 @@
 #include "pinhole.h"
 #include "optical_flow_lk.h"
 #include "optical_flow_klt.h"
+#include "census.h"
 #include "log_api.h"
 
 #include "iostream"
@@ -236,6 +237,9 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.camera_model()->SetIntrinsicParameter(fx, fy, cx, cy);
     frontend.camera_model()->SetDistortionParameter(Vec5(k1, k2, k3, p1, p2));
 
+    // Config image processor.
+    frontend.image_processor() = std::make_unique<IMAGE_PROCESSOR::CensusProcessor>();
+
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector>();
     frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeaturePointDetector::HARRIS;
@@ -328,12 +332,12 @@ int main() {
     std::vector<std::string> cam0_filenames;
     GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames);
     std::sort(cam0_filenames.begin(), cam0_filenames.end());
-    cam0_filenames.resize(20);
+    cam0_filenames.resize(40);
 
     std::vector<std::string> cam1_filenames;
     GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames);
     std::sort(cam1_filenames.begin(), cam1_filenames.end());
-    cam1_filenames.resize(20);
+    cam1_filenames.resize(40);
 
     TestFrontendMono(cam0_filenames);
     TestFrontendStereo(cam0_filenames, cam1_filenames);

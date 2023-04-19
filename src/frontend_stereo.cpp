@@ -7,9 +7,15 @@ namespace VISUAL_FRONTEND {
 bool FrontendStereo::ProcessSourceImage(const Image &cur_image_left, const Image &cur_image_right) {
     RETURN_FALSE_IF(cur_image_left.data() == nullptr || cur_image_right.data() == nullptr);
 
-    std::copy_n(cur_image_left.data(), cur_image_left.rows() * cur_image_left.cols(), cur_pyramid_left_->GetImage(0).data());
+    if (image_processor_ == nullptr) {
+        std::copy_n(cur_image_left.data(), cur_image_left.rows() * cur_image_left.cols(), cur_pyramid_left_->GetImage(0).data());
+        std::copy_n(cur_image_right.data(), cur_image_right.rows() * cur_image_right.cols(), cur_pyramid_right_->GetImage(0).data());
+    } else {
+        image_processor_->Process(cur_image_left, cur_pyramid_left_->GetImage(0));
+        image_processor_->Process(cur_image_right, cur_pyramid_right_->GetImage(0));
+    }
+
     cur_pyramid_left_->CreateImagePyramid(4);
-    std::copy_n(cur_image_right.data(), cur_image_right.rows() * cur_image_right.cols(), cur_pyramid_right_->GetImage(0).data());
     cur_pyramid_right_->CreateImagePyramid(4);
 
     return true;
@@ -135,7 +141,7 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
         tracked_status_.resize(cur_pixel_uv_left_->size(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED));
 
         // Detect new features in cur.
-        feature_detector_->DetectGoodFeatures(cur_pyramid_left_->GetImage(0),
+        feature_detector_->DetectGoodFeatures(cur_image_left,
                                               options_.kMaxStoredFeaturePointsNumber,
                                               *cur_pixel_uv_left_);
         const uint32_t new_features_num = cur_pixel_uv_left_->size() - cur_ids_->size();
