@@ -74,7 +74,7 @@ bool FrontendMono::RejectOutliersByTrackingBack() {
 
     for (uint32_t i = 0; i < tracked_status_.size(); ++i) {
         if (tracked_status_[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED)) {
-            if (((*ref_pixel_uv_left_)[i] - ref_pixel_xy_left_tracked_back_[i]).norm() > 1.0f) {
+            if (((*ref_pixel_uv_left_)[i] - ref_pixel_xy_left_tracked_back_[i]).squaredNorm() > options_.kMaxValidTrackBackPixelResidual) {
                 tracked_status_[i] = static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::LARGE_RESIDUAL);
             }
         }

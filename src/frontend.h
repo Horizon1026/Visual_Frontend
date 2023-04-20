@@ -21,6 +21,7 @@ struct FrontendOptions {
     uint32_t kMaxStoredFeaturePointsNumber = 120;
     bool kSelfSelectKeyframe = true;
     uint32_t kMinDetectedFeaturePointsNumberInCurrentImage = 60;
+    float kMaxValidTrackBackPixelResidual = 1.0f;
 };
 
 class Frontend {
