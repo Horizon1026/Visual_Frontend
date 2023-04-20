@@ -238,7 +238,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.camera_model()->SetDistortionParameter(Vec5(k1, k2, k3, p1, p2));
 
     // Config image processor.
-    frontend.image_processor() = std::make_unique<IMAGE_PROCESSOR::CensusProcessor>();
+    // frontend.image_processor() = std::make_unique<IMAGE_PROCESSOR::CensusProcessor>();
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector>();
@@ -257,9 +257,9 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.feature_tracker()->options().kMaxConvergeResidual = 1.0f;
 
     // Config epipolar solver.
-    frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
-    frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::EPIPOLAR_RANSAC;
-    frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
+    // frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
+    // frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::EPIPOLAR_RANSAC;
+    // frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
     for (const auto &filename : cam0_filenames) {
         cv::Mat cv_image = cv::imread(filename, 0);
@@ -326,7 +326,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     }
 }
 
-int main() {
+int main(int argc, char **argv) {
     LogInfo(YELLOW ">> Test visual frontend on euroc dataset." RESET_COLOR);
 
     std::vector<std::string> cam0_filenames;

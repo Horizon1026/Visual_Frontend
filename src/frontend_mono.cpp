@@ -39,17 +39,49 @@ bool FrontendMono::TrackFeatures() {
     return true;
 }
 
-bool FrontendMono::RejectOutliersByEpipolarConstrain() {
+bool FrontendMono::LiftAllPointsFromPixelToNormalizedPlaneAndUndistortThem() {
     cur_norm_xy_left_->resize(cur_pixel_uv_left_->size());
     for (uint32_t i = 0; i < cur_pixel_uv_left_->size(); ++i) {
         camera_model_->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_left_)[i], (*cur_norm_xy_left_)[i]);
     }
 
+    return true;
+}
+
+bool FrontendMono::RejectOutliersByEpipolarConstrain() {
     Mat3 essential;
     if (!epipolar_solver_->EstimateEssential(*ref_norm_xy_left_, *cur_norm_xy_left_, essential, tracked_status_)) {
         LogError("epipolar_solver_->EstimateEssential error");
         return false;
     }
+
+    LogInfo("After essential checking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
+        << " / " << tracked_status_.size());
+    return true;
+}
+
+bool FrontendMono::RejectOutliersByTrackingBack() {
+    ref_pixel_xy_left_tracked_back_ = *cur_pixel_uv_left_;
+
+    for (uint32_t i = 0; i < ref_vel_->size(); ++i) {
+        ref_pixel_xy_left_tracked_back_[i] -= (*ref_vel_)[i];
+    }
+
+    if (!feature_tracker_->TrackMultipleLevel(*cur_pyramid_left_, *ref_pyramid_left_, *cur_pixel_uv_left_, ref_pixel_xy_left_tracked_back_, tracked_status_)) {
+        LogError("feature_tracker_->TrackMultipleLevel error.");
+        return false;
+    }
+
+    for (uint32_t i = 0; i < tracked_status_.size(); ++i) {
+        if (tracked_status_[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED)) {
+            if (((*ref_pixel_uv_left_)[i] - ref_pixel_xy_left_tracked_back_[i]).norm() > 1.0f) {
+                tracked_status_[i] = static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::LARGE_RESIDUAL);
+            }
+        }
+    }
+
+    LogInfo("After tracking back, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
+        << " / " << tracked_status_.size());
 
     return true;
 }
@@ -65,8 +97,6 @@ bool FrontendMono::ComputeOpticalFlowVelocity() {
     }
 
     *ref_vel_ = *cur_vel_;
-    LogInfo("After essential checking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
-        << " / " << tracked_status_.size());
 
     return true;
 }
@@ -159,8 +189,15 @@ bool FrontendMono::RunOnce(const Image &cur_image) {
         // Track features from ref pyramid to cur pyramid.
         RETURN_FALSE_IF_FALSE(TrackFeatures());
 
-        // Reject outliers by essential/fundemantal matrix.
-        RETURN_FALSE_IF_FALSE(RejectOutliersByEpipolarConstrain());
+        // Lift and do undistortion.
+        RETURN_FALSE_IF_FALSE(LiftAllPointsFromPixelToNormalizedPlaneAndUndistortThem());
+
+        // Reject outliers by essential/fundemantal matrix or tracking back.
+        if (epipolar_solver_ == nullptr) {
+            RETURN_FALSE_IF_FALSE(RejectOutliersByTrackingBack());
+        } else {
+            RETURN_FALSE_IF_FALSE(RejectOutliersByEpipolarConstrain());
+        }
 
         // Compute optical flow velocity. It is useful for feature prediction.
         RETURN_FALSE_IF_FALSE(ComputeOpticalFlowVelocity());

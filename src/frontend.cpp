@@ -25,7 +25,6 @@ Frontend::~Frontend() {
 bool Frontend::CheckAllComponents() {
     RETURN_FALSE_IF(feature_tracker_ == nullptr);
     RETURN_FALSE_IF(feature_detector_ == nullptr);
-    RETURN_FALSE_IF(epipolar_solver_ == nullptr);
     RETURN_FALSE_IF(camera_model_ == nullptr);
     return true;
 }

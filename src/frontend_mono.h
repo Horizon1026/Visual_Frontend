@@ -34,12 +34,18 @@ private:
     bool PredictPixelLocation();
     bool TrackFeatures();
     bool ComputeOpticalFlowVelocity();
+    bool LiftAllPointsFromPixelToNormalizedPlaneAndUndistortThem();
     bool RejectOutliersByEpipolarConstrain();
+    bool RejectOutliersByTrackingBack();
     bool SparsifyTrackedFeatures();
     bool SelectKeyframe();
     bool AdjustTrackingResultByStatus();
     bool SupplementNewFeatures(const Image &cur_image_left);
     bool MakeCurrentFrameKeyframe();
+
+private:
+    // Temp vector for tracking back.
+    std::vector<Vec2> ref_pixel_xy_left_tracked_back_ = {};
 };
 
 }
