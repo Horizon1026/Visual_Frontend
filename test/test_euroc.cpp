@@ -4,7 +4,7 @@
 #include "optical_flow_lk.h"
 #include "optical_flow_klt.h"
 #include "census.h"
-#include "log_api.h"
+#include "log_report.h"
 
 #include "iostream"
 #include "dirent.h"
@@ -197,7 +197,7 @@ void GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
     DIR *ptr_dir;
     struct dirent *ptr;
     if (!(ptr_dir = opendir(dir.c_str()))) {
-        LogError("Cannot open dir " << dir);
+        ReportError("Cannot open dir " << dir);
         return;
     }
 
@@ -213,7 +213,7 @@ void GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
 }
 
 void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
-    LogInfo(">> Test frontend mono.");
+    ReportInfo(">> Test frontend mono.");
 
     // Config frontend.
     cv::Mat image = cv::imread(cam0_filenames.front());
@@ -270,7 +270,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
 }
 
 void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const std::vector<std::string> &cam1_filenames) {
-    LogInfo(">> Test frontend stereo.");
+    ReportInfo(">> Test frontend stereo.");
 
     // Config frontend.
     cv::Mat image = cv::imread(cam0_filenames.front());
@@ -327,7 +327,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
 }
 
 int main(int argc, char **argv) {
-    LogInfo(YELLOW ">> Test visual frontend on euroc dataset." RESET_COLOR);
+    ReportInfo(YELLOW ">> Test visual frontend on euroc dataset." RESET_COLOR);
 
     std::vector<std::string> cam0_filenames;
     GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames);

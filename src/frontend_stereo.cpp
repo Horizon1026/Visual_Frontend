@@ -1,6 +1,6 @@
 #include "frontend_stereo.h"
 #include "slam_operations.h"
-#include "log_api.h"
+#include "log_report.h"
 
 namespace VISUAL_FRONTEND {
 
@@ -22,7 +22,7 @@ bool FrontendStereo::ProcessSourceImage(const Image &cur_image_left, const Image
 }
 
 bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image_right) {
-    LogInfo("---------------------------------------------------------");
+    ReportInfo("---------------------------------------------------------");
 
     // If components is not valid, return false.
     RETURN_FALSE_IF_FALSE(CheckAllComponents());
@@ -42,10 +42,10 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
         *cur_ids_ = *ref_ids_;
         tracked_status_.clear();
         if (!feature_tracker_->TrackMultipleLevel(*ref_pyramid_left_, *cur_pyramid_left_, *ref_pixel_uv_left_, *cur_pixel_uv_left_, tracked_status_)) {
-            LogError("feature_tracker_->TrackMultipleLevel track from ref_left to cur_left error.");
+            ReportError("feature_tracker_->TrackMultipleLevel track from ref_left to cur_left error.");
             return false;
         }
-        LogInfo("After optical flow tracking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
+        ReportInfo("After optical flow tracking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
             << " / " << tracked_status_.size());
 
         // Reject outliers by essential/fundemantal matrix.
@@ -55,10 +55,10 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
             camera_model_->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_left_)[i], (*cur_norm_xy_left_)[i]);
         }
         if (!epipolar_solver_->EstimateEssential(*ref_norm_xy_left_, *cur_norm_xy_left_, essential, tracked_status_)) {
-            LogError("epipolar_solver_->EstimateEssential error");
+            ReportError("epipolar_solver_->EstimateEssential error");
             return false;
         }
-        LogInfo("After essential checking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
+        ReportInfo("After essential checking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
             << " / " << tracked_status_.size());
 
         // Compute optical flow velocity. It is useful for feature prediction.
@@ -75,7 +75,7 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
         // Track features from cur pyramid left to cur pyramid right.
         *cur_pixel_uv_right_ = *cur_pixel_uv_left_;
         if (!feature_tracker_->TrackMultipleLevel(*cur_pyramid_left_, *cur_pyramid_right_, *cur_pixel_uv_left_, *cur_pixel_uv_right_, tracked_status_)) {
-            LogError("feature_tracker_->TrackMultipleLevel track from cur_left to cur_right error.");
+            ReportError("feature_tracker_->TrackMultipleLevel track from cur_left to cur_right error.");
             return false;
         }
 
@@ -85,7 +85,7 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
             camera_model_->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_right_)[i], (*cur_norm_xy_right_)[i]);
         }
         if (!epipolar_solver_->EstimateEssential(*cur_norm_xy_left_, *cur_norm_xy_right_, essential, tracked_status_)) {
-            LogError("epipolar_solver_->EstimateEssential error");
+            ReportError("epipolar_solver_->EstimateEssential error");
             return false;
         }
 
@@ -96,7 +96,7 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
                                             static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED),
                                             static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::NOT_TRACKED),
                                             tracked_status_);
-        LogInfo("After grid filtering, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
+        ReportInfo("After grid filtering, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
             << " / " << tracked_status_.size());
     }
 
@@ -105,7 +105,7 @@ bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image
     is_cur_image_keyframe_ = tracked_num < options_.kMinDetectedFeaturePointsNumberInCurrentImage
                           || !options_.kSelfSelectKeyframe;
     if (is_cur_image_keyframe_) {
-        LogInfo("Current frame is keyframe.");
+        ReportInfo("Current frame is keyframe.");
     }
 
     // Visualize result when this API is defined.

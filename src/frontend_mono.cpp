@@ -1,6 +1,6 @@
 #include "frontend_mono.h"
 #include "slam_operations.h"
-#include "log_api.h"
+#include "log_report.h"
 
 namespace VISUAL_FRONTEND {
 
@@ -29,11 +29,11 @@ bool FrontendMono::TrackFeatures() {
     *cur_ids_ = *ref_ids_;
     tracked_status_.clear();
     if (!feature_tracker_->TrackMultipleLevel(*ref_pyramid_left_, *cur_pyramid_left_, *ref_pixel_uv_left_, *cur_pixel_uv_left_, tracked_status_)) {
-        LogError("feature_tracker_->TrackMultipleLevel error.");
+        ReportError("feature_tracker_->TrackMultipleLevel error.");
         return false;
     }
 
-    LogInfo("After optical flow tracking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
+    ReportInfo("After optical flow tracking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
         << " / " << tracked_status_.size());
 
     return true;
@@ -51,11 +51,11 @@ bool FrontendMono::LiftAllPointsFromPixelToNormalizedPlaneAndUndistortThem() {
 bool FrontendMono::RejectOutliersByEpipolarConstrain() {
     Mat3 essential;
     if (!epipolar_solver_->EstimateEssential(*ref_norm_xy_left_, *cur_norm_xy_left_, essential, tracked_status_)) {
-        LogError("epipolar_solver_->EstimateEssential error");
+        ReportError("epipolar_solver_->EstimateEssential error");
         return false;
     }
 
-    LogInfo("After essential checking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
+    ReportInfo("After essential checking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
         << " / " << tracked_status_.size());
     return true;
 }
@@ -68,7 +68,7 @@ bool FrontendMono::RejectOutliersByTrackingBack() {
     }
 
     if (!feature_tracker_->TrackMultipleLevel(*cur_pyramid_left_, *ref_pyramid_left_, *cur_pixel_uv_left_, ref_pixel_xy_left_tracked_back_, tracked_status_)) {
-        LogError("feature_tracker_->TrackMultipleLevel error.");
+        ReportError("feature_tracker_->TrackMultipleLevel error.");
         return false;
     }
 
@@ -80,7 +80,7 @@ bool FrontendMono::RejectOutliersByTrackingBack() {
         }
     }
 
-    LogInfo("After tracking back, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
+    ReportInfo("After tracking back, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
         << " / " << tracked_status_.size());
 
     return true;
@@ -108,7 +108,7 @@ bool FrontendMono::SparsifyTrackedFeatures() {
                                         static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED),
                                         static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::NOT_TRACKED),
                                         tracked_status_);
-    LogInfo("After grid filtering, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
+    ReportInfo("After grid filtering, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::TRACKED))
         << " / " << tracked_status_.size());
 
     return true;
@@ -119,7 +119,7 @@ bool FrontendMono::SelectKeyframe() {
     is_cur_image_keyframe_ = tracked_num < options_.kMinDetectedFeaturePointsNumberInCurrentImage
                           || !options_.kSelfSelectKeyframe;
     if (is_cur_image_keyframe_) {
-        LogInfo("Current frame is keyframe.");
+        ReportInfo("Current frame is keyframe.");
     }
     return true;
 }
@@ -173,7 +173,7 @@ bool FrontendMono::MakeCurrentFrameKeyframe() {
 }
 
 bool FrontendMono::RunOnce(const Image &cur_image) {
-    LogInfo("---------------------------------------------------------");
+    ReportInfo("---------------------------------------------------------");
 
     // If components is not valid, return false.
     RETURN_FALSE_IF_FALSE(CheckAllComponents());
