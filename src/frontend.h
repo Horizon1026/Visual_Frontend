@@ -71,7 +71,7 @@ public:
     std::array<std::vector<Vec2>, 2> stored_velocity_ = {};
     std::array<std::vector<Vec3>, 2> stored_points_3d_ = {};
     std::array<std::vector<uint32_t>, 2> stored_tracked_cnt_ = {};
-    std::vector<uint8_t> tracked_status_ = {};
+    std::vector<uint8_t> tracked_status_;
 
     // Reference frame.
     ImagePyramid *ref_pyramid_left_ = &stored_pyramids_[0];
