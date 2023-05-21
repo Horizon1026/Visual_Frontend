@@ -242,11 +242,11 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector>();
-    frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeaturePointDetector::HARRIS;
-    frontend.feature_detector()->options().kMinValidResponse = 20.0f;
+    frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeaturePointDetector::kHarris;
     frontend.feature_detector()->options().kMinFeatureDistance = 25;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 12;
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 12;
+    frontend.feature_detector()->harris().options().kMinValidResponse = 20.0f;
 
     // Config optical flow tracker.
     frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowLk>();
@@ -258,7 +258,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
 
     // Config epipolar solver.
     // frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
-    // frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::EPIPOLAR_RANSAC;
+    // frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
     // frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
     for (const auto &filename : cam0_filenames) {
@@ -296,11 +296,11 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector>();
-    frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeaturePointDetector::HARRIS;
-    frontend.feature_detector()->options().kMinValidResponse = 20.0f;
+    frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeaturePointDetector::kHarris;
     frontend.feature_detector()->options().kMinFeatureDistance = 25;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 12;
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 12;
+    frontend.feature_detector()->harris().options().kMinValidResponse = 20.0f;
 
     // Config optical flow tracker.
     frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowLk>();
@@ -312,7 +312,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
 
     // Config epipolar solver.
     frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
-    frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::EPIPOLAR_RANSAC;
+    frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
     frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
     for (unsigned i = 0; i < cam0_filenames.size(); ++i) {
