@@ -41,14 +41,21 @@ public:
     // Draw tracking results.
     virtual void DrawTrackingResults(const std::string title) {};
 
-    FrontendOptions &options() { return options_; }
-
     // Reference for components.
+    FrontendOptions &options() { return options_; }
     std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::HarrisFeature>> &feature_detector() { return feature_detector_; }
     std::unique_ptr<FEATURE_TRACKER::OpticalFlow> &feature_tracker() { return feature_tracker_; }
     std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() { return camera_model_; }
     std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() { return epipolar_solver_; }
     std::unique_ptr<IMAGE_PROCESSOR::ImageProcessor> &image_processor() { return image_processor_; }
+
+    // Const eference for components.
+    const FrontendOptions &options() const { return options_; }
+    const std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::HarrisFeature>> &feature_detector() const { return feature_detector_; }
+    const std::unique_ptr<FEATURE_TRACKER::OpticalFlow> &feature_tracker() const { return feature_tracker_; }
+    const std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() const { return camera_model_; }
+    const std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() const { return epipolar_solver_; }
+    const std::unique_ptr<IMAGE_PROCESSOR::ImageProcessor> &image_processor() const { return image_processor_; }
 
     // Check every components.
     virtual bool CheckAllComponents();
