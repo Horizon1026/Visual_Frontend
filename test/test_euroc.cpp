@@ -241,12 +241,11 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     // frontend.image_processor() = std::make_unique<IMAGE_PROCESSOR::CensusProcessor>();
 
     // Config feature detector.
-    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector>();
-    frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeaturePointDetector::kHarris;
+    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::HarrisFeature>>();
     frontend.feature_detector()->options().kMinFeatureDistance = 25;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 12;
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 12;
-    frontend.feature_detector()->harris().options().kMinValidResponse = 20.0f;
+    frontend.feature_detector()->feature().options().kMinValidResponse = 20.0f;
 
     // Config optical flow tracker.
     frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowLk>();
@@ -295,12 +294,11 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     frontend.camera_model()->SetDistortionParameter(Vec5(k1, k2, k3, p1, p2));
 
     // Config feature detector.
-    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector>();
-    frontend.feature_detector()->options().kMethod = FEATURE_DETECTOR::FeaturePointDetector::kHarris;
+    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::HarrisFeature>>();
     frontend.feature_detector()->options().kMinFeatureDistance = 25;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 12;
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 12;
-    frontend.feature_detector()->harris().options().kMinValidResponse = 20.0f;
+    frontend.feature_detector()->feature().options().kMinValidResponse = 20.0f;
 
     // Config optical flow tracker.
     frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowLk>();
