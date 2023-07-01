@@ -2,9 +2,8 @@
 A general and simple visual frontend consulting VINS-Mono.
 
 # Components
-- [x] Simple mono visual frontend
-- [x] Simple stereo visual frontend
-- [ ] Some others
+- [x] Simple mono visual frontend based on klt.
+- [x] Simple stereo visual frontend based on klt.
 
 # Dependence
 Slam_Utility, Feature_Detector, Feature_Tracker, Sensor_Model, Vision_Geometry, Image_Processor, OpenCV4(only for test)

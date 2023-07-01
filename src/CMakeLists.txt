@@ -30,10 +30,16 @@ if ( NOT TARGET lib_optical_flow_tracker )
     add_subdirectory( ${OPTICAL_FLOW_TRACKER_PATH}/src/optical_flow_tracker ${PROJECT_SOURCE_DIR}/build/lib_optical_flow_tracker )
 endif()
 
-# Add vision geometry.
+# Add all components of vision geometry.
 set( VISION_GEOMETRY_PATH ${PROJECT_SOURCE_DIR}/../Vision_Geometry )
-if ( NOT TARGET lib_vision_geometry )
-    add_subdirectory( ${VISION_GEOMETRY_PATH}/src ${PROJECT_SOURCE_DIR}/build/lib_vision_geometry )
+if ( NOT TARGET lib_vision_geometry_epipolar )
+    add_subdirectory( ${VISION_GEOMETRY_PATH}/src/epipolar ${PROJECT_SOURCE_DIR}/build/lib_vision_geometry_epipolar )
+endif()
+if ( NOT TARGET lib_vision_geometry_pnp )
+    add_subdirectory( ${VISION_GEOMETRY_PATH}/src/perspective_n_point ${PROJECT_SOURCE_DIR}/build/lib_vision_geometry_pnp )
+endif()
+if ( NOT TARGET lib_vision_geometry_triangulation )
+    add_subdirectory( ${VISION_GEOMETRY_PATH}/src/triangulation ${PROJECT_SOURCE_DIR}/build/lib_vision_geometry_triangulation )
 endif()
 
 # Add camera model.
@@ -59,7 +65,9 @@ target_link_libraries( lib_visual_frontend
 
     lib_feature_point_detector
     lib_optical_flow_tracker
-    lib_vision_geometry
+    lib_vision_geometry_epipolar
+    lib_vision_geometry_pnp
+    lib_vision_geometry_triangulation
     lib_camera_model
     lib_image_processor
 )

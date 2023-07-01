@@ -193,12 +193,12 @@ void DrawStereoReferenceResults(const std::string title,
     cv::waitKey(0);
 }
 
-void GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
+bool GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
     DIR *ptr_dir;
     struct dirent *ptr;
     if (!(ptr_dir = opendir(dir.c_str()))) {
         ReportError("Cannot open dir " << dir);
-        return;
+        return false;
     }
 
     filenames.reserve(1000);
@@ -210,6 +210,8 @@ void GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
     }
 
     closedir(ptr_dir);
+
+    return true;
 }
 
 void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
@@ -328,12 +330,12 @@ int main(int argc, char **argv) {
     ReportInfo(YELLOW ">> Test visual frontend on euroc dataset." RESET_COLOR);
 
     std::vector<std::string> cam0_filenames;
-    GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames);
+    RETURN_FALSE_IF_FALSE(GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames));
     std::sort(cam0_filenames.begin(), cam0_filenames.end());
     cam0_filenames.resize(40);
 
     std::vector<std::string> cam1_filenames;
-    GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames);
+    RETURN_FALSE_IF_FALSE(GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames));
     std::sort(cam1_filenames.begin(), cam1_filenames.end());
     cam1_filenames.resize(40);
 
