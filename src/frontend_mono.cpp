@@ -4,7 +4,7 @@
 
 namespace VISUAL_FRONTEND {
 
-bool FrontendMono::ProcessSourceImage(const Image &cur_image) {
+bool FrontendMono::ProcessSourceImage(const GrayImage &cur_image) {
     RETURN_FALSE_IF(cur_image.data() == nullptr);
 
     if (image_processor_ == nullptr) {
@@ -143,7 +143,7 @@ bool FrontendMono::AdjustTrackingResultByStatus() {
     return true;
 }
 
-bool FrontendMono::SupplementNewFeatures(const Image &cur_image_left) {
+bool FrontendMono::SupplementNewFeatures(const GrayImage &cur_image_left) {
     feature_detector_->DetectGoodFeatures(cur_image_left,
                                           options_.kMaxStoredFeaturePointsNumber,
                                           *cur_pixel_uv_left_);
@@ -172,13 +172,13 @@ bool FrontendMono::MakeCurrentFrameKeyframe() {
     return true;
 }
 
-bool FrontendMono::RunOnce(const Image &cur_image) {
+bool FrontendMono::RunOnce(const GrayImage &cur_image) {
     ReportInfo("---------------------------------------------------------");
 
     // If components is not valid, return false.
     RETURN_FALSE_IF_FALSE(CheckAllComponents());
 
-    // Image process.
+    // GrayImage process.
     RETURN_FALSE_IF_FALSE(ProcessSourceImage(cur_image));
 
     // Track features if ref frame is ok.

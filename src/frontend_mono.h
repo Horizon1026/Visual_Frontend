@@ -7,7 +7,7 @@ namespace VISUAL_FRONTEND {
 
 // Visualize api for mono frontend.
 typedef void (*FrontendMonoVisualizeFunctionPtr)(const std::string,                 // title.
-                                                 const Image &, const Image &,      // ref_image, cur_image.
+                                                 const GrayImage &, const GrayImage &,      // ref_image, cur_image.
                                                  const std::vector<Vec2> &,         // ref_pixel_uv.
                                                  const std::vector<Vec2> &,         // cur_pixel_uv.
                                                  const std::vector<uint32_t> &,     // ref_ids.
@@ -24,13 +24,13 @@ public:
     FrontendMono(const FrontendMono &frontend_mono) = delete;
 
     // Frontend is driven by mono image or stereo images.
-    virtual bool RunOnce(const Image &image) override;
+    virtual bool RunOnce(const GrayImage &image) override;
 
     // Visualize API.
     FrontendMonoVisualizeFunctionPtr VisualizeResult = nullptr;
 
 private:
-    bool ProcessSourceImage(const Image &cur_image);
+    bool ProcessSourceImage(const GrayImage &cur_image);
     bool PredictPixelLocation();
     bool TrackFeatures();
     bool ComputeOpticalFlowVelocity();
@@ -40,7 +40,7 @@ private:
     bool SparsifyTrackedFeatures();
     bool SelectKeyframe();
     bool AdjustTrackingResultByStatus();
-    bool SupplementNewFeatures(const Image &cur_image_left);
+    bool SupplementNewFeatures(const GrayImage &cur_image_left);
     bool MakeCurrentFrameKeyframe();
 
 private:

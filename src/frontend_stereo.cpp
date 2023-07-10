@@ -4,7 +4,7 @@
 
 namespace VISUAL_FRONTEND {
 
-bool FrontendStereo::ProcessSourceImage(const Image &cur_image_left, const Image &cur_image_right) {
+bool FrontendStereo::ProcessSourceImage(const GrayImage &cur_image_left, const GrayImage &cur_image_right) {
     RETURN_FALSE_IF(cur_image_left.data() == nullptr || cur_image_right.data() == nullptr);
 
     if (image_processor_ == nullptr) {
@@ -21,13 +21,13 @@ bool FrontendStereo::ProcessSourceImage(const Image &cur_image_left, const Image
     return true;
 }
 
-bool FrontendStereo::RunOnce(const Image &cur_image_left, const Image &cur_image_right) {
+bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &cur_image_right) {
     ReportInfo("---------------------------------------------------------");
 
     // If components is not valid, return false.
     RETURN_FALSE_IF_FALSE(CheckAllComponents());
 
-    // Image process.
+    // GrayImage process.
     RETURN_FALSE_IF_FALSE(ProcessSourceImage(cur_image_left, cur_image_right));
 
     // Track features if ref frame is ok.

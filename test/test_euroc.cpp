@@ -14,8 +14,8 @@
 #include "opencv2/opencv.hpp"
 
 void DrawKltResults(const std::string title,
-                    const Image &ref_image,
-                    const Image &cur_image,
+                    const GrayImage &ref_image,
+                    const GrayImage &cur_image,
                     const std::vector<Vec2> &ref_points,
                     const std::vector<Vec2> &cur_points) {
     cv::Mat cv_ref_image(ref_image.rows(), ref_image.cols(), CV_8UC1, ref_image.data());
@@ -52,8 +52,8 @@ void DrawKltResults(const std::string title,
 }
 
 void DrawMonoReferenceResults(const std::string title,
-                              const Image &ref_image,
-                              const Image &cur_image,
+                              const GrayImage &ref_image,
+                              const GrayImage &cur_image,
                               const std::vector<Vec2> &ref_points,
                               const std::vector<Vec2> &cur_points,
                               const std::vector<uint32_t> &ref_ids,
@@ -102,10 +102,10 @@ void DrawMonoReferenceResults(const std::string title,
 }
 
 void DrawStereoReferenceResults(const std::string title,
-                                const Image &ref_image_left,
-                                const Image &ref_image_right,
-                                const Image &cur_image_left,
-                                const Image &cur_image_right,
+                                const GrayImage &ref_image_left,
+                                const GrayImage &ref_image_right,
+                                const GrayImage &cur_image_left,
+                                const GrayImage &cur_image_right,
                                 const std::vector<Vec2> &ref_points_left,
                                 const std::vector<Vec2> &ref_points_right,
                                 const std::vector<Vec2> &cur_points_left,
@@ -264,7 +264,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
 
     for (const auto &filename : cam0_filenames) {
         cv::Mat cv_image = cv::imread(filename, 0);
-        Image image;
+        GrayImage image;
         image.SetImage(cv_image.data, cv_image.rows, cv_image.cols);
         frontend.RunOnce(image);
     }
@@ -318,8 +318,8 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     for (unsigned i = 0; i < cam0_filenames.size(); ++i) {
         cv::Mat cv_image_left = cv::imread(cam0_filenames[i], 0);
         cv::Mat cv_image_right = cv::imread(cam1_filenames[i], 0);
-        Image image_left;
-        Image image_right;
+        GrayImage image_left;
+        GrayImage image_right;
         image_left.SetImage(cv_image_left.data, cv_image_left.rows, cv_image_left.cols);
         image_right.SetImage(cv_image_right.data, cv_image_right.rows, cv_image_right.cols);
         frontend.RunOnce(image_left, image_right);
