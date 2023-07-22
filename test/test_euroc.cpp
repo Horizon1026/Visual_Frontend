@@ -1,8 +1,8 @@
 #include "frontend_mono.h"
 #include "frontend_stereo.h"
 #include "pinhole.h"
-#include "optical_flow_lk.h"
-#include "optical_flow_klt.h"
+#include "optical_flow_basic_klt.h"
+#include "optical_flow_affine_klt.h"
 #include "census.h"
 #include "log_report.h"
 
@@ -237,7 +237,9 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     const float p2 = 1.76187114e-05f;
     frontend.camera_model() = std::make_unique<SENSOR_MODEL::Pinhole>();
     frontend.camera_model()->SetIntrinsicParameter(fx, fy, cx, cy);
-    frontend.camera_model()->SetDistortionParameter(Vec5(k1, k2, k3, p1, p2));
+    Vec5 distort_param;
+    distort_param << k1, k2, k3, p1, p2;
+    frontend.camera_model()->SetDistortionParameter(distort_param);
 
     // Config image processor.
     // frontend.image_processor() = std::make_unique<IMAGE_PROCESSOR::CensusProcessor>();
@@ -250,12 +252,11 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.feature_detector()->feature().options().kMinValidResponse = 20.0f;
 
     // Config optical flow tracker.
-    frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowLk>();
+    frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowBasicKlt>();
     frontend.feature_tracker()->options().kMethod = FEATURE_TRACKER::OpticalFlowMethod::kFast;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 10;
     frontend.feature_tracker()->options().kPatchColHalfSize = 10;
     frontend.feature_tracker()->options().kMaxIteration = 15;
-    frontend.feature_tracker()->options().kMaxConvergeResidual = 1.0f;
 
     // Config epipolar solver.
     // frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
@@ -293,7 +294,9 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     const float p2 = 1.76187114e-05f;
     frontend.camera_model() = std::make_unique<SENSOR_MODEL::Pinhole>();
     frontend.camera_model()->SetIntrinsicParameter(fx, fy, cx, cy);
-    frontend.camera_model()->SetDistortionParameter(Vec5(k1, k2, k3, p1, p2));
+    Vec5 distort_param;
+    distort_param << k1, k2, k3, p1, p2;
+    frontend.camera_model()->SetDistortionParameter(distort_param);
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::HarrisFeature>>();
@@ -303,12 +306,11 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     frontend.feature_detector()->feature().options().kMinValidResponse = 20.0f;
 
     // Config optical flow tracker.
-    frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowLk>();
+    frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowBasicKlt>();
     frontend.feature_tracker()->options().kMethod = FEATURE_TRACKER::OpticalFlowMethod::kFast;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 10;
     frontend.feature_tracker()->options().kPatchColHalfSize = 10;
     frontend.feature_tracker()->options().kMaxIteration = 15;
-    frontend.feature_tracker()->options().kMaxConvergeResidual = 1.0f;
 
     // Config epipolar solver.
     frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
