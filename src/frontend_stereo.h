@@ -6,7 +6,7 @@
 namespace VISUAL_FRONTEND {
 
 // Visualize api for stereo frontend.
-typedef void (*FrontendStereoVisualizeFunctionPtr)(const std::string,               // title
+typedef void (*FrontendStereoVisualizeFunctionPtr)(const std::string &,               // title
                                                    const GrayImage &,                   // ref_image_left
                                                    const GrayImage &,                   // ref_image_right
                                                    const GrayImage &,                   // cur_image_left

@@ -6,6 +6,8 @@
 #include "census.h"
 #include "log_report.h"
 
+#include "visualizor.h"
+
 #include "iostream"
 #include "dirent.h"
 #include "vector"
@@ -13,7 +15,7 @@
 
 #include "opencv2/opencv.hpp"
 
-void DrawKltResults(const std::string title,
+void DrawKltResults(const std::string &title,
                     const GrayImage &ref_image,
                     const GrayImage &cur_image,
                     const std::vector<Vec2> &ref_points,
@@ -51,7 +53,7 @@ void DrawKltResults(const std::string title,
     cv::waitKey(0);
 }
 
-void DrawMonoReferenceResults(const std::string title,
+void DrawMonoReferenceResults(const std::string &title,
                               const GrayImage &ref_image,
                               const GrayImage &cur_image,
                               const std::vector<Vec2> &ref_points,
@@ -101,7 +103,7 @@ void DrawMonoReferenceResults(const std::string title,
     cv::waitKey(0);
 }
 
-void DrawStereoReferenceResults(const std::string title,
+void DrawStereoReferenceResults(const std::string &title,
                                 const GrayImage &ref_image_left,
                                 const GrayImage &ref_image_right,
                                 const GrayImage &cur_image_left,
@@ -190,7 +192,7 @@ void DrawStereoReferenceResults(const std::string title,
     }
 
     cv::imshow(title, show_image);
-    cv::waitKey(0);
+    cv::waitKey(1);
 }
 
 bool GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
@@ -223,7 +225,6 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 70;
-    frontend.VisualizeResult = DrawMonoReferenceResults;
 
     // Config camera model.
     const float fx = 458.654f;
@@ -334,15 +335,25 @@ int main(int argc, char **argv) {
     std::vector<std::string> cam0_filenames;
     RETURN_FALSE_IF_FALSE(GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames));
     std::sort(cam0_filenames.begin(), cam0_filenames.end());
-    cam0_filenames.resize(40);
 
     std::vector<std::string> cam1_filenames;
     RETURN_FALSE_IF_FALSE(GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames));
     std::sort(cam1_filenames.begin(), cam1_filenames.end());
-    cam1_filenames.resize(40);
 
-    TestFrontendMono(cam0_filenames);
-    TestFrontendStereo(cam0_filenames, cam1_filenames);
+    if (argc > 2) {
+        const int32_t steps_cnt = atoi(argv[2]);
+        ReportInfo("Only run " << steps_cnt << " steps, full steps is " << cam0_filenames.size() << ".");
+        cam0_filenames.resize(steps_cnt);
+        cam1_filenames.resize(steps_cnt);
+    }
+
+    if (argc > 1 && std::string(argv[1]) == "stereo") {
+        ReportInfo("Run stereo visual frontend.");
+        TestFrontendStereo(cam0_filenames, cam1_filenames);
+    } else {
+        ReportInfo("Run mono visual frontend.");
+        TestFrontendMono(cam0_filenames);
+    }
 
     return 0;
 }

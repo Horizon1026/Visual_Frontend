@@ -17,6 +17,9 @@ endif()
 if ( NOT TARGET lib_slam_utility_memory )
     add_subdirectory( ${SLAM_UTILITY_PATH}/memory ${PROJECT_SOURCE_DIR}/build/lib_slam_utility_memory )
 endif()
+if ( NOT TARGET lib_slam_utility_visualize )
+    add_subdirectory( ${SLAM_UTILITY_PATH}/visualize ${PROJECT_SOURCE_DIR}/build/lib_slam_utility_visualize )
+endif()
 
 # Add feature detector.
 set( FEATURE_DETECTOR_PATH ${PROJECT_SOURCE_DIR}/../Feature_Detector )
@@ -62,6 +65,7 @@ target_link_libraries( lib_visual_frontend
     lib_slam_utility_operate
     lib_slam_utility_log
     lib_slam_utility_memory
+    lib_slam_utility_visualize
 
     lib_feature_point_detector
     lib_optical_flow_tracker

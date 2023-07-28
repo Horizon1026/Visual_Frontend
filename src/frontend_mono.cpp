@@ -1,6 +1,8 @@
 #include "frontend_mono.h"
 #include "slam_operations.h"
 #include "log_report.h"
+#include "tick_tock.h"
+#include "visualizor.h"
 
 namespace VISUAL_FRONTEND {
 
@@ -148,6 +150,8 @@ bool FrontendMono::SupplementNewFeatures(const GrayImage &cur_image_left) {
                                           options_.kMaxStoredFeaturePointsNumber,
                                           *cur_pixel_uv_left_);
     const uint32_t new_features_num = cur_pixel_uv_left_->size() - cur_ids_->size();
+
+    // TODO: This step cost too much time.
     for (uint32_t i = 0; i < new_features_num; ++i) {
         cur_ids_->emplace_back(feature_id_cnt_);
         cur_norm_xy_left_->emplace_back(Vec2::Zero());
@@ -210,14 +214,13 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
     RETURN_FALSE_IF_FALSE(SelectKeyframe());
 
     // Visualize result when this API is defined.
-    if (VisualizeResult != nullptr) {
-        VisualizeResult("Frontend Mono Tracking Result",
-                        ref_pyramid_left_->GetImage(0), cur_pyramid_left_->GetImage(0),
-                        *ref_pixel_uv_left_, *cur_pixel_uv_left_,
-                        *ref_ids_, *cur_ids_,
-                        *ref_tracked_cnt_,
-                        *ref_vel_);
-    }
+    Visualizor::ShowImageWithTrackedFeaturesWithId(
+        "Frontend Mono Tracking Result",
+        ref_pyramid_left_->GetImage(0),
+        cur_pyramid_left_->GetImage(0),
+        *ref_pixel_uv_left_, *cur_pixel_uv_left_,
+        *ref_ids_, *cur_ids_, *ref_tracked_cnt_);
+    Visualizor::WaitKey(1);
 
     // If frontend is configured to select keyframe by itself, frontend will track features from fixed keyframe to current frame.
     if (is_cur_image_keyframe_) {

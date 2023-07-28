@@ -5,16 +5,6 @@
 
 namespace VISUAL_FRONTEND {
 
-// Visualize api for mono frontend.
-typedef void (*FrontendMonoVisualizeFunctionPtr)(const std::string,                 // title.
-                                                 const GrayImage &, const GrayImage &,      // ref_image, cur_image.
-                                                 const std::vector<Vec2> &,         // ref_pixel_uv.
-                                                 const std::vector<Vec2> &,         // cur_pixel_uv.
-                                                 const std::vector<uint32_t> &,     // ref_ids.
-                                                 const std::vector<uint32_t> &,     // cur_ids.
-                                                 const std::vector<uint32_t> &,     // ref_features_tracked_times.
-                                                 const std::vector<Vec2> &);        // ref_features_optical_flow_velocity.
-
 class FrontendMono : public Frontend {
 
 public:
@@ -25,9 +15,6 @@ public:
 
     // Frontend is driven by mono image or stereo images.
     virtual bool RunOnce(const GrayImage &image) override;
-
-    // Visualize API.
-    FrontendMonoVisualizeFunctionPtr VisualizeResult = nullptr;
 
 private:
     bool ProcessSourceImage(const GrayImage &cur_image);
@@ -45,7 +32,7 @@ private:
 
 private:
     // Temp vector for tracking back.
-    std::vector<Vec2> ref_pixel_xy_left_tracked_back_ = {};
+    std::vector<Vec2> ref_pixel_xy_left_tracked_back_;
 };
 
 }
