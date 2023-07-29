@@ -190,13 +190,14 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
         RETURN_FALSE_IF_FALSE(PredictPixelLocation());
         // Track features from ref pyramid to cur pyramid.
         RETURN_FALSE_IF_FALSE(TrackFeatures());
-        // Lift and do undistortion.
-        RETURN_FALSE_IF_FALSE(LiftAllPointsFromPixelToNormalizedPlaneAndUndistortThem());
 
-        // Reject outliers by essential/fundemantal matrix or tracking back.
         if (epipolar_solver_ == nullptr) {
+            // Lift and do undistortion.
+            RETURN_FALSE_IF_FALSE(LiftAllPointsFromPixelToNormalizedPlaneAndUndistortThem());
+            // Reject outliers by essential/fundemantal matrix.
             RETURN_FALSE_IF_FALSE(RejectOutliersByTrackingBack());
         } else {
+            // Reject outliers by tracking back.
             RETURN_FALSE_IF_FALSE(RejectOutliersByEpipolarConstrain());
         }
 
