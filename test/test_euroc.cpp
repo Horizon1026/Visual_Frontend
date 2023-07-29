@@ -67,7 +67,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>>();
-    frontend.feature_detector()->options().kMinFeatureDistance = 25;
+    frontend.feature_detector()->options().kMinFeatureDistance = 35;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 10;
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 10;
 
@@ -79,9 +79,9 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.feature_tracker()->options().kMaxIteration = 15;
 
     // Config epipolar solver.
-    // frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
-    // frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
-    // frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
+    frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
+    frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
+    frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
     for (const auto &filename : cam0_filenames) {
         cv::Mat cv_image = cv::imread(filename, 0);
