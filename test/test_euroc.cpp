@@ -43,7 +43,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     VISUAL_FRONTEND::FrontendMono frontend(image.rows(), image.cols());
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
-    frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 50;
+    frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 40;
 
     // Config camera model.
     const float fx = 458.654f;

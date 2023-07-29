@@ -94,7 +94,7 @@ bool FrontendMono::ComputeOpticalFlowVelocity() {
         if (tracked_status_[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
             (*cur_vel_)[i] = (*cur_pixel_uv_left_)[i] - (*ref_pixel_uv_left_)[i];
         } else {
-            (*cur_vel_)[i] = cur_vel_->front();
+            (*cur_vel_)[i].setZero();
         }
     }
 
