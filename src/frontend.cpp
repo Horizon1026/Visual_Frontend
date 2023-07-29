@@ -19,7 +19,9 @@ Frontend::Frontend(const uint32_t image_rows, const uint32_t image_cols) {
 }
 
 Frontend::~Frontend() {
-    SlamMemory::Free(stored_buff_);
+    if (stored_buff_ == nullptr) {
+        SlamMemory::Free(stored_buff_);
+    }
 }
 
 bool Frontend::CheckAllComponents() {

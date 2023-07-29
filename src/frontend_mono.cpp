@@ -146,12 +146,15 @@ bool FrontendMono::AdjustTrackingResultByStatus() {
 }
 
 bool FrontendMono::SupplementNewFeatures(const GrayImage &cur_image_left) {
+    TickTock timer;
+    // TODO: This step cost too much time.
     feature_detector_->DetectGoodFeatures(cur_image_left,
                                           options_.kMaxStoredFeaturePointsNumber,
                                           *cur_pixel_uv_left_);
+    ReportDebug("time cost " << timer.TickInMillisecond() << " ms.");
+
     const uint32_t new_features_num = cur_pixel_uv_left_->size() - cur_ids_->size();
 
-    // TODO: This step cost too much time.
     for (uint32_t i = 0; i < new_features_num; ++i) {
         cur_ids_->emplace_back(feature_id_cnt_);
         cur_norm_xy_left_->emplace_back(Vec2::Zero());
@@ -186,7 +189,7 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
     RETURN_FALSE_IF_FALSE(ProcessSourceImage(cur_image));
 
     // Track features if ref frame is ok.
-    if (ref_pixel_uv_left_->size() != 0) {
+    if (!ref_pixel_uv_left_->empty()) {
         // Predict pixel location on current image by optical flow velocity.
         RETURN_FALSE_IF_FALSE(PredictPixelLocation());
 
