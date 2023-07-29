@@ -76,10 +76,17 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
 
         // Track features from cur pyramid left to cur pyramid right.
         *cur_pixel_uv_right_ = *cur_pixel_uv_left_;
+        // Adjust patch size for stereo tracking.
+        const int32_t stored_half_row_size = feature_tracker_->options().kPatchRowHalfSize;
+        const int32_t stored_half_col_size = feature_tracker_->options().kPatchColHalfSize;
+        feature_tracker_->options().kPatchRowHalfSize = 1;
+        feature_tracker_->options().kPatchColHalfSize = 25;
         if (!feature_tracker_->TrackMultipleLevel(*cur_pyramid_left_, *cur_pyramid_right_, *cur_pixel_uv_left_, *cur_pixel_uv_right_, tracked_status_)) {
             ReportError("feature_tracker_->TrackMultipleLevel track from cur_left to cur_right error.");
             return false;
         }
+        feature_tracker_->options().kPatchRowHalfSize = stored_half_row_size;
+        feature_tracker_->options().kPatchColHalfSize = stored_half_col_size;
 
         // Reject outliers by essential/fundemantal matrix.
         cur_norm_xy_right_->resize(cur_pixel_uv_right_->size());
