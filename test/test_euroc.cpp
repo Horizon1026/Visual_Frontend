@@ -15,98 +15,6 @@
 
 #include "opencv2/opencv.hpp"
 
-void DrawStereoReferenceResults(const std::string &title,
-                                const GrayImage &ref_image_left,
-                                const GrayImage &ref_image_right,
-                                const GrayImage &cur_image_left,
-                                const GrayImage &cur_image_right,
-                                const std::vector<Vec2> &ref_points_left,
-                                const std::vector<Vec2> &ref_points_right,
-                                const std::vector<Vec2> &cur_points_left,
-                                const std::vector<Vec2> &cur_points_right,
-                                const std::vector<uint32_t> &ref_ids,
-                                const std::vector<uint32_t> &cur_ids,
-                                const std::vector<uint32_t> &ref_tracked_cnt,
-                                const std::vector<Vec2> &ref_vel) {
-    cv::Mat cv_ref_image_left(ref_image_left.rows(), ref_image_left.cols(), CV_8UC1, ref_image_left.data());
-    cv::Mat cv_ref_image_right(ref_image_right.rows(), ref_image_right.cols(), CV_8UC1, ref_image_right.data());
-    cv::Mat cv_cur_image_left(cur_image_left.rows(), cur_image_left.cols(), CV_8UC1, cur_image_left.data());
-    cv::Mat cv_cur_image_right(cur_image_right.rows(), cur_image_right.cols(), CV_8UC1, cur_image_right.data());
-
-    cv::Point2f ref_left_offset(0, 0);
-    cv::Point2f ref_right_offset(cv_ref_image_left.cols, 0);
-    cv::Point2f cur_left_offset(0, cv_ref_image_left.rows);
-    cv::Point2f cur_right_offset(cv_ref_image_left.cols, cv_ref_image_left.rows);
-
-    // Merge images.
-    cv::Mat merged_image(cv_ref_image_left.rows * 2, cv_ref_image_left.cols * 2, CV_8UC1);
-    for (int32_t v = 0; v < merged_image.rows; ++v) {
-        for (int32_t u = 0; u < merged_image.cols; ++u) {
-            if (v < cv_ref_image_left.rows && u < cv_ref_image_left.cols) {
-                merged_image.at<uchar>(v, u) = cv_ref_image_left.at<uchar>(v, u);
-            } else if (v < cv_ref_image_left.rows * 2 && u < cv_ref_image_left.cols) {
-                merged_image.at<uchar>(v, u) = cv_cur_image_left.at<uchar>(v - cv_ref_image_left.rows, u);
-            } else if (v < cv_ref_image_left.rows && u < cv_ref_image_left.cols * 2) {
-                merged_image.at<uchar>(v, u) = cv_ref_image_right.at<uchar>(v, u - cv_ref_image_left.cols);
-            } else {
-                merged_image.at<uchar>(v, u) = cv_cur_image_right.at<uchar>(v - cv_ref_image_left.rows, u - cv_ref_image_left.cols);
-            }
-        }
-    }
-
-    // Construct image to show.
-    cv::Mat show_image(merged_image.rows, merged_image.cols, CV_8UC3);
-    cv::cvtColor(merged_image, show_image, cv::COLOR_GRAY2BGR);
-
-    // Display text.
-    cv::Point2f label_offset(0, 20);
-    cv::putText(show_image, "ref_left", ref_left_offset + label_offset, cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255, 255, 255));
-    cv::putText(show_image, "ref_right", ref_right_offset + label_offset, cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255, 255, 255));
-    cv::putText(show_image, "cur_left", cur_left_offset + label_offset, cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255, 255, 255));
-    cv::putText(show_image, "cur_right", cur_right_offset + label_offset, cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255, 255, 255));
-
-    // [top left] ref left.
-    for (uint32_t i = 0; i < ref_points_left.size(); ++i) {
-        cv::Point2f dst = cv::Point2f(ref_points_left[i].x(), ref_points_left[i].y()) + ref_left_offset;
-        int32_t color = 255 - ref_tracked_cnt[i] * 50;
-        if (color < 0) {
-            color = 0;
-        }
-        cv::circle(show_image, dst, 1, cv::Scalar(0, 255 - color, 255), 3);
-        cv::putText(show_image, std::to_string(ref_ids[i]), dst, cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(0, 255 - color, 255));
-    }
-
-    // [top right] ref right.
-    for (uint32_t i = 0; i < ref_points_right.size(); ++i) {
-        cv::Point2f dst = cv::Point2f(ref_points_right[i].x(), ref_points_right[i].y()) + ref_right_offset;
-        int32_t color = 255 - ref_tracked_cnt[i] * 50;
-        if (color < 0) {
-            color = 0;
-        }
-        cv::circle(show_image, dst, 1, cv::Scalar(0, 255 - color, 255), 3);
-        cv::putText(show_image, std::to_string(ref_ids[i]), dst, cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(0, 255 - color, 255));
-    }
-
-    // [down left] cur left.
-    for (uint32_t i = 0; i < cur_points_left.size(); ++i) {
-        cv::Point2f dst = cv::Point2f(cur_points_left[i].x(), cur_points_left[i].y()) + cur_left_offset;
-        cv::circle(show_image, dst, 1, cv::Scalar(255, 255, 0), 3);
-        cv::putText(show_image, std::to_string(cur_ids[i]), dst,
-            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(255, 255, 0));
-    }
-
-    // [down right] cur right.
-    for (uint32_t i = 0; i < cur_points_right.size(); ++i) {
-        cv::Point2f dst = cv::Point2f(cur_points_right[i].x(), cur_points_right[i].y()) + cur_right_offset;
-        cv::circle(show_image, dst, 1, cv::Scalar(255, 0, 0), 3);
-        cv::putText(show_image, std::to_string(cur_ids[i]), dst,
-            cv::FONT_HERSHEY_COMPLEX_SMALL, 0.6, cv::Scalar(255, 0, 0));
-    }
-
-    cv::imshow(title, show_image);
-    cv::waitKey(1);
-}
-
 bool GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
     DIR *ptr_dir;
     struct dirent *ptr;
@@ -193,7 +101,6 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 70;
-    frontend.VisualizeResult = DrawStereoReferenceResults;
 
     // Config camera model.
     const float fx = 458.654f;

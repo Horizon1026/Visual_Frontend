@@ -1,6 +1,8 @@
 #include "frontend_stereo.h"
 #include "slam_operations.h"
 #include "log_report.h"
+#include "tick_tock.h"
+#include "visualizor.h"
 
 namespace VISUAL_FRONTEND {
 
@@ -109,16 +111,24 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
     }
 
     // Visualize result when this API is defined.
-    if (VisualizeResult != nullptr) {
-        VisualizeResult("Frontend Mono Tracking Result",
-                        ref_pyramid_left_->GetImage(0), ref_pyramid_right_->GetImage(0),
-                        cur_pyramid_left_->GetImage(0), cur_pyramid_right_->GetImage(0),
-                        *ref_pixel_uv_left_, *ref_pixel_uv_right_,
-                        *cur_pixel_uv_left_, *cur_pixel_uv_right_,
-                        *ref_ids_, *cur_ids_,
-                        *ref_tracked_cnt_,
-                        *ref_vel_);
-    }
+    Visualizor::ShowImageWithTrackedFeaturesWithId(
+        "Frontend Mono Tracking Result",
+        ref_pyramid_left_->GetImage(0),
+        ref_pyramid_right_->GetImage(0),
+        cur_pyramid_left_->GetImage(0),
+        cur_pyramid_right_->GetImage(0),
+        *ref_pixel_uv_left_,
+        *ref_pixel_uv_right_,
+        *cur_pixel_uv_left_,
+        *cur_pixel_uv_right_,
+        *ref_ids_,
+        *ref_ids_,
+        *cur_ids_,
+        *cur_ids_,
+        *ref_tracked_cnt_,
+        *cur_vel_
+    );
+    Visualizor::WaitKey(1);
 
     // If frontend is configured to select keyframe by itself, frontend will track features from fixed keyframe to current frame.
     if (is_cur_image_keyframe_) {

@@ -5,21 +5,6 @@
 
 namespace VISUAL_FRONTEND {
 
-// Visualize api for stereo frontend.
-typedef void (*FrontendStereoVisualizeFunctionPtr)(const std::string &,               // title
-                                                   const GrayImage &,                   // ref_image_left
-                                                   const GrayImage &,                   // ref_image_right
-                                                   const GrayImage &,                   // cur_image_left
-                                                   const GrayImage &,                   // cur_image_right
-                                                   const std::vector<Vec2> &,       // ref_points_left
-                                                   const std::vector<Vec2> &,       // ref_points_right
-                                                   const std::vector<Vec2> &,       // cur_points_left
-                                                   const std::vector<Vec2> &,       // cur_points_right
-                                                   const std::vector<uint32_t> &,   // ref_ids
-                                                   const std::vector<uint32_t> &,   // cur_ids
-                                                   const std::vector<uint32_t> &,   // ref_tracked_cnt
-                                                   const std::vector<Vec2> &);      // ref_vel
-
 class FrontendStereo : public Frontend {
 
 public:
@@ -30,9 +15,6 @@ public:
 
     // Frontend is driven by mono image or stereo images.
     virtual bool RunOnce(const GrayImage &image_left, const GrayImage &image_right) override;
-
-    // Visualize API.
-    FrontendStereoVisualizeFunctionPtr VisualizeResult = nullptr;
 
 private:
     bool ProcessSourceImage(const GrayImage &cur_image_left, const GrayImage &cur_image_right);

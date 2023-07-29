@@ -1,4 +1,4 @@
 cd build/
-./test_euroc mono 20
-./test_euroc stereo 20
+./test_euroc mono 50
+./test_euroc stereo 50
 cd ..
