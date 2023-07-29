@@ -94,7 +94,7 @@ bool FrontendMono::ComputeOpticalFlowVelocity() {
         if (tracked_status_[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
             (*cur_vel_)[i] = (*cur_pixel_uv_left_)[i] - (*ref_pixel_uv_left_)[i];
         } else {
-            (*cur_vel_)[i].setZero();
+            (*cur_vel_)[i] = cur_vel_->front();
         }
     }
 
@@ -190,10 +190,10 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
         RETURN_FALSE_IF_FALSE(PredictPixelLocation());
         // Track features from ref pyramid to cur pyramid.
         RETURN_FALSE_IF_FALSE(TrackFeatures());
+        // Lift and do undistortion.
+        RETURN_FALSE_IF_FALSE(LiftAllPointsFromPixelToNormalizedPlaneAndUndistortThem());
 
         if (epipolar_solver_ == nullptr) {
-            // Lift and do undistortion.
-            RETURN_FALSE_IF_FALSE(LiftAllPointsFromPixelToNormalizedPlaneAndUndistortThem());
             // Reject outliers by essential/fundemantal matrix.
             RETURN_FALSE_IF_FALSE(RejectOutliersByTrackingBack());
         } else {
