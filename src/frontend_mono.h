@@ -13,7 +13,7 @@ public:
     virtual ~FrontendMono() = default;
     FrontendMono(const FrontendMono &frontend_mono) = delete;
 
-    // Frontend is driven by mono image or stereo images.
+    // Frontend is driven by mono image.
     virtual bool RunOnce(const GrayImage &image) override;
 
 private:

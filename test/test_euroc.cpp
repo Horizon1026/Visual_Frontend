@@ -13,8 +13,6 @@
 #include "vector"
 #include "cstring"
 
-#include "opencv2/opencv.hpp"
-
 bool GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
     DIR *ptr_dir;
     struct dirent *ptr;
@@ -40,8 +38,9 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     ReportInfo(">> Test frontend mono.");
 
     // Config frontend.
-    cv::Mat image = cv::imread(cam0_filenames.front());
-    VISUAL_FRONTEND::FrontendMono frontend(image.rows, image.cols);
+    GrayImage image;
+    Visualizor::LoadImage(cam0_filenames.front(), image);
+    VISUAL_FRONTEND::FrontendMono frontend(image.rows(), image.cols());
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 50;
@@ -84,9 +83,8 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
     for (const auto &filename : cam0_filenames) {
-        cv::Mat cv_image = cv::imread(filename, 0);
         GrayImage image;
-        image.SetImage(cv_image.data, cv_image.rows, cv_image.cols);
+        Visualizor::LoadImage(filename, image);
         frontend.RunOnce(image);
     }
 }
@@ -95,11 +93,12 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     ReportInfo(">> Test frontend stereo.");
 
     // Config frontend.
-    cv::Mat image = cv::imread(cam0_filenames.front());
-    VISUAL_FRONTEND::FrontendStereo frontend(image.rows, image.cols);
+    GrayImage image;
+    Visualizor::LoadImage(cam0_filenames.front(), image);
+    VISUAL_FRONTEND::FrontendStereo frontend(image.rows(), image.cols());
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
-    frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 70;
+    frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 50;
 
     // Config camera model.
     const float fx = 458.654f;
@@ -119,15 +118,15 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>>();
-    frontend.feature_detector()->options().kMinFeatureDistance = 25;
-    frontend.feature_detector()->options().kGridFilterRowDivideNumber = 12;
-    frontend.feature_detector()->options().kGridFilterColDivideNumber = 12;
+    frontend.feature_detector()->options().kMinFeatureDistance = 35;
+    frontend.feature_detector()->options().kGridFilterRowDivideNumber = 10;
+    frontend.feature_detector()->options().kGridFilterColDivideNumber = 10;
 
     // Config optical flow tracker.
     frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowBasicKlt>();
     frontend.feature_tracker()->options().kMethod = FEATURE_TRACKER::OpticalFlowMethod::kFast;
-    frontend.feature_tracker()->options().kPatchRowHalfSize = 10;
-    frontend.feature_tracker()->options().kPatchColHalfSize = 10;
+    frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
+    frontend.feature_tracker()->options().kPatchColHalfSize = 6;
     frontend.feature_tracker()->options().kMaxIteration = 15;
 
     // Config epipolar solver.
@@ -136,12 +135,10 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
     for (unsigned i = 0; i < cam0_filenames.size(); ++i) {
-        cv::Mat cv_image_left = cv::imread(cam0_filenames[i], 0);
-        cv::Mat cv_image_right = cv::imread(cam1_filenames[i], 0);
         GrayImage image_left;
         GrayImage image_right;
-        image_left.SetImage(cv_image_left.data, cv_image_left.rows, cv_image_left.cols);
-        image_right.SetImage(cv_image_right.data, cv_image_right.rows, cv_image_right.cols);
+        Visualizor::LoadImage(cam0_filenames[i], image_left);
+        Visualizor::LoadImage(cam1_filenames[i], image_right);
         frontend.RunOnce(image_left, image_right);
     }
 }
@@ -150,11 +147,15 @@ int main(int argc, char **argv) {
     ReportInfo(YELLOW ">> Test visual frontend on euroc dataset." RESET_COLOR);
 
     std::vector<std::string> cam0_filenames;
-    RETURN_FALSE_IF_FALSE(GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames));
+    if (!GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames)) {
+        RETURN_FALSE_IF_FALSE(GetFilesInPath("D:/My_Github/MH_05_difficult/mav0/cam0/data", cam0_filenames));
+    }
     std::sort(cam0_filenames.begin(), cam0_filenames.end());
 
     std::vector<std::string> cam1_filenames;
-    RETURN_FALSE_IF_FALSE(GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames));
+    if (!GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames)) {
+        RETURN_FALSE_IF_FALSE(GetFilesInPath("D:/My_Github/MH_05_difficult/mav0/cam1/data", cam1_filenames));
+    }
     std::sort(cam1_filenames.begin(), cam1_filenames.end());
 
     if (argc > 2) {
