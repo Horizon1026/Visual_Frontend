@@ -44,7 +44,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     VISUAL_FRONTEND::FrontendMono frontend(image.rows, image.cols);
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
-    frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 70;
+    frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 50;
 
     // Config camera model.
     const float fx = 458.654f;
@@ -66,17 +66,16 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     // frontend.image_processor() = std::make_unique<IMAGE_PROCESSOR::CensusProcessor>();
 
     // Config feature detector.
-    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::HarrisFeature>>();
+    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>>();
     frontend.feature_detector()->options().kMinFeatureDistance = 25;
-    frontend.feature_detector()->options().kGridFilterRowDivideNumber = 12;
-    frontend.feature_detector()->options().kGridFilterColDivideNumber = 12;
-    frontend.feature_detector()->feature().options().kMinValidResponse = 20.0f;
+    frontend.feature_detector()->options().kGridFilterRowDivideNumber = 10;
+    frontend.feature_detector()->options().kGridFilterColDivideNumber = 10;
 
     // Config optical flow tracker.
     frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowBasicKlt>();
     frontend.feature_tracker()->options().kMethod = FEATURE_TRACKER::OpticalFlowMethod::kFast;
-    frontend.feature_tracker()->options().kPatchRowHalfSize = 10;
-    frontend.feature_tracker()->options().kPatchColHalfSize = 10;
+    frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
+    frontend.feature_tracker()->options().kPatchColHalfSize = 6;
     frontend.feature_tracker()->options().kMaxIteration = 15;
 
     // Config epipolar solver.
@@ -119,11 +118,10 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     frontend.camera_model()->SetDistortionParameter(distort_param);
 
     // Config feature detector.
-    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::HarrisFeature>>();
+    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>>();
     frontend.feature_detector()->options().kMinFeatureDistance = 25;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 12;
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 12;
-    frontend.feature_detector()->feature().options().kMinValidResponse = 20.0f;
 
     // Config optical flow tracker.
     frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowBasicKlt>();

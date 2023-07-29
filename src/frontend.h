@@ -7,6 +7,8 @@
 
 #include "feature_point_detector.h"
 #include "feature_harris.h"
+#include "feature_fast.h"
+
 #include "optical_flow.h"
 #include "camera_basic.h"
 #include "geometry_epipolar.h"
@@ -43,7 +45,7 @@ public:
 
     // Reference for components.
     FrontendOptions &options() { return options_; }
-    std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::HarrisFeature>> &feature_detector() { return feature_detector_; }
+    std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>> &feature_detector() { return feature_detector_; }
     std::unique_ptr<FEATURE_TRACKER::OpticalFlow> &feature_tracker() { return feature_tracker_; }
     std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() { return camera_model_; }
     std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() { return epipolar_solver_; }
@@ -51,7 +53,7 @@ public:
 
     // Const eference for components.
     const FrontendOptions &options() const { return options_; }
-    const std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::HarrisFeature>> &feature_detector() const { return feature_detector_; }
+    const std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>> &feature_detector() const { return feature_detector_; }
     const std::unique_ptr<FEATURE_TRACKER::OpticalFlow> &feature_tracker() const { return feature_tracker_; }
     const std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() const { return camera_model_; }
     const std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() const { return epipolar_solver_; }
@@ -65,7 +67,7 @@ public:
     FrontendOptions options_;
 
     // Components.
-    std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::HarrisFeature>> feature_detector_ = nullptr;
+    std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>> feature_detector_ = nullptr;
     std::unique_ptr<FEATURE_TRACKER::OpticalFlow> feature_tracker_ = nullptr;
     std::unique_ptr<SENSOR_MODEL::CameraBasic> camera_model_ = nullptr;
     std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> epipolar_solver_ = nullptr;

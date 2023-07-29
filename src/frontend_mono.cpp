@@ -146,12 +146,9 @@ bool FrontendMono::AdjustTrackingResultByStatus() {
 }
 
 bool FrontendMono::SupplementNewFeatures(const GrayImage &cur_image_left) {
-    TickTock timer;
-    // TODO: This step cost too much time.
     feature_detector_->DetectGoodFeatures(cur_image_left,
                                           options_.kMaxStoredFeaturePointsNumber,
                                           *cur_pixel_uv_left_);
-    ReportDebug("time cost " << timer.TickInMillisecond() << " ms.");
 
     const uint32_t new_features_num = cur_pixel_uv_left_->size() - cur_ids_->size();
 
@@ -184,7 +181,6 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
 
     // If components is not valid, return false.
     RETURN_FALSE_IF_FALSE(CheckAllComponents());
-
     // GrayImage process.
     RETURN_FALSE_IF_FALSE(ProcessSourceImage(cur_image));
 
@@ -192,10 +188,8 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
     if (!ref_pixel_uv_left_->empty()) {
         // Predict pixel location on current image by optical flow velocity.
         RETURN_FALSE_IF_FALSE(PredictPixelLocation());
-
         // Track features from ref pyramid to cur pyramid.
         RETURN_FALSE_IF_FALSE(TrackFeatures());
-
         // Lift and do undistortion.
         RETURN_FALSE_IF_FALSE(LiftAllPointsFromPixelToNormalizedPlaneAndUndistortThem());
 
@@ -208,7 +202,6 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
 
         // Compute optical flow velocity. It is useful for feature prediction.
         RETURN_FALSE_IF_FALSE(ComputeOpticalFlowVelocity());
-
         // Grid filter to make points sparsely.
         RETURN_FALSE_IF_FALSE(SparsifyTrackedFeatures());
     }
@@ -229,10 +222,8 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
     if (is_cur_image_keyframe_) {
         // Prepare to make current frame to be reference frame (keyframe).
         RETURN_FALSE_IF_FALSE(AdjustTrackingResultByStatus());
-
         // Detect new features in cur.
         RETURN_FALSE_IF_FALSE(SupplementNewFeatures(cur_image));
-
         // Current frame becomes keyframe.
         RETURN_FALSE_IF_FALSE(MakeCurrentFrameKeyframe());
     }

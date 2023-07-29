@@ -1,3 +1,3 @@
 cd build/
-./test_euroc mono 50
+./test_euroc mono
 cd ..
