@@ -216,7 +216,7 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
         cur_pyramid_left_->GetImage(0),
         *ref_pixel_uv_left_, *cur_pixel_uv_left_,
         *ref_ids_, *cur_ids_, tracked_status_,
-        static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual),
+        static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked),
         *ref_tracked_cnt_, *cur_vel_);
     Visualizor::WaitKey(1);
 

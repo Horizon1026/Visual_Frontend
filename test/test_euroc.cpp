@@ -78,9 +78,9 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.feature_tracker()->options().kMaxIteration = 15;
 
     // Config epipolar solver.
-    frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
-    frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
-    frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
+    // frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
+    // frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
+    // frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
     for (const auto &filename : cam0_filenames) {
         GrayImage image;
