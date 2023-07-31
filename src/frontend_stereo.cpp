@@ -43,8 +43,8 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
         // Track features from ref pyramid to cur pyramid.
         *cur_ids_ = *ref_ids_;
         tracked_status_.clear();
-        if (!feature_tracker_->TrackMultipleLevel(*ref_pyramid_left_, *cur_pyramid_left_, *ref_pixel_uv_left_, *cur_pixel_uv_left_, tracked_status_)) {
-            ReportError("feature_tracker_->TrackMultipleLevel track from ref_left to cur_left error.");
+        if (!feature_tracker_->TrackFeatures(*ref_pyramid_left_, *cur_pyramid_left_, *ref_pixel_uv_left_, *cur_pixel_uv_left_, tracked_status_)) {
+            ReportError("feature_tracker_->TrackFeatures track from ref_left to cur_left error.");
             return false;
         }
         ReportInfo("After optical flow tracking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked))
@@ -81,8 +81,8 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
         const int32_t stored_half_col_size = feature_tracker_->options().kPatchColHalfSize;
         feature_tracker_->options().kPatchRowHalfSize = 1;
         feature_tracker_->options().kPatchColHalfSize = 25;
-        if (!feature_tracker_->TrackMultipleLevel(*cur_pyramid_left_, *cur_pyramid_right_, *cur_pixel_uv_left_, *cur_pixel_uv_right_, tracked_status_)) {
-            ReportError("feature_tracker_->TrackMultipleLevel track from cur_left to cur_right error.");
+        if (!feature_tracker_->TrackFeatures(*cur_pyramid_left_, *cur_pyramid_right_, *cur_pixel_uv_left_, *cur_pixel_uv_right_, tracked_status_)) {
+            ReportError("feature_tracker_->TrackFeatures track from cur_left to cur_right error.");
             return false;
         }
         feature_tracker_->options().kPatchRowHalfSize = stored_half_row_size;

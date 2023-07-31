@@ -30,8 +30,8 @@ bool FrontendMono::PredictPixelLocation() {
 bool FrontendMono::TrackFeatures() {
     *cur_ids_ = *ref_ids_;
     tracked_status_.clear();
-    if (!feature_tracker_->TrackMultipleLevel(*ref_pyramid_left_, *cur_pyramid_left_, *ref_pixel_uv_left_, *cur_pixel_uv_left_, tracked_status_)) {
-        ReportError("feature_tracker_->TrackMultipleLevel error.");
+    if (!feature_tracker_->TrackFeatures(*ref_pyramid_left_, *cur_pyramid_left_, *ref_pixel_uv_left_, *cur_pixel_uv_left_, tracked_status_)) {
+        ReportError("feature_tracker_->TrackFeatures error.");
         return false;
     }
 
@@ -69,8 +69,8 @@ bool FrontendMono::RejectOutliersByTrackingBack() {
         ref_pixel_xy_left_tracked_back_[i] -= (*ref_vel_)[i];
     }
 
-    if (!feature_tracker_->TrackMultipleLevel(*cur_pyramid_left_, *ref_pyramid_left_, *cur_pixel_uv_left_, ref_pixel_xy_left_tracked_back_, tracked_status_)) {
-        ReportError("feature_tracker_->TrackMultipleLevel error.");
+    if (!feature_tracker_->TrackFeatures(*cur_pyramid_left_, *ref_pyramid_left_, *cur_pixel_uv_left_, ref_pixel_xy_left_tracked_back_, tracked_status_)) {
+        ReportError("feature_tracker_->TrackFeatures error.");
         return false;
     }
 
