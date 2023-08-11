@@ -3,6 +3,7 @@
 #include "pinhole.h"
 #include "optical_flow_basic_klt.h"
 #include "optical_flow_affine_klt.h"
+#include "optical_flow_lssd_klt.h"
 #include "census.h"
 #include "log_report.h"
 
@@ -71,7 +72,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 10;
 
     // Config optical flow tracker.
-    frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowBasicKlt>();
+    frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowLssdKlt>();
     frontend.feature_tracker()->options().kMethod = FEATURE_TRACKER::OpticalFlowMethod::kFast;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
     frontend.feature_tracker()->options().kPatchColHalfSize = 6;
@@ -123,7 +124,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 10;
 
     // Config optical flow tracker.
-    frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowBasicKlt>();
+    frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowLssdKlt>();
     frontend.feature_tracker()->options().kMethod = FEATURE_TRACKER::OpticalFlowMethod::kFast;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
     frontend.feature_tracker()->options().kPatchColHalfSize = 6;
@@ -172,7 +173,8 @@ int main(int argc, char **argv) {
         ReportInfo("Run mono visual frontend.");
         TestFrontendMono(cam0_filenames);
     } else {
-        ReportInfo("Please config 'mono' or 'stereo' to run visual frontend.");
+        ReportInfo("Please config 'mono' or 'stereo' to run visual frontend. Default mono.");
+        TestFrontendMono(cam0_filenames);
     }
 
     return 0;
