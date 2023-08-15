@@ -14,6 +14,11 @@
 #include "vector"
 #include "cstring"
 
+namespace {
+    using FeatureType = FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>;
+    using KltType = FEATURE_TRACKER::OpticalFlowBasicKlt;
+}
+
 bool GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
     DIR *ptr_dir;
     struct dirent *ptr;
@@ -66,13 +71,13 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     // frontend.image_processor() = std::make_unique<IMAGE_PROCESSOR::CensusProcessor>();
 
     // Config feature detector.
-    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>>();
+    frontend.feature_detector() = std::make_unique<FeatureType>();
     frontend.feature_detector()->options().kMinFeatureDistance = 35;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 10;
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 10;
 
     // Config optical flow tracker.
-    frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowLssdKlt>();
+    frontend.feature_tracker() = std::make_unique<KltType>();
     frontend.feature_tracker()->options().kMethod = FEATURE_TRACKER::OpticalFlowMethod::kFast;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
     frontend.feature_tracker()->options().kPatchColHalfSize = 6;
@@ -118,13 +123,13 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     frontend.camera_model()->SetDistortionParameter(distort_param);
 
     // Config feature detector.
-    frontend.feature_detector() = std::make_unique<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>>();
+    frontend.feature_detector() = std::make_unique<FeatureType>();
     frontend.feature_detector()->options().kMinFeatureDistance = 35;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 10;
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 10;
 
     // Config optical flow tracker.
-    frontend.feature_tracker() = std::make_unique<FEATURE_TRACKER::OpticalFlowLssdKlt>();
+    frontend.feature_tracker() = std::make_unique<KltType>();
     frontend.feature_tracker()->options().kMethod = FEATURE_TRACKER::OpticalFlowMethod::kFast;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
     frontend.feature_tracker()->options().kPatchColHalfSize = 6;
