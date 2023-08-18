@@ -154,13 +154,13 @@ int main(int argc, char **argv) {
 
     std::vector<std::string> cam0_filenames;
     if (!GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames)) {
-        RETURN_FALSE_IF_FALSE(GetFilesInPath("D:/My_Github/MH_05_difficult/mav0/cam0/data", cam0_filenames));
+        RETURN_FALSE_IF_FALSE(GetFilesInPath("D:/My_Github/Datasets/MH_05_difficult/mav0/cam0/data", cam0_filenames));
     }
     std::sort(cam0_filenames.begin(), cam0_filenames.end());
 
     std::vector<std::string> cam1_filenames;
     if (!GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames)) {
-        RETURN_FALSE_IF_FALSE(GetFilesInPath("D:/My_Github/MH_05_difficult/mav0/cam1/data", cam1_filenames));
+        RETURN_FALSE_IF_FALSE(GetFilesInPath("D:/My_Github/Datasets/MH_05_difficult/mav0/cam1/data", cam1_filenames));
     }
     std::sort(cam1_filenames.begin(), cam1_filenames.end());
 
