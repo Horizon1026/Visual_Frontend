@@ -20,6 +20,7 @@
 
 namespace VISUAL_FRONTEND {
 
+/* Options for Class Frontend. */
 struct FrontendOptions {
     uint32_t kImageRows = 0;
     uint32_t kImageCols = 0;
@@ -31,6 +32,7 @@ struct FrontendOptions {
     bool kEnableVisualizeResult = true;
 };
 
+/* Class Frontend Declaration. */
 class Frontend {
 
 public:
@@ -50,28 +52,86 @@ public:
     // Support for log recording.
     virtual void RegisterLogPackages() = 0;
 
-    // Reference for components.
+    // Reference for member variables.
     FrontendOptions &options() { return options_; }
+
     std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>> &feature_detector() { return feature_detector_; }
     std::unique_ptr<FEATURE_TRACKER::OpticalFlow> &feature_tracker() { return feature_tracker_; }
     std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() { return camera_model_; }
     std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() { return epipolar_solver_; }
     std::unique_ptr<IMAGE_PROCESSOR::ImageProcessor> &image_processor() { return image_processor_; }
+
+    uint8_t *&stored_buff() { return stored_buff_; }
+    std::vector<uint8_t> &tracked_status() { return tracked_status_; }
+
+    ImagePyramid *&ref_pyramid_left() { return ref_pyramid_left_; }
+    ImagePyramid *&ref_pyramid_right() { return ref_pyramid_right_; }
+    std::vector<uint32_t> *&ref_ids() { return ref_ids_; }
+    std::vector<Vec2> *&ref_pixel_uv_left() { return ref_pixel_uv_left_; }
+    std::vector<Vec2> *&ref_norm_xy_left() { return ref_norm_xy_left_; }
+    std::vector<Vec2> *&ref_pixel_uv_right() { return ref_pixel_uv_right_; }
+    std::vector<Vec2> *&ref_norm_xy_right() { return ref_norm_xy_right_; }
+    std::vector<Vec3> *&ref_points_xyz() { return ref_points_xyz_; }
+    std::vector<Vec2> *&ref_vel() { return ref_vel_; }
+    std::vector<uint32_t> *&ref_tracked_cnt() { return ref_tracked_cnt_; }
+
+    ImagePyramid *&cur_pyramid_left() { return cur_pyramid_left_; }
+    ImagePyramid *&cur_pyramid_right() { return cur_pyramid_right_; }
+    std::vector<uint32_t> *&cur_ids() { return cur_ids_; }
+    std::vector<Vec2> *&cur_pixel_uv_left() { return cur_pixel_uv_left_; }
+    std::vector<Vec2> *&cur_norm_xy_left() { return cur_norm_xy_left_; }
+    std::vector<Vec2> *&cur_pixel_uv_right() { return cur_pixel_uv_right_; }
+    std::vector<Vec2> *&cur_norm_xy_right() { return cur_norm_xy_right_; }
+    std::vector<Vec3> *&cur_points_xyz() { return cur_points_xyz_; }
+    std::vector<Vec2> *&cur_vel() { return cur_vel_; }
+    std::vector<uint32_t> *&cur_tracked_cnt() { return cur_tracked_cnt_; }
+
+    uint32_t &feature_id_cnt() { return feature_id_cnt_; }
+    bool &is_cur_image_keyframe() { return is_cur_image_keyframe_; }
     SLAM_DATA_LOG::BinaryDataLog &logger() { return logger_; }
 
-    // Const eference for components.
+    // Const reference for member variables.
     const FrontendOptions &options() const { return options_; }
+
     const std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>> &feature_detector() const { return feature_detector_; }
     const std::unique_ptr<FEATURE_TRACKER::OpticalFlow> &feature_tracker() const { return feature_tracker_; }
     const std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() const { return camera_model_; }
     const std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() const { return epipolar_solver_; }
     const std::unique_ptr<IMAGE_PROCESSOR::ImageProcessor> &image_processor() const { return image_processor_; }
+
+    const uint8_t *stored_buff() const { return stored_buff_; }
+    const std::vector<uint8_t> &tracked_status() const { return tracked_status_; }
+
+    const ImagePyramid *ref_pyramid_left() const { return ref_pyramid_left_; }
+    const ImagePyramid *ref_pyramid_right() const { return ref_pyramid_right_; }
+    const std::vector<uint32_t> *ref_ids() const { return ref_ids_; }
+    const std::vector<Vec2> *ref_pixel_uv_left() const { return ref_pixel_uv_left_; }
+    const std::vector<Vec2> *ref_norm_xy_left() const { return ref_norm_xy_left_; }
+    const std::vector<Vec2> *ref_pixel_uv_right() const { return ref_pixel_uv_right_; }
+    const std::vector<Vec2> *ref_norm_xy_right() const { return ref_norm_xy_right_; }
+    const std::vector<Vec3> *ref_points_xyz() const { return ref_points_xyz_; }
+    const std::vector<Vec2> *ref_vel() const { return ref_vel_; }
+    const std::vector<uint32_t> *ref_tracked_cnt() const { return ref_tracked_cnt_; }
+
+    const ImagePyramid *cur_pyramid_left() const { return cur_pyramid_left_; }
+    const ImagePyramid *cur_pyramid_right() const { return cur_pyramid_right_; }
+    const std::vector<uint32_t> *cur_ids() const { return cur_ids_; }
+    const std::vector<Vec2> *cur_pixel_uv_left() const { return cur_pixel_uv_left_; }
+    const std::vector<Vec2> *cur_norm_xy_left() const { return cur_norm_xy_left_; }
+    const std::vector<Vec2> *cur_pixel_uv_right() const { return cur_pixel_uv_right_; }
+    const std::vector<Vec2> *cur_norm_xy_right() const { return cur_norm_xy_right_; }
+    const std::vector<Vec3> *cur_points_xyz() const { return cur_points_xyz_; }
+    const std::vector<Vec2> *cur_vel() const { return cur_vel_; }
+    const std::vector<uint32_t> *cur_tracked_cnt() const { return cur_tracked_cnt_; }
+
+    const uint32_t &feature_id_cnt() const { return feature_id_cnt_; }
+    const bool &is_cur_image_keyframe() const { return is_cur_image_keyframe_; }
     const SLAM_DATA_LOG::BinaryDataLog &logger() const { return logger_; }
 
     // Check every components.
     virtual bool CheckAllComponents();
 
-public:
+private:
     // Options.
     FrontendOptions options_;
 

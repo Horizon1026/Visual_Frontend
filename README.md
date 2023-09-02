@@ -22,6 +22,7 @@ A general and simple visual frontend consulting VINS-Mono.
 - Sensor_Model
 - Vision_Geometry
 - Image_Processor
+- Visualizor2D
 - Binary_Data_Log
 
 # Tips

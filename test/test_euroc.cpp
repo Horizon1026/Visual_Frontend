@@ -48,7 +48,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     Visualizor::LoadImage(cam0_filenames.front(), image);
     VISUAL_FRONTEND::FrontendMono frontend(image.rows(), image.cols());
     frontend.options().kEnableRecordBinaryLog = true;
-    frontend.options().kEnableVisualizeResult = false;
+    frontend.options().kEnableVisualizeResult = true;
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 40;
