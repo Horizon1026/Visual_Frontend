@@ -52,7 +52,6 @@ private:
 private:
     // Temp vector for tracking back.
     std::vector<Vec2> ref_pixel_xy_left_tracked_back_;
-
     // Temp package data for log file.
     FrontendMonoLog log_package_data_;
 };
