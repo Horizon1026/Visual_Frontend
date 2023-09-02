@@ -18,6 +18,24 @@ Frontend::Frontend(const uint32_t image_rows, const uint32_t image_cols) {
     }
 }
 
+bool Frontend::PrepareForLogRecording(const std::string &log_file_name) {
+
+    // Register packages for log file.
+    if (options_.kRecordBinaryLog) {
+        if (!logger_.CreateLogFile(log_file_name)) {
+            ReportError("Visual frontend cannot create log file.");
+            options_.kRecordBinaryLog = false;
+            return false;
+        }
+
+        RegisterLogPackages();
+
+        logger_.PrepareForRecording();
+    }
+
+    return true;
+}
+
 Frontend::~Frontend() {
     if (stored_buff_ == nullptr) {
         SlamMemory::Free(stored_buff_);

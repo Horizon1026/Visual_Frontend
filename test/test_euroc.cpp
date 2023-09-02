@@ -50,6 +50,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 40;
+    frontend.PrepareForLogRecording();
 
     // Config camera model.
     const float fx = 458.654f;
@@ -105,6 +106,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 30;
+    frontend.PrepareForLogRecording();
 
     // Config camera model.
     const float fx = 458.654f;

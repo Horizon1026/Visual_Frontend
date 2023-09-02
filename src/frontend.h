@@ -14,6 +14,8 @@
 #include "geometry_epipolar.h"
 #include "image_processor.h"
 
+#include "binary_data_log.h"
+
 #include "memory"
 
 namespace VISUAL_FRONTEND {
@@ -25,6 +27,7 @@ struct FrontendOptions {
     bool kSelfSelectKeyframe = true;
     uint32_t kMinDetectedFeaturePointsNumberInCurrentImage = 60;
     float kMaxValidTrackBackPixelResidual = 1.0f;
+    bool kRecordBinaryLog = true;
 };
 
 class Frontend {
@@ -35,13 +38,16 @@ public:
     virtual ~Frontend();
     Frontend(const Frontend &frontend) = delete;
 
-public:
+    // Perpare for log recording.
+    bool PrepareForLogRecording(const std::string &log_file_name = "./frontend_log.binlog");
+
     // Frontend is driven by mono image or stereo images.
     virtual bool RunOnce(const GrayImage &image) { return false; }
     virtual bool RunOnce(const GrayImage &image_left, const GrayImage &image_right) { return false; }
-
     // Draw tracking results.
-    virtual void DrawTrackingResults(const std::string title) {};
+    virtual void DrawTrackingResults(const std::string title) = 0;
+    // Support for log recording.
+    virtual void RegisterLogPackages() = 0;
 
     // Reference for components.
     FrontendOptions &options() { return options_; }
@@ -50,6 +56,7 @@ public:
     std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() { return camera_model_; }
     std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() { return epipolar_solver_; }
     std::unique_ptr<IMAGE_PROCESSOR::ImageProcessor> &image_processor() { return image_processor_; }
+    SLAM_DATA_LOG::BinaryDataLog &logger() { return logger_; }
 
     // Const eference for components.
     const FrontendOptions &options() const { return options_; }
@@ -58,6 +65,7 @@ public:
     const std::unique_ptr<SENSOR_MODEL::CameraBasic> &camera_model() const { return camera_model_; }
     const std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() const { return epipolar_solver_; }
     const std::unique_ptr<IMAGE_PROCESSOR::ImageProcessor> &image_processor() const { return image_processor_; }
+    const SLAM_DATA_LOG::BinaryDataLog &logger() const { return logger_; }
 
     // Check every components.
     virtual bool CheckAllComponents();
@@ -112,6 +120,9 @@ public:
 
     // Keyframe flag.
     bool is_cur_image_keyframe_ = false;
+
+    // Record log.
+    SLAM_DATA_LOG::BinaryDataLog logger_;
 
 };
 

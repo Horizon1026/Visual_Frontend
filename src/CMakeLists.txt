@@ -60,6 +60,12 @@ if ( NOT TARGET lib_image_processor )
     add_subdirectory( ${IMAGE_PROCESSOR_PATH}/src ${PROJECT_SOURCE_DIR}/build/lib_image_processor )
 endif()
 
+# Add binary data logger.
+set( BINARY_DATA_LOG_PATH ${PROJECT_SOURCE_DIR}/../Binary_Data_Log )
+if ( NOT TARGET lib_binary_data_log )
+    add_subdirectory( ${BINARY_DATA_LOG_PATH}/src ${PROJECT_SOURCE_DIR}/build/lib_binary_data_log )
+endif()
+
 add_library( lib_visual_frontend ${AUX_SRC_FRONTEND} )
 target_include_directories( lib_visual_frontend PUBLIC . )
 target_link_libraries( lib_visual_frontend
@@ -77,4 +83,5 @@ target_link_libraries( lib_visual_frontend
     lib_vision_geometry_triangulation
     lib_camera_model
     lib_image_processor
+    lib_binary_data_log
 )
