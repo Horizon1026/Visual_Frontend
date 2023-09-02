@@ -75,7 +75,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FeatureType>();
-    frontend.feature_detector()->options().kMinFeatureDistance = 25;
+    frontend.feature_detector()->options().kMinFeatureDistance = 30;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 10;
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 10;
 
