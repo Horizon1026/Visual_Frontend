@@ -35,7 +35,7 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
     // Track features if ref frame is ok.
     if (ref_pixel_uv_left()->size() != 0) {
         // Predict pixel location on current image by optical flow velocity.
-        *cur_pixel_uv_left() = *ref_pixel_uv_left();    // Deep copy.
+        *cur_pixel_uv_left() = *ref_pixel_uv_left();
         for (uint32_t i = 0; i < ref_vel()->size(); ++i) {
             (*cur_pixel_uv_left())[i] += (*ref_vel())[i];
         }
@@ -75,18 +75,39 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
         *ref_vel() = *cur_vel();
 
         // Track features from cur pyramid left to cur pyramid right.
-        *cur_pixel_uv_right() = *cur_pixel_uv_left();
-        // Adjust patch size for stereo tracking.
-        const int32_t stored_half_row_size = feature_tracker()->options().kPatchRowHalfSize;
-        const int32_t stored_half_col_size = feature_tracker()->options().kPatchColHalfSize;
-        feature_tracker()->options().kPatchRowHalfSize = 1;
-        feature_tracker()->options().kPatchColHalfSize = 25;
-        if (!feature_tracker()->TrackFeatures(*cur_pyramid_left(), *cur_pyramid_right(), *cur_pixel_uv_left(), *cur_pixel_uv_right(), tracked_status())) {
-            ReportError("feature_tracker()->TrackFeatures track from cur_left to cur_right error.");
+        ReportInfo("cur_image_right " << LogPtr(cur_image_right.data()));
+        ReportInfo("feature_detector() " << LogPtr(feature_detector().get()));
+        detected_features_in_cur_right_.clear();
+        feature_detector()->DetectGoodFeatures(cur_image_right,
+                                               options().kMaxStoredFeaturePointsNumber,
+                                               detected_features_in_cur_right_);
+        ReportInfo("detected_features_in_cur_right_ size " << detected_features_in_cur_right_.size());
+
+        ReportInfo("descriptor_ " << LogPtr(descriptor_.get()));
+        descriptor_->options().kLength = 256;
+        descriptor_->options().kHalfPatchSize = 8;
+        cur_descriptor_left_.clear();
+        cur_descriptor_right_.clear();
+        ReportInfo("cur_image_left " << LogPtr(cur_image_left.data()));
+        ReportInfo("*cur_pixel_uv_left() size " << cur_pixel_uv_left()->size());
+        descriptor_->Compute(cur_image_left, *cur_pixel_uv_left(), cur_descriptor_left_);
+        ReportInfo("*cur_pixel_uv_left() size " << cur_pixel_uv_left()->size());
+        ReportInfo("cur_descriptor_left_ size " << cur_descriptor_left_.size());
+        descriptor_->Compute(cur_image_right, detected_features_in_cur_right_, cur_descriptor_right_);
+        ReportInfo("cur_descriptor_right_ size " << cur_descriptor_right_.size());
+
+        feature_matcher_->options().kMaxValidPredictRowDistance = 50;
+        feature_matcher_->options().kMaxValidPredictColDistance = 200;
+        feature_matcher_->options().kMaxValidDescriptorDistance = 60;
+
+        if (!feature_matcher_->NearbyMatch(cur_descriptor_left_, cur_descriptor_right_,
+                                           *cur_pixel_uv_left(), detected_features_in_cur_right_,
+                                           *cur_pixel_uv_right(), tracked_status())) {
+            ReportError("feature_matcher_->NearbyMatch track from cur_left to cur_right error.");
             return false;
         }
-        feature_tracker()->options().kPatchRowHalfSize = stored_half_row_size;
-        feature_tracker()->options().kPatchColHalfSize = stored_half_col_size;
+        ReportInfo("*cur_pixel_uv_right() size " << cur_pixel_uv_right()->size());
+        ReportInfo("tracked_status() size " << tracked_status().size());
 
         // Reject outliers by essential/fundemantal matrix.
         cur_norm_xy_right()->resize(cur_pixel_uv_right()->size());
