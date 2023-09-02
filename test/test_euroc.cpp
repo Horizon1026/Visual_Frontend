@@ -130,7 +130,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FeatureType>();
-    frontend.feature_detector()->options().kMinFeatureDistance = 35;
+    frontend.feature_detector()->options().kMinFeatureDistance = 30;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 10;
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 10;
 
@@ -145,6 +145,17 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
     frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
     frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
+
+    // Config feature descriptor.
+    frontend.descriptor() = std::make_unique<FEATURE_DETECTOR::BriefDescriptor>();
+    frontend.descriptor()->options().kLength = 256;
+    frontend.descriptor()->options().kHalfPatchSize = 16;
+
+    // Config descriptor matcher.
+    frontend.feature_matcher() = std::make_unique<VISUAL_FRONTEND::BriefMatcher>();
+    frontend.feature_matcher()->options().kMaxValidPredictRowDistance = 100;
+    frontend.feature_matcher()->options().kMaxValidPredictColDistance = 300;
+    frontend.feature_matcher()->options().kMaxValidDescriptorDistance = 60;
 
     for (unsigned i = 0; i < cam0_filenames.size(); ++i) {
         GrayImage image_left;

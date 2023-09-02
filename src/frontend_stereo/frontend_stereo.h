@@ -47,12 +47,16 @@ public:
     // Support for log recording.
     virtual void RegisterLogPackages() override {}
 
+    // Reference for member variables.
+    std::unique_ptr<FEATURE_DETECTOR::BriefDescriptor> &descriptor() { return descriptor_; }
+    std::unique_ptr<BriefMatcher> &feature_matcher() { return feature_matcher_; }
+
 private:
     bool ProcessSourceImage(const GrayImage &cur_image_left, const GrayImage &cur_image_right);
 
 private:
-    std::unique_ptr<FEATURE_DETECTOR::BriefDescriptor> descriptor_ = std::make_unique<FEATURE_DETECTOR::BriefDescriptor>();
-    std::unique_ptr<BriefMatcher> feature_matcher_ = std::make_unique<BriefMatcher>();
+    std::unique_ptr<FEATURE_DETECTOR::BriefDescriptor> descriptor_ = nullptr;
+    std::unique_ptr<BriefMatcher> feature_matcher_ = nullptr;
 
     std::vector<Vec2> detected_features_in_cur_right_;
     std::vector<FEATURE_DETECTOR::BriefType> cur_descriptor_left_;
