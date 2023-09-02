@@ -47,6 +47,8 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     GrayImage image;
     Visualizor::LoadImage(cam0_filenames.front(), image);
     VISUAL_FRONTEND::FrontendMono frontend(image.rows(), image.cols());
+    frontend.options().kEnableRecordBinaryLog = true;
+    frontend.options().kEnableVisualizeResult = false;
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 40;
@@ -73,7 +75,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FeatureType>();
-    frontend.feature_detector()->options().kMinFeatureDistance = 35;
+    frontend.feature_detector()->options().kMinFeatureDistance = 25;
     frontend.feature_detector()->options().kGridFilterRowDivideNumber = 10;
     frontend.feature_detector()->options().kGridFilterColDivideNumber = 10;
 
@@ -103,6 +105,8 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     GrayImage image;
     Visualizor::LoadImage(cam0_filenames.front(), image);
     VISUAL_FRONTEND::FrontendStereo frontend(image.rows(), image.cols());
+    frontend.options().kEnableRecordBinaryLog = false;
+    frontend.options().kEnableVisualizeResult = false;
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 30;

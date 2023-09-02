@@ -21,15 +21,17 @@ Frontend::Frontend(const uint32_t image_rows, const uint32_t image_cols) {
 bool Frontend::PrepareForLogRecording(const std::string &log_file_name) {
 
     // Register packages for log file.
-    if (options_.kRecordBinaryLog) {
+    if (options_.kEnableRecordBinaryLog) {
         if (!logger_.CreateLogFile(log_file_name)) {
             ReportError("Visual frontend cannot create log file.");
-            options_.kRecordBinaryLog = false;
+            options_.kEnableRecordBinaryLog = false;
             return false;
         }
 
+        // This should be implemented by sub class.
         RegisterLogPackages();
 
+        // Write log file header.
         logger_.PrepareForRecording();
     }
 

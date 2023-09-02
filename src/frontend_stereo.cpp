@@ -173,6 +173,10 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
 
 // Draw tracking results.
 void FrontendStereo::DrawTrackingResults(const std::string title) {
+    if (!options().kEnableVisualizeResult) {
+        return;
+    }
+
     Visualizor::ShowImageWithTrackedFeaturesWithId(
         title,
         ref_pyramid_left_->GetImage(0),

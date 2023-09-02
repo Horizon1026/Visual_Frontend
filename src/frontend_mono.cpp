@@ -225,7 +225,7 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
     }
 
     // Record package data.
-    if (options().kRecordBinaryLog) {
+    if (options().kEnableRecordBinaryLog) {
         logger().RecordPackage(kFrontendMonoLogIndex, reinterpret_cast<const char *>(&log_package_data_));
     }
 
@@ -234,6 +234,10 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
 
 // Draw tracking results.
 void FrontendMono::DrawTrackingResults(const std::string title) {
+    if (!options().kEnableVisualizeResult) {
+        return;
+    }
+
     Visualizor::ShowImageWithTrackedFeaturesWithId(
         title,
         ref_pyramid_left_->GetImage(0),
