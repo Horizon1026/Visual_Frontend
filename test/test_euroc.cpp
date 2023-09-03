@@ -95,6 +95,9 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
         GrayImage image;
         Visualizor::LoadImage(filename, image);
         frontend.RunOnce(image);
+
+        VISUAL_FRONTEND::FrontendOutputData output;
+        frontend.GetFrontendOutputData(output);
     }
 }
 
@@ -163,6 +166,9 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
         Visualizor::LoadImage(cam0_filenames[i], image_left);
         Visualizor::LoadImage(cam1_filenames[i], image_right);
         frontend.RunOnce(image_left, image_right);
+
+        VISUAL_FRONTEND::FrontendOutputData output;
+        frontend.GetFrontendOutputData(output);
     }
 }
 

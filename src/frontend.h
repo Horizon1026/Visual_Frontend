@@ -5,6 +5,8 @@
 #include "datatype_image.h"
 #include "datatype_image_pyramid.h"
 
+#include "frontend_output.h"
+
 #include "feature_point_detector.h"
 #include "feature_harris.h"
 #include "feature_fast.h"
@@ -51,6 +53,8 @@ public:
     virtual void DrawTrackingResults(const std::string title) = 0;
     // Support for log recording.
     virtual void RegisterLogPackages() = 0;
+    // Get frontend result.
+    virtual void GetFrontendOutputData(FrontendOutputData &output_data) = 0;
 
     // Reference for member variables.
     FrontendOptions &options() { return options_; }
