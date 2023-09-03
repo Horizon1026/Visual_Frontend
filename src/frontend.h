@@ -44,7 +44,7 @@ public:
     Frontend(const Frontend &frontend) = delete;
 
     // Perpare for log recording.
-    bool PrepareForLogRecording(const std::string &log_file_name = "./frontend_log.binlog");
+    bool Initialize(const std::string &log_file_name = "./frontend_log.binlog");
 
     // Frontend is driven by mono image or stereo images.
     virtual bool RunOnce(const GrayImage &image) { return false; }

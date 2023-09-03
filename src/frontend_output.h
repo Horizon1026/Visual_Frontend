@@ -12,6 +12,7 @@ struct ObservePerView {
 };
 
 struct FrontendOutputData {
+    bool is_current_keyframe = true;
     std::vector<uint32_t> features_id;
     std::vector<ObservePerView> observes_per_frame;
     std::vector<Vec2> optical_velocity_in_ref_view;

@@ -13,6 +13,7 @@
 #include "dirent.h"
 #include "vector"
 #include "cstring"
+#include "unistd.h"
 
 namespace {
     using FeatureType = FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>;
@@ -52,7 +53,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 40;
-    frontend.PrepareForLogRecording();
+    frontend.Initialize();
 
     // Config camera model.
     const float fx = 458.654f;
@@ -86,7 +87,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     frontend.feature_tracker()->options().kPatchColHalfSize = 6;
     frontend.feature_tracker()->options().kMaxIteration = 15;
 
-    // Config epipolar solver.
+    // Config epipolar solver. Disable it for better performance.
     // frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
     // frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
     // frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
@@ -110,7 +111,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 30;
-    frontend.PrepareForLogRecording();
+    frontend.Initialize();
 
     // Config camera model.
     const float fx = 458.654f;

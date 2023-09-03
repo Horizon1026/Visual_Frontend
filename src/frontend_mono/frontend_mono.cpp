@@ -150,11 +150,16 @@ bool FrontendMono::SupplementNewFeatures(const GrayImage &cur_image_left) {
                                            options().kMaxStoredFeaturePointsNumber,
                                            *cur_pixel_uv_left());
 
-    const uint32_t new_features_num = cur_pixel_uv_left()->size() - cur_ids()->size();
+    const uint32_t old_features_num = cur_ids()->size();
+    const uint32_t new_features_num = cur_pixel_uv_left()->size() - old_features_num;
+    Vec2 temp_cur_norm_xy_left = Vec2::Zero();
 
     for (uint32_t i = 0; i < new_features_num; ++i) {
         cur_ids()->emplace_back(feature_id_cnt());
-        cur_norm_xy_left()->emplace_back(Vec2::Zero());
+
+        camera_model()->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i + old_features_num], temp_cur_norm_xy_left);
+        cur_norm_xy_left()->emplace_back(temp_cur_norm_xy_left);
+
         ref_tracked_cnt()->emplace_back(1);
         ++feature_id_cnt();
     }
@@ -221,7 +226,13 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
         RETURN_FALSE_IF_FALSE(SupplementNewFeatures(cur_image));
         // Current frame becomes keyframe.
         RETURN_FALSE_IF_FALSE(MakeCurrentFrameKeyframe());
+    } else {
+        // Record log data.
+        log_package_data_.num_of_new_features = 0;
     }
+
+    // Update frontend output data.
+    UpdateFrontendOutputData();
 
     // Record package data.
     if (options().kEnableRecordBinaryLog) {
@@ -272,6 +283,13 @@ void FrontendMono::UpdateFrontendOutputData() {
     output_data().features_id.clear();
     output_data().observes_per_frame.clear();
     output_data().optical_velocity_in_ref_view.clear();
+
+    output_data().is_current_keyframe = is_cur_image_keyframe();
+    if (output_data().is_current_keyframe) {
+        // If current frame is keyframe, tracking result will be stored in ref_info.
+    } else {
+        // If current frame is not keyframe, tracking result will be stored in cur_info.
+    }
 }
 
 }
