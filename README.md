@@ -24,6 +24,7 @@ A general and simple visual frontend consulting VINS-Mono.
 - Image_Processor
 - Visualizor2D
 - Binary_Data_Log
+- Binary_Data_Viewer (Used to plot curve log file in './output')
 
 # Tips
 - 欢迎一起交流学习，不同意商用；
