@@ -67,7 +67,6 @@ public:
     std::unique_ptr<FEATURE_DETECTOR::BriefDescriptor> &descriptor() { return descriptor_; }
     std::unique_ptr<BriefMatcher> &feature_matcher() { return feature_matcher_; }
     Pixel &half_patch_size_for_stereo_tracking() { return half_patch_size_for_stereo_tracking_; }
-    std::vector<uint8_t> &stereo_tracked_status() { return stereo_tracked_status_; }
 
 private:
     bool ProcessSourceImage(const GrayImage &cur_image_left, const GrayImage &cur_image_right);
@@ -87,9 +86,13 @@ private:
     std::unique_ptr<FEATURE_DETECTOR::BriefDescriptor> descriptor_ = nullptr;
     std::unique_ptr<BriefMatcher> feature_matcher_ = nullptr;
 
+    // Support for stereo tracking.
     Pixel half_patch_size_for_stereo_tracking_ = Pixel(2, 25);
-    std::vector<uint8_t> stereo_tracked_status_;
+    std::array<std::vector<uint8_t>, 2> stereo_tracked_status_;
+    std::vector<uint8_t> *ref_stereo_tracked_status_ = &stereo_tracked_status_[0];
+    std::vector<uint8_t> *cur_stereo_tracked_status_ = &stereo_tracked_status_[1];
 
+    // Support for stereo matching.
     std::vector<Vec2> detected_features_in_cur_right_;
     std::vector<FEATURE_DETECTOR::BriefType> cur_descriptor_left_;
     std::vector<FEATURE_DETECTOR::BriefType> cur_descriptor_right_;

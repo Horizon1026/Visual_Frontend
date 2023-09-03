@@ -92,7 +92,7 @@ bool FrontendStereo::SparsifyTrackedFeaturesInLeft() {
 }
 
 bool FrontendStereo::TrackFeaturesFromCurrentLeftToCurrentRightImage(const GrayImage &cur_image_left, const GrayImage &cur_image_right) {
-    stereo_tracked_status_ = tracked_status();
+    *cur_stereo_tracked_status_ = tracked_status();
 
     if (feature_matcher_ == nullptr) {
         *cur_pixel_uv_right() = *cur_pixel_uv_left();
@@ -100,7 +100,7 @@ bool FrontendStereo::TrackFeaturesFromCurrentLeftToCurrentRightImage(const GrayI
         const int32_t stored_half_col_size = feature_tracker()->options().kPatchColHalfSize;
         feature_tracker()->options().kPatchRowHalfSize = half_patch_size_for_stereo_tracking_.x();
         feature_tracker()->options().kPatchColHalfSize = half_patch_size_for_stereo_tracking_.y();
-        if (!feature_tracker()->TrackFeatures(*cur_pyramid_left(), *cur_pyramid_right(), *cur_pixel_uv_left(), *cur_pixel_uv_right(), stereo_tracked_status_)) {
+        if (!feature_tracker()->TrackFeatures(*cur_pyramid_left(), *cur_pyramid_right(), *cur_pixel_uv_left(), *cur_pixel_uv_right(), *cur_stereo_tracked_status_)) {
             ReportError("feature_tracker()->TrackFeatures track from cur_left to cur_right error.");
             return false;
         }
@@ -120,7 +120,7 @@ bool FrontendStereo::TrackFeaturesFromCurrentLeftToCurrentRightImage(const GrayI
         cur_pixel_uv_right()->clear();
         if (!feature_matcher_->NearbyMatch(cur_descriptor_left_, cur_descriptor_right_,
                                            *cur_pixel_uv_left(), detected_features_in_cur_right_,
-                                           *cur_pixel_uv_right(), stereo_tracked_status_)) {
+                                           *cur_pixel_uv_right(), *cur_stereo_tracked_status_)) {
             ReportError("feature_matcher_->NearbyMatch track from cur_left to cur_right error.");
             return false;
         }
@@ -128,7 +128,7 @@ bool FrontendStereo::TrackFeaturesFromCurrentLeftToCurrentRightImage(const GrayI
     }
 
     // Record log data.
-    log_package_data_.num_of_tracked_feature_from_left_to_right = SlamOperation::StatisItemInVector(stereo_tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    log_package_data_.num_of_tracked_feature_from_left_to_right = SlamOperation::StatisItemInVector(*cur_stereo_tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
     return true;
 }
 
@@ -139,13 +139,13 @@ bool FrontendStereo::RejectOutliersBetweenCurrentLeftToCurrentRightImage() {
     }
 
     Mat3 essential;
-    if (!epipolar_solver()->EstimateEssential(*cur_norm_xy_left(), *cur_norm_xy_right(), essential, stereo_tracked_status_)) {
+    if (!epipolar_solver()->EstimateEssential(*cur_norm_xy_left(), *cur_norm_xy_right(), essential, *cur_stereo_tracked_status_)) {
         ReportError("epipolar_solver()->EstimateEssential error");
         return false;
     }
 
     // Record log data.
-    log_package_data_.num_of_inliers_from_left_to_right = SlamOperation::StatisItemInVector(stereo_tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    log_package_data_.num_of_inliers_from_left_to_right = SlamOperation::StatisItemInVector(*cur_stereo_tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
     return true;
 }
 
@@ -174,7 +174,7 @@ bool FrontendStereo::AdjustTrackingResultByStatus() {
     SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_norm_xy_right());
     SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_vel());
     SlamOperation::ReduceVectorByStatus(tracked_status(), *ref_tracked_cnt());
-    SlamOperation::ReduceVectorByStatus(tracked_status(), stereo_tracked_status_);
+    SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_stereo_tracked_status_);
     tracked_status().resize(cur_pixel_uv_left()->size(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
 
     return true;
@@ -210,6 +210,7 @@ bool FrontendStereo::MakeCurrentFrameKeyframe() {
     SlamOperation::ExchangePointer(&ref_norm_xy_left(), &cur_norm_xy_left());
     SlamOperation::ExchangePointer(&ref_norm_xy_right(), &cur_norm_xy_right());
     SlamOperation::ExchangePointer(&ref_vel(), &cur_vel());
+    SlamOperation::ExchangePointer(&ref_stereo_tracked_status_, &cur_stereo_tracked_status_);
 
     return true;
 }
