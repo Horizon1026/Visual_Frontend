@@ -34,8 +34,8 @@ public:
     virtual void DrawTrackingResults(const std::string title) override;
     // Support for log recording.
     virtual void RegisterLogPackages() override;
-    // Get frontend result.
-    virtual void GetFrontendOutputData(FrontendOutputData &output_data) override;
+    // Update frontend result.
+    virtual void UpdateFrontendOutputData() override;
 
 private:
     bool ProcessSourceImage(const GrayImage &cur_image);

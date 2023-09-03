@@ -62,8 +62,8 @@ public:
     virtual void DrawTrackingResults(const std::string title) override;
     // Support for log recording.
     virtual void RegisterLogPackages() override;
-    // Get frontend result.
-    virtual void GetFrontendOutputData(FrontendOutputData &output_data) override;
+    // Update frontend result.
+    virtual void UpdateFrontendOutputData() override;
 
     // Reference for member variables.
     std::unique_ptr<FEATURE_DETECTOR::BriefDescriptor> &descriptor() { return descriptor_; }

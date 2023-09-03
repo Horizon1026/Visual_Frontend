@@ -354,11 +354,11 @@ void FrontendStereo::RegisterLogPackages() {
     }
 }
 
-// Get frontend result.
-void FrontendStereo::GetFrontendOutputData(FrontendOutputData &output_data) {
-    output_data.features_id.clear();
-    output_data.observes_per_frame.clear();
-    output_data.optical_velocity_in_ref_view.clear();
+// Update frontend result.
+void FrontendStereo::UpdateFrontendOutputData() {
+    output_data().features_id.clear();
+    output_data().observes_per_frame.clear();
+    output_data().optical_velocity_in_ref_view.clear();
 }
 
 }

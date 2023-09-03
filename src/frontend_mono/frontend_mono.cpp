@@ -267,11 +267,11 @@ void FrontendMono::RegisterLogPackages() {
     }
 }
 
-// Get frontend result.
-void FrontendMono::GetFrontendOutputData(FrontendOutputData &output_data) {
-    output_data.features_id.clear();
-    output_data.observes_per_frame.clear();
-    output_data.optical_velocity_in_ref_view.clear();
+// Update frontend result.
+void FrontendMono::UpdateFrontendOutputData() {
+    output_data().features_id.clear();
+    output_data().observes_per_frame.clear();
+    output_data().optical_velocity_in_ref_view.clear();
 }
 
 }

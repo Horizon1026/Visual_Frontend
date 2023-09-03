@@ -53,8 +53,8 @@ public:
     virtual void DrawTrackingResults(const std::string title) = 0;
     // Support for log recording.
     virtual void RegisterLogPackages() = 0;
-    // Get frontend result.
-    virtual void GetFrontendOutputData(FrontendOutputData &output_data) = 0;
+    // Update frontend result.
+    virtual void UpdateFrontendOutputData() = 0;
 
     // Reference for member variables.
     FrontendOptions &options() { return options_; }
@@ -92,6 +92,7 @@ public:
 
     uint32_t &feature_id_cnt() { return feature_id_cnt_; }
     bool &is_cur_image_keyframe() { return is_cur_image_keyframe_; }
+    FrontendOutputData &output_data() { return output_data_; }
     SLAM_DATA_LOG::BinaryDataLog &logger() { return logger_; }
 
     // Const reference for member variables.
@@ -130,6 +131,7 @@ public:
 
     const uint32_t &feature_id_cnt() const { return feature_id_cnt_; }
     const bool &is_cur_image_keyframe() const { return is_cur_image_keyframe_; }
+    const FrontendOutputData &output_data() const { return output_data_; }
     const SLAM_DATA_LOG::BinaryDataLog &logger() const { return logger_; }
 
     // Check every components.
@@ -183,8 +185,9 @@ private:
     // Feature index count;
     uint32_t feature_id_cnt_ = 1;
 
-    // Keyframe flag.
+    // Outpu data.
     bool is_cur_image_keyframe_ = false;
+    FrontendOutputData output_data_;
 
     // Record log.
     SLAM_DATA_LOG::BinaryDataLog logger_;
