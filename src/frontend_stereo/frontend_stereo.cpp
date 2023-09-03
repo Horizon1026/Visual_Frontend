@@ -6,6 +6,8 @@
 
 namespace VISUAL_FRONTEND {
 
+constexpr uint32_t kFrontendStereoLogIndex = 2;
+
 bool FrontendStereo::ProcessSourceImage(const GrayImage &cur_image_left, const GrayImage &cur_image_right) {
     RETURN_FALSE_IF(cur_image_left.data() == nullptr || cur_image_right.data() == nullptr);
 
@@ -23,162 +25,242 @@ bool FrontendStereo::ProcessSourceImage(const GrayImage &cur_image_left, const G
     return true;
 }
 
-bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &cur_image_right) {
-    ReportInfo("---------------------------------------------------------");
+bool FrontendStereo::PredictPixelLocationInCurrentLeftImage() {
+    *cur_pixel_uv_left() = *ref_pixel_uv_left();
+    for (uint32_t i = 0; i < ref_vel()->size(); ++i) {
+        (*cur_pixel_uv_left())[i] += (*ref_vel())[i];
+    }
+    return true;
+}
 
-    // If components is not valid, return false.
-    RETURN_FALSE_IF_FALSE(CheckAllComponents());
+bool FrontendStereo::TrackFeaturesFromRefernceLeftToCurrentLeftImage() {
+    *cur_ids() = *ref_ids();
+    tracked_status().clear();
+    if (!feature_tracker()->TrackFeatures(*ref_pyramid_left(), *cur_pyramid_left(), *ref_pixel_uv_left(), *cur_pixel_uv_left(), tracked_status())) {
+        ReportError("feature_tracker()->TrackFeatures track from ref_left to cur_left error.");
+        return false;
+    }
 
-    // GrayImage process.
-    RETURN_FALSE_IF_FALSE(ProcessSourceImage(cur_image_left, cur_image_right));
+    // Record log data.
+    log_package_data_.num_of_old_features_in_only_left = ref_pixel_uv_left()->size();
+    log_package_data_.num_of_tracked_features_in_only_left = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
 
-    // Track features if ref frame is ok.
-    if (ref_pixel_uv_left()->size() != 0) {
-        // Predict pixel location on current image by optical flow velocity.
-        *cur_pixel_uv_left() = *ref_pixel_uv_left();
-        for (uint32_t i = 0; i < ref_vel()->size(); ++i) {
-            (*cur_pixel_uv_left())[i] += (*ref_vel())[i];
+    return true;
+}
+
+bool FrontendStereo::RejectOutliersBetweenRefernceLeftAndCurrentLeftImage() {
+    Mat3 essential;
+    cur_norm_xy_left()->resize(cur_pixel_uv_left()->size());
+    for (uint32_t i = 0; i < cur_pixel_uv_left()->size(); ++i) {
+        camera_model()->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i], (*cur_norm_xy_left())[i]);
+    }
+    if (!epipolar_solver()->EstimateEssential(*ref_norm_xy_left(), *cur_norm_xy_left(), essential, tracked_status())) {
+        ReportError("epipolar_solver()->EstimateEssential error");
+        return false;
+    }
+
+    // Record log data.
+    log_package_data_.num_of_inliers_in_only_left = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    return true;
+}
+
+bool FrontendStereo::ComputeOpticalFlowVelocity() {
+    cur_vel()->resize(ref_pixel_uv_left()->size());
+    for (uint32_t i = 0; i < ref_pixel_uv_left()->size(); ++i) {
+        if (tracked_status()[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+            (*cur_vel())[i] = (*cur_pixel_uv_left())[i] - (*ref_pixel_uv_left())[i];
+        } else {
+            (*cur_vel())[i].setZero();
         }
+    }
+    *ref_vel() = *cur_vel();
+    return true;
+}
 
-        // Track features from ref pyramid to cur pyramid.
-        *cur_ids() = *ref_ids();
-        tracked_status().clear();
-        if (!feature_tracker()->TrackFeatures(*ref_pyramid_left(), *cur_pyramid_left(), *ref_pixel_uv_left(), *cur_pixel_uv_left(), tracked_status())) {
-            ReportError("feature_tracker()->TrackFeatures track from ref_left to cur_left error.");
+bool FrontendStereo::SparsifyTrackedFeaturesInLeft() {
+    feature_detector()->SparsifyFeatures(*cur_pixel_uv_left(),
+                                            cur_pyramid_left()->GetImage(0).rows(),
+                                            cur_pyramid_left()->GetImage(0).cols(),
+                                            static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked),
+                                            static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kNotTracked),
+                                            tracked_status());
+    const int32_t num_of_inliers_after_filter_in_only_left = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+
+    // Record log data.
+    log_package_data_.num_of_inliers_after_filter_in_only_left = num_of_inliers_after_filter_in_only_left;
+    return true;
+}
+
+bool FrontendStereo::TrackFeaturesFromCurrentLeftToCurrentRightImage(const GrayImage &cur_image_left, const GrayImage &cur_image_right) {
+    stereo_tracked_status_ = tracked_status();
+
+    if (feature_matcher_ == nullptr) {
+        *cur_pixel_uv_right() = *cur_pixel_uv_left();
+        const int32_t stored_half_row_size = feature_tracker()->options().kPatchRowHalfSize;
+        const int32_t stored_half_col_size = feature_tracker()->options().kPatchColHalfSize;
+        feature_tracker()->options().kPatchRowHalfSize = half_patch_size_for_stereo_tracking_.x();
+        feature_tracker()->options().kPatchColHalfSize = half_patch_size_for_stereo_tracking_.y();
+        if (!feature_tracker()->TrackFeatures(*cur_pyramid_left(), *cur_pyramid_right(), *cur_pixel_uv_left(), *cur_pixel_uv_right(), stereo_tracked_status_)) {
+            ReportError("feature_tracker()->TrackFeatures track from cur_left to cur_right error.");
             return false;
         }
-        ReportInfo("After optical flow tracking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked))
-            << " / " << tracked_status().size());
+        feature_tracker()->options().kPatchRowHalfSize = stored_half_row_size;
+        feature_tracker()->options().kPatchColHalfSize = stored_half_col_size;
 
-        // Reject outliers by essential/fundemantal matrix.
-        Mat3 essential;
-        cur_norm_xy_left()->resize(cur_pixel_uv_left()->size());
-        for (uint32_t i = 0; i < cur_pixel_uv_left()->size(); ++i) {
-            camera_model()->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i], (*cur_norm_xy_left())[i]);
-        }
-        if (!epipolar_solver()->EstimateEssential(*ref_norm_xy_left(), *cur_norm_xy_left(), essential, tracked_status())) {
-            ReportError("epipolar_solver()->EstimateEssential error");
-            return false;
-        }
-        ReportInfo("After essential checking, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked))
-            << " / " << tracked_status().size());
-
-        // Compute optical flow velocity. It is useful for feature prediction.
-        cur_vel()->resize(ref_pixel_uv_left()->size());
-        for (uint32_t i = 0; i < ref_pixel_uv_left()->size(); ++i) {
-            if (tracked_status()[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
-                (*cur_vel())[i] = (*cur_pixel_uv_left())[i] - (*ref_pixel_uv_left())[i];
-            } else {
-                (*cur_vel())[i].setZero();
-            }
-        }
-        *ref_vel() = *cur_vel();
-
-        // Track features from cur pyramid left to cur pyramid right.
+    } else {
         detected_features_in_cur_right_.clear();
         feature_detector()->DetectGoodFeatures(cur_image_right,
                                                options().kMaxStoredFeaturePointsNumber * 2,
                                                detected_features_in_cur_right_);
-        ReportInfo("Detect " << detected_features_in_cur_right_.size() << " features in cur right image.");
         cur_descriptor_left_.clear();
         cur_descriptor_right_.clear();
         descriptor_->Compute(cur_image_left, *cur_pixel_uv_left(), cur_descriptor_left_);
         descriptor_->Compute(cur_image_right, detected_features_in_cur_right_, cur_descriptor_right_);
-        ReportInfo("Compute descriptors.");
 
         cur_pixel_uv_right()->clear();
         if (!feature_matcher_->NearbyMatch(cur_descriptor_left_, cur_descriptor_right_,
                                            *cur_pixel_uv_left(), detected_features_in_cur_right_,
-                                           *cur_pixel_uv_right(), tracked_status())) {
+                                           *cur_pixel_uv_right(), stereo_tracked_status_)) {
             ReportError("feature_matcher_->NearbyMatch track from cur_left to cur_right error.");
             return false;
         }
-        ReportInfo("After stereo matching, matched / to_match / detected is " << SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked))
-            << " / " << tracked_status().size() << " / " << detected_features_in_cur_right_.size());
 
-        // Show match result.
-        Visualizor::ShowImageWithTrackedFeatures("Features matched by Brief descriptor", cur_image_left, cur_image_right,
-            *cur_pixel_uv_left(), *cur_pixel_uv_right(), tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
-        Visualizor::WaitKey(1);
-
-        // Reject outliers by essential/fundemantal matrix.
-        cur_norm_xy_right()->resize(cur_pixel_uv_right()->size());
-        for (uint32_t i = 0; i < cur_pixel_uv_right()->size(); ++i) {
-            camera_model()->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_right())[i], (*cur_norm_xy_right())[i]);
-        }
-        if (!epipolar_solver()->EstimateEssential(*cur_norm_xy_left(), *cur_norm_xy_right(), essential, tracked_status())) {
-            ReportError("epipolar_solver()->EstimateEssential error");
-            return false;
-        }
-
-        // Grid filter to make points sparsely.
-        feature_detector()->SparsifyFeatures(*cur_pixel_uv_left(),
-                                             cur_pyramid_left()->GetImage(0).rows(),
-                                             cur_pyramid_left()->GetImage(0).cols(),
-                                             static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked),
-                                             static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kNotTracked),
-                                             tracked_status());
-        ReportInfo("After grid filtering, tracked / to_track is " << SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked))
-            << " / " << tracked_status().size());
     }
 
-    // Check if cur_pyarmid should be keyframe.
+    // Record log data.
+    log_package_data_.num_of_tracked_feature_from_left_to_right = SlamOperation::StatisItemInVector(stereo_tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    return true;
+}
+
+bool FrontendStereo::RejectOutliersBetweenCurrentLeftToCurrentRightImage() {
+    cur_norm_xy_right()->resize(cur_pixel_uv_right()->size());
+    for (uint32_t i = 0; i < cur_pixel_uv_right()->size(); ++i) {
+        camera_model()->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_right())[i], (*cur_norm_xy_right())[i]);
+    }
+
+    Mat3 essential;
+    if (!epipolar_solver()->EstimateEssential(*cur_norm_xy_left(), *cur_norm_xy_right(), essential, stereo_tracked_status_)) {
+        ReportError("epipolar_solver()->EstimateEssential error");
+        return false;
+    }
+
+    // Record log data.
+    log_package_data_.num_of_inliers_from_left_to_right = SlamOperation::StatisItemInVector(stereo_tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    return true;
+}
+
+bool FrontendStereo::SelectKeyframe() {
     const uint32_t tracked_num = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
     is_cur_image_keyframe() = tracked_num < options().kMinDetectedFeaturePointsNumberInCurrentImage
                           || !options().kSelfSelectKeyframe;
-    if (is_cur_image_keyframe()) {
-        ReportInfo("Current frame is keyframe.");
+    // Record log data.
+    log_package_data_.is_keyframe = is_cur_image_keyframe();
+    return true;
+}
+
+bool FrontendStereo::AdjustTrackingResultByStatus() {
+    // Update tracked statis result.
+    for (uint32_t i = 0; i < tracked_status().size(); ++i) {
+        if (tracked_status()[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+            ++(*ref_tracked_cnt())[i];
+        }
     }
 
+    // Adjust result.
+    SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_pixel_uv_left());
+    SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_pixel_uv_right());
+    SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_ids());
+    SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_norm_xy_left());
+    SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_norm_xy_right());
+    SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_vel());
+    SlamOperation::ReduceVectorByStatus(tracked_status(), *ref_tracked_cnt());
+    SlamOperation::ReduceVectorByStatus(tracked_status(), stereo_tracked_status_);
+    tracked_status().resize(cur_pixel_uv_left()->size(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+
+    return true;
+}
+
+bool FrontendStereo::SupplememtNewFeatures(const GrayImage &cur_image_left) {
+    feature_detector()->DetectGoodFeatures(cur_image_left,
+                                            options().kMaxStoredFeaturePointsNumber,
+                                            *cur_pixel_uv_left());
+    const uint32_t new_features_num = cur_pixel_uv_left()->size() - cur_ids()->size();
+    for (uint32_t i = 0; i < new_features_num; ++i) {
+        cur_ids()->emplace_back(feature_id_cnt());
+        cur_norm_xy_left()->emplace_back(Vec2::Zero());
+        cur_norm_xy_right()->emplace_back(Vec2::Zero());
+        ref_tracked_cnt()->emplace_back(1);
+        ++feature_id_cnt();
+    }
+    // Record log data.
+    log_package_data_.num_of_new_features_in_only_left = new_features_num;
+    return true;
+}
+
+bool FrontendStereo::MakeCurrentFrameKeyframe() {
+    // When current frame becomes keyframe, prediction will not work in next tracking.
+    cur_vel()->clear();
+
+    // Replace ref with cur.
+    SlamOperation::ExchangePointer(&ref_pyramid_left(), &cur_pyramid_left());
+    SlamOperation::ExchangePointer(&ref_pyramid_right(), &cur_pyramid_right());
+    SlamOperation::ExchangePointer(&ref_pixel_uv_left(), &cur_pixel_uv_left());
+    SlamOperation::ExchangePointer(&ref_pixel_uv_right(), &cur_pixel_uv_right());
+    SlamOperation::ExchangePointer(&ref_ids(), &cur_ids());
+    SlamOperation::ExchangePointer(&ref_norm_xy_left(), &cur_norm_xy_left());
+    SlamOperation::ExchangePointer(&ref_norm_xy_right(), &cur_norm_xy_right());
+    SlamOperation::ExchangePointer(&ref_vel(), &cur_vel());
+
+    return true;
+}
+
+bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &cur_image_right) {
+    // If components is not valid, return false.
+    RETURN_FALSE_IF_FALSE(CheckAllComponents());
+    // GrayImage process.
+    RETURN_FALSE_IF_FALSE(ProcessSourceImage(cur_image_left, cur_image_right));
+
+    // Track features if ref frame is ok.
+    if (!ref_pixel_uv_left()->empty()) {
+        // Predict pixel location on current image by optical flow velocity.
+        RETURN_FALSE_IF_FALSE(PredictPixelLocationInCurrentLeftImage());
+        // Track features from ref pyramid to cur pyramid.
+        RETURN_FALSE_IF_FALSE(TrackFeaturesFromRefernceLeftToCurrentLeftImage());
+        // Reject outliers by essential/fundemantal matrix.
+        RETURN_FALSE_IF_FALSE(RejectOutliersBetweenRefernceLeftAndCurrentLeftImage());
+        // Compute optical flow velocity. It is useful for feature prediction.
+        RETURN_FALSE_IF_FALSE(ComputeOpticalFlowVelocity());
+        // Grid filter to make points sparsely.
+        RETURN_FALSE_IF_FALSE(SparsifyTrackedFeaturesInLeft());
+        // Track features from cur pyramid left to cur pyramid right.
+        RETURN_FALSE_IF_FALSE(TrackFeaturesFromCurrentLeftToCurrentRightImage(cur_image_left, cur_image_right));
+        // Reject outliers by essential/fundemantal matrix.
+        RETURN_FALSE_IF_FALSE(RejectOutliersBetweenCurrentLeftToCurrentRightImage());
+    }
+
+    // Check if cur_pyarmid should be keyframe.
+    RETURN_FALSE_IF_FALSE(SelectKeyframe());
+
     // Visualize result when this API is defined.
-    DrawTrackingResults("Frontend Mono Tracking Result");
+    DrawTrackingResults("Frontend Stereo Tracking Result");
 
     // If frontend is configured to select keyframe by itself, frontend will track features from fixed keyframe to current frame.
     if (is_cur_image_keyframe()) {
         // Prepare to make current frame to be reference frame (keyframe).
-        // Update tracked statis result.
-        for (uint32_t i = 0; i < tracked_status().size(); ++i) {
-            if (tracked_status()[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
-                ++(*ref_tracked_cnt())[i];
-            }
-        }
-
-        // Adjust result.
-        SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_pixel_uv_left());
-        SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_pixel_uv_right());
-        SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_ids());
-        SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_norm_xy_left());
-        SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_norm_xy_right());
-        SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_vel());
-        SlamOperation::ReduceVectorByStatus(tracked_status(), *ref_tracked_cnt());
-        tracked_status().resize(cur_pixel_uv_left()->size(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
-
+        RETURN_FALSE_IF_FALSE(AdjustTrackingResultByStatus());
         // Detect new features in cur.
-        feature_detector()->DetectGoodFeatures(cur_image_left,
-                                               options().kMaxStoredFeaturePointsNumber,
-                                               *cur_pixel_uv_left());
-        const uint32_t new_features_num = cur_pixel_uv_left()->size() - cur_ids()->size();
-        for (uint32_t i = 0; i < new_features_num; ++i) {
-            cur_ids()->emplace_back(feature_id_cnt());
-            cur_norm_xy_left()->emplace_back(Vec2::Zero());
-            cur_norm_xy_right()->emplace_back(Vec2::Zero());
-            ref_tracked_cnt()->emplace_back(1);
-            ++feature_id_cnt();
-        }
-
+        RETURN_FALSE_IF_FALSE(SupplememtNewFeatures(cur_image_left));
         // Current frame becomes keyframe.
-        // When current frame becomes keyframe, prediction will not work in next tracking.
-        cur_vel()->clear();
+        RETURN_FALSE_IF_FALSE(MakeCurrentFrameKeyframe());
 
-        // Replace ref with cur.
-        SlamOperation::ExchangePointer(&ref_pyramid_left(), &cur_pyramid_left());
-        SlamOperation::ExchangePointer(&ref_pyramid_right(), &cur_pyramid_right());
-        SlamOperation::ExchangePointer(&ref_pixel_uv_left(), &cur_pixel_uv_left());
-        SlamOperation::ExchangePointer(&ref_pixel_uv_right(), &cur_pixel_uv_right());
-        SlamOperation::ExchangePointer(&ref_ids(), &cur_ids());
-        SlamOperation::ExchangePointer(&ref_norm_xy_left(), &cur_norm_xy_left());
-        SlamOperation::ExchangePointer(&ref_norm_xy_right(), &cur_norm_xy_right());
-        SlamOperation::ExchangePointer(&ref_vel(), &cur_vel());
+    } else {
+        // Record log data.
+        log_package_data_.num_of_new_features_in_only_left = 0;
+    }
+
+    // Record package data.
+    if (options().kEnableRecordBinaryLog) {
+        logger().RecordPackage(kFrontendStereoLogIndex, reinterpret_cast<const char *>(&log_package_data_));
     }
 
     return true;
@@ -208,6 +290,27 @@ void FrontendStereo::DrawTrackingResults(const std::string title) {
         *cur_vel()
     );
     Visualizor::WaitKey(1);
+}
+
+// Support for log recording.
+void FrontendStereo::RegisterLogPackages() {
+    using namespace SLAM_DATA_LOG;
+
+    std::unique_ptr<PackageInfo> package_ptr = std::make_unique<PackageInfo>();
+    package_ptr->id = kFrontendStereoLogIndex;
+    package_ptr->name = "frontend_stereo";
+    package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint8, .name = "is_keyframe"});
+    package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_old_features_in_only_left"});
+    package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_tracked_features_in_only_left"});
+    package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_inliers_in_only_left"});
+    package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_inliers_after_filter_in_only_left"});
+    package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_tracked_feature_from_left_to_right"});
+    package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_inliers_from_left_to_right"});
+    package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_new_features_in_only_left"});
+
+    if (!logger().RegisterPackage(package_ptr)) {
+        ReportError("Failed to register package.");
+    }
 }
 
 }

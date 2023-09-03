@@ -105,8 +105,8 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     GrayImage image;
     Visualizor::LoadImage(cam0_filenames.front(), image);
     VISUAL_FRONTEND::FrontendStereo frontend(image.rows(), image.cols());
-    frontend.options().kEnableRecordBinaryLog = false;
-    frontend.options().kEnableVisualizeResult = false;
+    frontend.options().kEnableRecordBinaryLog = true;
+    frontend.options().kEnableVisualizeResult = true;
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 30;
@@ -152,10 +152,10 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     frontend.descriptor()->options().kHalfPatchSize = 16;
 
     // Config descriptor matcher.
-    frontend.feature_matcher() = std::make_unique<VISUAL_FRONTEND::BriefMatcher>();
-    frontend.feature_matcher()->options().kMaxValidPredictRowDistance = 100;
-    frontend.feature_matcher()->options().kMaxValidPredictColDistance = 300;
-    frontend.feature_matcher()->options().kMaxValidDescriptorDistance = 60;
+    // frontend.feature_matcher() = std::make_unique<VISUAL_FRONTEND::BriefMatcher>();
+    // frontend.feature_matcher()->options().kMaxValidPredictRowDistance = 50;
+    // frontend.feature_matcher()->options().kMaxValidPredictColDistance = 150;
+    // frontend.feature_matcher()->options().kMaxValidDescriptorDistance = 60;
 
     for (unsigned i = 0; i < cam0_filenames.size(); ++i) {
         GrayImage image_left;
