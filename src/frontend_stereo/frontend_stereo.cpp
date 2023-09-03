@@ -287,6 +287,10 @@ void FrontendStereo::DrawTrackingResults(const std::string title) {
         *ref_ids(),
         *cur_ids(),
         *cur_ids(),
+        tracked_status(),
+        *ref_stereo_tracked_status_,
+        *cur_stereo_tracked_status_,
+        static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked),
         *ref_tracked_cnt(),
         *cur_vel()
     );
