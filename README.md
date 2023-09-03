@@ -6,10 +6,10 @@ A general and simple visual frontend consulting VINS-Mono.
     - [x] Pipeline.
     - [x] Result visualization.
     - [x] Log record.
-- [ ] Simple stereo visual frontend based on klt.
-    - [ ] Pipeline.
+- [x] Simple stereo visual frontend based on klt.
+    - [x] Pipeline.
     - [x] Result visualization.
-    - [ ] Log record.
+    - [x] Log record.
 - [ ] Simple mono/stereo fusion visual frontend based on klt.
     - [ ] Pipeline.
     - [ ] Result visualization.
