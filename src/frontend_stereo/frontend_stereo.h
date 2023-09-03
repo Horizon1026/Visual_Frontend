@@ -98,6 +98,8 @@ private:
     std::vector<FEATURE_DETECTOR::BriefType> cur_descriptor_right_;
     std::vector<Vec2> predicted_pixel_uv_in_cur_right_;
 
+    // Temp vector for tracking back.
+    std::vector<Vec2> ref_pixel_uv_left_tracked_back_;
     // Temp package data for log file.
     FrontendStereoLog log_package_data_;
 };

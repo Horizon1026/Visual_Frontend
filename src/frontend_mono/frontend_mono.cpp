@@ -65,20 +65,19 @@ bool FrontendMono::RejectOutliersByEpipolarConstrain() {
 }
 
 bool FrontendMono::RejectOutliersByTrackingBack() {
-    ref_pixel_xy_left_tracked_back_ = *cur_pixel_uv_left();
-
+    ref_pixel_uv_left_tracked_back_ = *cur_pixel_uv_left();
     for (uint32_t i = 0; i < ref_vel()->size(); ++i) {
-        ref_pixel_xy_left_tracked_back_[i] -= (*ref_vel())[i];
+        ref_pixel_uv_left_tracked_back_[i] -= (*ref_vel())[i];
     }
 
-    if (!feature_tracker()->TrackFeatures(*cur_pyramid_left(), *ref_pyramid_left(), *cur_pixel_uv_left(), ref_pixel_xy_left_tracked_back_, tracked_status())) {
+    if (!feature_tracker()->TrackFeatures(*cur_pyramid_left(), *ref_pyramid_left(), *cur_pixel_uv_left(), ref_pixel_uv_left_tracked_back_, tracked_status())) {
         ReportError("feature_tracker()->TrackFeatures error.");
         return false;
     }
 
     for (uint32_t i = 0; i < tracked_status().size(); ++i) {
         if (tracked_status()[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
-            if (((*ref_pixel_uv_left())[i] - ref_pixel_xy_left_tracked_back_[i]).squaredNorm() > options().kMaxValidTrackBackPixelResidual) {
+            if (((*ref_pixel_uv_left())[i] - ref_pixel_uv_left_tracked_back_[i]).squaredNorm() > options().kMaxValidTrackBackPixelResidual) {
                 tracked_status()[i] = static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual);
             }
         }

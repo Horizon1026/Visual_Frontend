@@ -7,6 +7,7 @@
 namespace VISUAL_FRONTEND {
 
 constexpr uint32_t kFrontendStereoLogIndex = 2;
+constexpr int32_t kMaxAllowedNonEpipolarDirectionPixelResidual = 20;
 
 bool FrontendStereo::ProcessSourceImage(const GrayImage &cur_image_left, const GrayImage &cur_image_right) {
     RETURN_FALSE_IF(cur_image_left.data() == nullptr || cur_image_right.data() == nullptr);
@@ -54,9 +55,32 @@ bool FrontendStereo::RejectOutliersBetweenRefernceLeftAndCurrentLeftImage() {
     for (uint32_t i = 0; i < cur_pixel_uv_left()->size(); ++i) {
         camera_model()->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i], (*cur_norm_xy_left())[i]);
     }
-    if (!epipolar_solver()->EstimateEssential(*ref_norm_xy_left(), *cur_norm_xy_left(), essential, tracked_status())) {
-        ReportError("epipolar_solver()->EstimateEssential error");
-        return false;
+
+    if (epipolar_solver() == nullptr) {
+        // If epipolar solver is not given, do outliers rejection by klt tracking back.
+        ref_pixel_uv_left_tracked_back_ = *cur_pixel_uv_left();
+        for (uint32_t i = 0; i < ref_vel()->size(); ++i) {
+            ref_pixel_uv_left_tracked_back_[i] -= (*ref_vel())[i];
+        }
+
+        if (!feature_tracker()->TrackFeatures(*cur_pyramid_left(), *ref_pyramid_left(), *cur_pixel_uv_left(), ref_pixel_uv_left_tracked_back_, tracked_status())) {
+            ReportError("feature_tracker()->TrackFeatures error.");
+            return false;
+        }
+
+        for (uint32_t i = 0; i < tracked_status().size(); ++i) {
+            if (tracked_status()[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+                if (((*ref_pixel_uv_left())[i] - ref_pixel_uv_left_tracked_back_[i]).squaredNorm() > options().kMaxValidTrackBackPixelResidual) {
+                    tracked_status()[i] = static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual);
+                }
+            }
+        }
+    } else {
+        // If epipolar solver is given, do outliers rejection by it.
+        if (!epipolar_solver()->EstimateEssential(*ref_norm_xy_left(), *cur_norm_xy_left(), essential, tracked_status())) {
+            ReportError("epipolar_solver()->EstimateEssential error");
+            return false;
+        }
     }
 
     // Record log data.
@@ -138,10 +162,22 @@ bool FrontendStereo::RejectOutliersBetweenCurrentLeftToCurrentRightImage() {
         camera_model()->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_right())[i], (*cur_norm_xy_right())[i]);
     }
 
-    Mat3 essential;
-    if (!epipolar_solver()->EstimateEssential(*cur_norm_xy_left(), *cur_norm_xy_right(), essential, *cur_stereo_tracked_status_)) {
-        ReportError("epipolar_solver()->EstimateEssential error");
-        return false;
+    if (epipolar_solver() == nullptr) {
+        // If epipolar solver is not given, do outliers rejection by base line.
+        RETURN_FALSE_IF(cur_norm_xy_left()->size() != cur_norm_xy_right()->size());
+        RETURN_FALSE_IF(cur_stereo_tracked_status_->size() != cur_norm_xy_right()->size());
+        for (uint32_t i = 0; i < cur_stereo_tracked_status_->size(); ++i) {
+            if (std::fabs((*cur_norm_xy_left())[i].y() - (*cur_norm_xy_right())[i].y()) > kMaxAllowedNonEpipolarDirectionPixelResidual / camera_model()->fy()) {
+                (*cur_stereo_tracked_status_)[i] = static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual);
+            }
+        }
+    } else {
+        // If epipolar solver is given, do outliers rejection by it.
+        Mat3 essential;
+        if (!epipolar_solver()->EstimateEssential(*cur_norm_xy_left(), *cur_norm_xy_right(), essential, *cur_stereo_tracked_status_)) {
+            ReportError("epipolar_solver()->EstimateEssential error");
+            return false;
+        }
     }
 
     // Record log data.
