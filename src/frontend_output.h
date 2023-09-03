@@ -11,11 +11,12 @@ struct ObservePerView {
     Vec2 rectified_norm_xy = Vec2::Zero();
 };
 
+using ObservePerFrame = std::vector<ObservePerView>;
+
 struct FrontendOutputData {
     bool is_current_keyframe = true;
     std::vector<uint32_t> features_id;
-    std::vector<ObservePerView> observes_per_frame;
-    std::vector<Vec2> optical_velocity_in_ref_view;
+    std::vector<ObservePerFrame> observes_per_frame;
 };
 
 }

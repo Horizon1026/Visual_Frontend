@@ -282,13 +282,28 @@ void FrontendMono::RegisterLogPackages() {
 void FrontendMono::UpdateFrontendOutputData() {
     output_data().features_id.clear();
     output_data().observes_per_frame.clear();
-    output_data().optical_velocity_in_ref_view.clear();
 
     output_data().is_current_keyframe = is_cur_image_keyframe();
     if (output_data().is_current_keyframe) {
         // If current frame is keyframe, tracking result will be stored in ref_info.
+        output_data().features_id = *ref_ids();
+        for (uint32_t i = 0; i < ref_ids()->size(); ++i) {
+            output_data().observes_per_frame.emplace_back(ObservePerFrame { ObservePerView {
+                .id = 0,
+                .raw_pixel_uv = (*ref_pixel_uv_left())[i],
+                .rectified_norm_xy = (*ref_norm_xy_left())[i],
+            }});
+        }
     } else {
         // If current frame is not keyframe, tracking result will be stored in cur_info.
+        output_data().features_id = *cur_ids();
+        for (uint32_t i = 0; i < cur_ids()->size(); ++i) {
+            output_data().observes_per_frame.emplace_back(ObservePerFrame{ ObservePerView {
+                .id = 0,
+                .raw_pixel_uv = (*cur_pixel_uv_left())[i],
+                .rectified_norm_xy = (*cur_norm_xy_left())[i],
+            }});
+        }
     }
 }
 

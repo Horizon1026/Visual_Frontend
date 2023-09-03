@@ -218,13 +218,18 @@ bool FrontendStereo::AdjustTrackingResultByStatus() {
 
 bool FrontendStereo::SupplememtNewFeatures(const GrayImage &cur_image_left) {
     feature_detector()->DetectGoodFeatures(cur_image_left,
-                                            options().kMaxStoredFeaturePointsNumber,
-                                            *cur_pixel_uv_left());
-    const uint32_t new_features_num = cur_pixel_uv_left()->size() - cur_ids()->size();
+                                           options().kMaxStoredFeaturePointsNumber,
+                                           *cur_pixel_uv_left());
+    const uint32_t old_features_num = cur_ids()->size();
+    const uint32_t new_features_num = cur_pixel_uv_left()->size() - old_features_num;
+    Vec2 temp_cur_norm_xy_left = Vec2::Zero();
+
     for (uint32_t i = 0; i < new_features_num; ++i) {
         cur_ids()->emplace_back(feature_id_cnt());
-        cur_norm_xy_left()->emplace_back(Vec2::Zero());
-        cur_norm_xy_right()->emplace_back(Vec2::Zero());
+
+        camera_model()->LiftToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i + old_features_num], temp_cur_norm_xy_left);
+        cur_norm_xy_left()->emplace_back(temp_cur_norm_xy_left);
+
         ref_tracked_cnt()->emplace_back(1);
         ++feature_id_cnt();
     }
@@ -295,6 +300,9 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
         log_package_data_.num_of_new_features_in_only_left = 0;
     }
 
+    // Update frontend output data.
+    UpdateFrontendOutputData();
+
     // Record package data.
     if (options().kEnableRecordBinaryLog) {
         logger().RecordPackage(kFrontendStereoLogIndex, reinterpret_cast<const char *>(&log_package_data_));
@@ -358,7 +366,48 @@ void FrontendStereo::RegisterLogPackages() {
 void FrontendStereo::UpdateFrontendOutputData() {
     output_data().features_id.clear();
     output_data().observes_per_frame.clear();
-    output_data().optical_velocity_in_ref_view.clear();
+
+    output_data().is_current_keyframe = is_cur_image_keyframe();
+    if (output_data().is_current_keyframe) {
+        // If current frame is keyframe, tracking result will be stored in ref_info.
+        output_data().features_id = *ref_ids();
+        for (uint32_t i = 0; i < ref_ids()->size(); ++i) {
+            output_data().observes_per_frame.emplace_back(ObservePerFrame { ObservePerView {
+                .id = 0,
+                .raw_pixel_uv = (*ref_pixel_uv_left())[i],
+                .rectified_norm_xy = (*ref_norm_xy_left())[i],
+            }});
+        }
+        for (uint32_t i = 0; i < ref_stereo_tracked_status_->size(); ++i) {
+            if ((*ref_stereo_tracked_status_)[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+                output_data().observes_per_frame[i].emplace_back(ObservePerView {
+                    .id = 1,
+                    .raw_pixel_uv = (*ref_pixel_uv_right())[i],
+                    .rectified_norm_xy = (*ref_norm_xy_right())[i],
+                });
+            }
+        }
+
+    } else {
+        // If current frame is not keyframe, tracking result will be stored in cur_info.
+        output_data().features_id = *cur_ids();
+        for (uint32_t i = 0; i < cur_ids()->size(); ++i) {
+            output_data().observes_per_frame.emplace_back(ObservePerFrame { ObservePerView {
+                .id = 0,
+                .raw_pixel_uv = (*cur_pixel_uv_left())[i],
+                .rectified_norm_xy = (*cur_norm_xy_left())[i],
+            }});
+        }
+        for (uint32_t i = 0; i < cur_stereo_tracked_status_->size(); ++i) {
+            if ((*cur_stereo_tracked_status_)[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+                output_data().observes_per_frame[i].emplace_back(ObservePerView {
+                    .id = 1,
+                    .raw_pixel_uv = (*cur_pixel_uv_right())[i],
+                    .rectified_norm_xy = (*cur_norm_xy_right())[i],
+                });
+            }
+        }
+    }
 }
 
 }

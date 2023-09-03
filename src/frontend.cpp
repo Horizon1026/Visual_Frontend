@@ -25,7 +25,6 @@ bool Frontend::Initialize(const std::string &log_file_name) {
     // Reserve capacity for output data.
     output_data_.features_id.reserve(options_.kMaxStoredFeaturePointsNumber);
     output_data_.observes_per_frame.reserve(options_.kMaxStoredFeaturePointsNumber);
-    output_data_.optical_velocity_in_ref_view.reserve(options_.kMaxStoredFeaturePointsNumber);
 
     // Register packages for log file.
     if (options_.kEnableRecordBinaryLog) {
