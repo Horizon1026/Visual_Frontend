@@ -21,8 +21,8 @@ endif()
 
 # Add visualizor.
 set( VISUALIZOR_PATH ${PROJECT_SOURCE_DIR}/../Visualizor2D/src )
-if ( NOT TARGET lib_slam_visualize )
-    add_subdirectory( ${VISUALIZOR_PATH} ${PROJECT_SOURCE_DIR}/build/lib_slam_visualize )
+if ( NOT TARGET lib_image_visualizor )
+    add_subdirectory( ${VISUALIZOR_PATH} ${PROJECT_SOURCE_DIR}/build/lib_image_visualizor )
 endif()
 
 # Add feature detector.
@@ -81,7 +81,7 @@ target_link_libraries( lib_visual_frontend_mono
     lib_slam_utility_operate
     lib_slam_utility_log
     lib_slam_utility_memory
-    lib_slam_visualize
+    lib_image_visualizor
 
     lib_feature_point_detector
 
