@@ -19,7 +19,9 @@ namespace {
     using FeatureType = FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>;
     using KltType = FEATURE_TRACKER::OpticalFlowBasicKlt;
 
-    constexpr bool kEnableDrawingOutputResult = false;
+    constexpr bool kEnableDrawingOutputResult = true;
+    constexpr bool kEnableRecordLog = false;
+    constexpr bool kEnableDrawingTrackingResult = false;
 }
 
 bool GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
@@ -50,8 +52,8 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     GrayImage image;
     Visualizor::LoadImage(cam0_filenames.front(), image);
     VISUAL_FRONTEND::FrontendMono frontend(image.rows(), image.cols());
-    frontend.options().kEnableRecordBinaryLog = true;
-    frontend.options().kEnableVisualizeResult = true;
+    frontend.options().kEnableRecordBinaryLog = kEnableRecordLog;
+    frontend.options().kEnableVisualizeResult = kEnableDrawingTrackingResult;
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 40;
@@ -104,7 +106,12 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
             const auto &output = frontend.output_data();
             std::vector<Vec2> pixel_uv;
             pixel_uv.reserve(output.features_id.size());
-            for (const auto &observe_per_view : output.observes_per_frame) {
+            for (uint32_t i = 0; i < output.observes_per_frame.size(); ++i) {
+                if (output.tracked_cnt[i] < 2) {
+                    break;
+                }
+
+                const auto &observe_per_view = output.observes_per_frame[i];
                 pixel_uv.emplace_back(observe_per_view[0].raw_pixel_uv);
             }
             std::vector<uint8_t> status(pixel_uv.size(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
@@ -124,8 +131,8 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     GrayImage image;
     Visualizor::LoadImage(cam0_filenames.front(), image);
     VISUAL_FRONTEND::FrontendStereo frontend(image.rows(), image.cols());
-    frontend.options().kEnableRecordBinaryLog = true;
-    frontend.options().kEnableVisualizeResult = true;
+    frontend.options().kEnableRecordBinaryLog = kEnableRecordLog;
+    frontend.options().kEnableVisualizeResult = kEnableDrawingTrackingResult;
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 30;
@@ -192,7 +199,13 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
             pixel_uv_left.reserve(output.features_id.size());
             pixel_uv_right.reserve(output.features_id.size());
             status.reserve(output.features_id.size());
-            for (const auto &observe_per_view : output.observes_per_frame) {
+
+            for (uint32_t i = 0; i < output.observes_per_frame.size(); ++i) {
+                if (output.tracked_cnt[i] < 2) {
+                    break;
+                }
+
+                const auto &observe_per_view = output.observes_per_frame[i];
                 pixel_uv_left.emplace_back(observe_per_view[0].raw_pixel_uv);
                 if (observe_per_view.size() > 1) {
                     pixel_uv_right.emplace_back(observe_per_view[1].raw_pixel_uv);
@@ -202,6 +215,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
                     status.emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual));
                 }
             }
+
             Visualizor::ShowImageWithTrackedFeatures(
                 "Mono frontend output", image_left, image_right, pixel_uv_left, pixel_uv_right, status,
                 static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)

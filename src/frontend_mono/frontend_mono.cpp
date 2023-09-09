@@ -301,6 +301,7 @@ void FrontendMono::UpdateFrontendOutputData() {
     if (output_data().is_current_keyframe) {
         // If current frame is keyframe, tracking result will be stored in ref_info.
         output_data().features_id = *ref_ids();
+        output_data().tracked_cnt = *ref_tracked_cnt();
         for (uint32_t i = 0; i < ref_ids()->size(); ++i) {
             output_data().observes_per_frame.emplace_back(ObservePerFrame { ObservePerView {
                 .id = 0,
@@ -311,6 +312,7 @@ void FrontendMono::UpdateFrontendOutputData() {
     } else {
         // If current frame is not keyframe, tracking result will be stored in cur_info.
         output_data().features_id = *cur_ids();
+        output_data().tracked_cnt = *cur_tracked_cnt();
         for (uint32_t i = 0; i < cur_ids()->size(); ++i) {
             output_data().observes_per_frame.emplace_back(ObservePerFrame{ ObservePerView {
                 .id = 0,

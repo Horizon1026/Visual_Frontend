@@ -17,6 +17,7 @@ struct FrontendOutputData {
     bool is_current_keyframe = true;
     std::vector<uint32_t> features_id;
     std::vector<ObservePerFrame> observes_per_frame;
+    std::vector<uint32_t> tracked_cnt;
 };
 
 }
