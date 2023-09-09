@@ -45,6 +45,30 @@ bool GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
     return true;
 }
 
+void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
+                            const GrayImage &image) {
+    // Show output data.
+    if (kEnableDrawingOutputResult) {
+        const auto &output = frontend.output_data();
+        std::vector<Vec2> pixel_uv;
+        pixel_uv.reserve(output.features_id.size());
+        for (uint32_t i = 0; i < output.observes_per_frame.size(); ++i) {
+            if (output.tracked_cnt[i] < 2) {
+                break;
+            }
+
+            const auto &observe_per_view = output.observes_per_frame[i];
+            pixel_uv.emplace_back(observe_per_view[0].raw_pixel_uv);
+        }
+        std::vector<uint8_t> status(pixel_uv.size(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+        Visualizor::ShowImageWithTrackedFeatures(
+            "Mono frontend output", image, pixel_uv, pixel_uv, status,
+            static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)
+        );
+        Visualizor::WaitKey(1);
+    }
+}
+
 void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     ReportInfo(">> Test frontend mono.");
 
@@ -100,27 +124,44 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
         GrayImage image;
         Visualizor::LoadImage(filename, image);
         frontend.RunOnce(image);
+        ShowFrontendMonoOutput(frontend, image);
+    }
+}
 
-        // Show output data.
-        if (kEnableDrawingOutputResult) {
-            const auto &output = frontend.output_data();
-            std::vector<Vec2> pixel_uv;
-            pixel_uv.reserve(output.features_id.size());
-            for (uint32_t i = 0; i < output.observes_per_frame.size(); ++i) {
-                if (output.tracked_cnt[i] < 2) {
-                    break;
-                }
+void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
+                              const GrayImage &image_left,
+                              const GrayImage &image_right) {
+    // Show output data.
+    if (kEnableDrawingOutputResult) {
+        const auto &output = frontend.output_data();
+        std::vector<Vec2> pixel_uv_left;
+        std::vector<Vec2> pixel_uv_right;
+        std::vector<uint8_t> status;
+        pixel_uv_left.reserve(output.features_id.size());
+        pixel_uv_right.reserve(output.features_id.size());
+        status.reserve(output.features_id.size());
 
-                const auto &observe_per_view = output.observes_per_frame[i];
-                pixel_uv.emplace_back(observe_per_view[0].raw_pixel_uv);
+        for (uint32_t i = 0; i < output.observes_per_frame.size(); ++i) {
+            if (output.tracked_cnt[i] < 2) {
+                break;
             }
-            std::vector<uint8_t> status(pixel_uv.size(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
-            Visualizor::ShowImageWithTrackedFeatures(
-                "Mono frontend output", image, pixel_uv, pixel_uv, status,
-                static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)
-            );
-            Visualizor::WaitKey(1);
+
+            const auto &observe_per_view = output.observes_per_frame[i];
+            pixel_uv_left.emplace_back(observe_per_view[0].raw_pixel_uv);
+            if (observe_per_view.size() > 1) {
+                pixel_uv_right.emplace_back(observe_per_view[1].raw_pixel_uv);
+                status.emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+            } else {
+                pixel_uv_right.emplace_back(Vec2::Zero());
+                status.emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual));
+            }
         }
+
+        Visualizor::ShowImageWithTrackedFeatures(
+            "Mono frontend output", image_left, image_right, pixel_uv_left, pixel_uv_right, status,
+            static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)
+        );
+        Visualizor::WaitKey(1);
     }
 }
 
@@ -189,39 +230,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
         Visualizor::LoadImage(cam0_filenames[i], image_left);
         Visualizor::LoadImage(cam1_filenames[i], image_right);
         frontend.RunOnce(image_left, image_right);
-
-        // Show output data.
-        if (kEnableDrawingOutputResult) {
-            const auto &output = frontend.output_data();
-            std::vector<Vec2> pixel_uv_left;
-            std::vector<Vec2> pixel_uv_right;
-            std::vector<uint8_t> status;
-            pixel_uv_left.reserve(output.features_id.size());
-            pixel_uv_right.reserve(output.features_id.size());
-            status.reserve(output.features_id.size());
-
-            for (uint32_t i = 0; i < output.observes_per_frame.size(); ++i) {
-                if (output.tracked_cnt[i] < 2) {
-                    break;
-                }
-
-                const auto &observe_per_view = output.observes_per_frame[i];
-                pixel_uv_left.emplace_back(observe_per_view[0].raw_pixel_uv);
-                if (observe_per_view.size() > 1) {
-                    pixel_uv_right.emplace_back(observe_per_view[1].raw_pixel_uv);
-                    status.emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
-                } else {
-                    pixel_uv_right.emplace_back(Vec2::Zero());
-                    status.emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual));
-                }
-            }
-
-            Visualizor::ShowImageWithTrackedFeatures(
-                "Mono frontend output", image_left, image_right, pixel_uv_left, pixel_uv_right, status,
-                static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)
-            );
-            Visualizor::WaitKey(1);
-        }
+        ShowFrontendStereoOutput(frontend, image_left, image_right);
     }
 }
 
