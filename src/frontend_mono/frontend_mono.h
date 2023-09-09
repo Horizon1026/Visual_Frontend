@@ -31,7 +31,7 @@ public:
     // Frontend is driven by mono image.
     virtual bool RunOnce(const GrayImage &image) override;
     // Draw tracking results.
-    virtual void DrawTrackingResults(const std::string title) override;
+    virtual void DrawTrackingResults(const std::string &title) override;
     // Support for log recording.
     virtual void RegisterLogPackages() override;
     // Update frontend result.

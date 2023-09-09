@@ -50,7 +50,7 @@ public:
     virtual bool RunOnce(const GrayImage &image) { return false; }
     virtual bool RunOnce(const GrayImage &image_left, const GrayImage &image_right) { return false; }
     // Draw tracking results.
-    virtual void DrawTrackingResults(const std::string title) = 0;
+    virtual void DrawTrackingResults(const std::string &title) = 0;
     // Support for log recording.
     virtual void RegisterLogPackages() = 0;
     // Update frontend result.
