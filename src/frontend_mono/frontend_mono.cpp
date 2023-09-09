@@ -6,7 +6,8 @@
 
 namespace VISUAL_FRONTEND {
 
-constexpr uint32_t kFrontendMonoLogIndex = 1;
+constexpr uint32_t kFrontendMonoCurvesLogIndex = 1;
+constexpr uint32_t kFrontendMonoTrackingResultIndex = 2;
 
 bool FrontendMono::ProcessSourceImage(const GrayImage &cur_image) {
     RETURN_FALSE_IF(cur_image.data() == nullptr);
@@ -236,7 +237,7 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
 
     // Record package data.
     if (options().kEnableRecordBinaryLog) {
-        logger().RecordPackage(kFrontendMonoLogIndex, reinterpret_cast<const char *>(&log_package_data_));
+        logger().RecordPackage(kFrontendMonoCurvesLogIndex, reinterpret_cast<const char *>(&log_package_data_));
     }
 
     return true;
@@ -258,6 +259,11 @@ void FrontendMono::DrawTrackingResults(const std::string &title) {
         *ref_tracked_cnt(), *cur_vel(), show_image);
     Visualizor::ShowImage(title, show_image);
     Visualizor::WaitKey(1);
+
+
+    if (options().kEnableRecordBinaryLog) {
+        logger().RecordPackage(kFrontendMonoTrackingResultIndex, show_image);
+    }
 }
 
 // Support for log recording.
@@ -265,7 +271,7 @@ void FrontendMono::RegisterLogPackages() {
     using namespace SLAM_DATA_LOG;
 
     std::unique_ptr<PackageInfo> package_ptr = std::make_unique<PackageInfo>();
-    package_ptr->id = kFrontendMonoLogIndex;
+    package_ptr->id = kFrontendMonoCurvesLogIndex;
     package_ptr->name = "frontend_mono";
     package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint8, .name = "is_keyframe"});
     package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_old_features"});
@@ -273,7 +279,14 @@ void FrontendMono::RegisterLogPackages() {
     package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_inliers"});
     package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_inliers_after_filter"});
     package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_new_features"});
+    if (!logger().RegisterPackage(package_ptr)) {
+        ReportError("Failed to register package.");
+    }
 
+    package_ptr = std::make_unique<PackageInfo>();
+    package_ptr->id = kFrontendMonoTrackingResultIndex;
+    package_ptr->name = "frontend_mono_result";
+    package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kImage, .name = "track_result"});
     if (!logger().RegisterPackage(package_ptr)) {
         ReportError("Failed to register package.");
     }
