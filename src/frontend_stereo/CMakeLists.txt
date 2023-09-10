@@ -30,9 +30,6 @@ set( FEATURE_DETECTOR_PATH ${PROJECT_SOURCE_DIR}/../Feature_Detector/src )
 if ( NOT TARGET lib_feature_point_detector )
     add_subdirectory( ${FEATURE_DETECTOR_PATH}/feature_point_detector ${PROJECT_SOURCE_DIR}/build/lib_feature_point_detector )
 endif()
-if ( NOT TARGET lib_feature_descriptor )
-    add_subdirectory( ${FEATURE_DETECTOR_PATH}/feature_descriptor ${PROJECT_SOURCE_DIR}/build/lib_feature_descriptor )
-endif()
 
 # Add optical flow tracker and descriptor matcher.
 set( OPTICAL_FLOW_TRACKER_PATH ${PROJECT_SOURCE_DIR}/../Feature_Tracker/src )
@@ -90,7 +87,6 @@ target_link_libraries( lib_visual_frontend_stereo
     lib_image_visualizor
 
     lib_feature_point_detector
-    lib_feature_descriptor
 
     lib_optical_flow_tracker
     lib_descriptor_matcher

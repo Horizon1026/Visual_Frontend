@@ -26,7 +26,6 @@ public:
 	FrontendMono() = delete;
     FrontendMono(const uint32_t image_rows, const uint32_t image_cols) : Frontend(image_rows, image_cols) {}
     virtual ~FrontendMono() = default;
-    FrontendMono(const FrontendMono &frontend_mono) = delete;
 
     // Frontend is driven by mono image.
     virtual bool RunOnce(const GrayImage &image) override;

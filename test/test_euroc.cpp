@@ -213,17 +213,6 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     // frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
     // frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
-    // Config feature descriptor.
-    frontend.descriptor() = std::make_unique<FEATURE_DETECTOR::BriefDescriptor>();
-    frontend.descriptor()->options().kLength = 256;
-    frontend.descriptor()->options().kHalfPatchSize = 16;
-
-    // Config descriptor matcher.
-    // frontend.feature_matcher() = std::make_unique<VISUAL_FRONTEND::BriefMatcher>();
-    // frontend.feature_matcher()->options().kMaxValidPredictRowDistance = 50;
-    // frontend.feature_matcher()->options().kMaxValidPredictColDistance = 150;
-    // frontend.feature_matcher()->options().kMaxValidDescriptorDistance = 60;
-
     for (unsigned i = 0; i < cam0_filenames.size(); ++i) {
         GrayImage image_left;
         GrayImage image_right;

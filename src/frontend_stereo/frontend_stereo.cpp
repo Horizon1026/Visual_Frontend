@@ -118,39 +118,18 @@ bool FrontendStereo::SparsifyTrackedFeaturesInLeft() {
 
 bool FrontendStereo::TrackFeaturesFromCurrentLeftToCurrentRightImage(const GrayImage &cur_image_left, const GrayImage &cur_image_right) {
     *cur_stereo_tracked_status_ = tracked_status();
+    *cur_pixel_uv_right() = *cur_pixel_uv_left();
 
-    if (feature_matcher_ == nullptr) {
-        *cur_pixel_uv_right() = *cur_pixel_uv_left();
-        const int32_t stored_half_row_size = feature_tracker()->options().kPatchRowHalfSize;
-        const int32_t stored_half_col_size = feature_tracker()->options().kPatchColHalfSize;
-        feature_tracker()->options().kPatchRowHalfSize = half_patch_size_for_stereo_tracking_.x();
-        feature_tracker()->options().kPatchColHalfSize = half_patch_size_for_stereo_tracking_.y();
-        if (!feature_tracker()->TrackFeatures(*cur_pyramid_left(), *cur_pyramid_right(), *cur_pixel_uv_left(), *cur_pixel_uv_right(), *cur_stereo_tracked_status_)) {
-            ReportError("feature_tracker()->TrackFeatures track from cur_left to cur_right error.");
-            return false;
-        }
-        feature_tracker()->options().kPatchRowHalfSize = stored_half_row_size;
-        feature_tracker()->options().kPatchColHalfSize = stored_half_col_size;
-
-    } else {
-        detected_features_in_cur_right_.clear();
-        feature_detector()->DetectGoodFeatures(cur_image_right,
-                                               options().kMaxStoredFeaturePointsNumber * 2,
-                                               detected_features_in_cur_right_);
-        cur_descriptor_left_.clear();
-        cur_descriptor_right_.clear();
-        descriptor_->Compute(cur_image_left, *cur_pixel_uv_left(), cur_descriptor_left_);
-        descriptor_->Compute(cur_image_right, detected_features_in_cur_right_, cur_descriptor_right_);
-
-        cur_pixel_uv_right()->clear();
-        if (!feature_matcher_->NearbyMatch(cur_descriptor_left_, cur_descriptor_right_,
-                                           *cur_pixel_uv_left(), detected_features_in_cur_right_,
-                                           *cur_pixel_uv_right(), *cur_stereo_tracked_status_)) {
-            ReportError("feature_matcher_->NearbyMatch track from cur_left to cur_right error.");
-            return false;
-        }
-
+    const int32_t stored_half_row_size = feature_tracker()->options().kPatchRowHalfSize;
+    const int32_t stored_half_col_size = feature_tracker()->options().kPatchColHalfSize;
+    feature_tracker()->options().kPatchRowHalfSize = half_patch_size_for_stereo_tracking_.x();
+    feature_tracker()->options().kPatchColHalfSize = half_patch_size_for_stereo_tracking_.y();
+    if (!feature_tracker()->TrackFeatures(*cur_pyramid_left(), *cur_pyramid_right(), *cur_pixel_uv_left(), *cur_pixel_uv_right(), *cur_stereo_tracked_status_)) {
+        ReportError("feature_tracker()->TrackFeatures track from cur_left to cur_right error.");
+        return false;
     }
+    feature_tracker()->options().kPatchRowHalfSize = stored_half_row_size;
+    feature_tracker()->options().kPatchColHalfSize = stored_half_col_size;
 
     // Record log data.
     log_package_data_.num_of_tracked_feature_from_left_to_right = SlamOperation::StatisItemInVector(*cur_stereo_tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
