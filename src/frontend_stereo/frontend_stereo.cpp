@@ -6,7 +6,8 @@
 
 namespace VISUAL_FRONTEND {
 
-constexpr uint32_t kFrontendStereoLogIndex = 2;
+constexpr uint32_t kFrontendStereoCurvesLogIndex = 1;
+constexpr uint32_t kFrontendStereoTrackingResultIndex = 2;
 constexpr int32_t kMaxAllowedNonEpipolarDirectionPixelResidual = 20;
 
 bool FrontendStereo::ProcessSourceImage(const GrayImage &cur_image_left, const GrayImage &cur_image_right) {
@@ -305,7 +306,7 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
 
     // Record package data.
     if (options().kEnableRecordBinaryLog) {
-        logger().RecordPackage(kFrontendStereoLogIndex, reinterpret_cast<const char *>(&log_package_data_));
+        logger().RecordPackage(kFrontendStereoCurvesLogIndex, reinterpret_cast<const char *>(&log_package_data_));
     }
 
     return true;
@@ -341,6 +342,10 @@ void FrontendStereo::DrawTrackingResults(const std::string &title) {
     );
     Visualizor::ShowImage(title, show_image);
     Visualizor::WaitKey(1);
+
+    if (options().kEnableRecordBinaryLog) {
+        logger().RecordPackage(kFrontendStereoTrackingResultIndex, show_image);
+    }
 }
 
 // Support for log recording.
@@ -348,7 +353,7 @@ void FrontendStereo::RegisterLogPackages() {
     using namespace SLAM_DATA_LOG;
 
     std::unique_ptr<PackageInfo> package_ptr = std::make_unique<PackageInfo>();
-    package_ptr->id = kFrontendStereoLogIndex;
+    package_ptr->id = kFrontendStereoCurvesLogIndex;
     package_ptr->name = "frontend_stereo";
     package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint8, .name = "is_keyframe"});
     package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_old_features_in_only_left"});
@@ -358,7 +363,14 @@ void FrontendStereo::RegisterLogPackages() {
     package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_tracked_feature_from_left_to_right"});
     package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_inliers_from_left_to_right"});
     package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_new_features_in_only_left"});
+    if (!logger().RegisterPackage(package_ptr)) {
+        ReportError("Failed to register package.");
+    }
 
+    package_ptr = std::make_unique<PackageInfo>();
+    package_ptr->id = kFrontendStereoTrackingResultIndex;
+    package_ptr->name = "frontend_stereo_result";
+    package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kImage, .name = "track_result"});
     if (!logger().RegisterPackage(package_ptr)) {
         ReportError("Failed to register package.");
     }
