@@ -24,27 +24,6 @@ namespace {
     constexpr bool kEnableDrawingTrackingResult = false;
 }
 
-bool GetFilesInPath(std::string dir, std::vector<std::string> &filenames) {
-    DIR *ptr_dir;
-    struct dirent *ptr;
-    if (!(ptr_dir = opendir(dir.c_str()))) {
-        ReportError("Cannot open dir " << dir);
-        return false;
-    }
-
-    filenames.reserve(1000);
-
-    while ((ptr = readdir(ptr_dir)) != 0) {
-        if (strcmp(ptr->d_name, ".") != 0 && strcmp(ptr->d_name, "..") != 0) {
-            filenames.emplace_back(dir + "/" + ptr->d_name);
-        }
-    }
-
-    closedir(ptr_dir);
-
-    return true;
-}
-
 void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
                             const GrayImage &image) {
     // Show output data.
@@ -227,14 +206,15 @@ int main(int argc, char **argv) {
     ReportInfo(YELLOW ">> Test visual frontend on euroc dataset." RESET_COLOR);
 
     std::vector<std::string> cam0_filenames;
-    if (!GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames)) {
-        RETURN_FALSE_IF_FALSE(GetFilesInPath("D:/My_Github/Datasets/MH_05_difficult/mav0/cam0/data", cam0_filenames));
+
+    if (!SlamOperation::GetFilesNameInDirectory("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames)) {
+        RETURN_FALSE_IF_FALSE(SlamOperation::GetFilesNameInDirectory("D:/My_Github/Datasets/MH_05_difficult/mav0/cam0/data", cam0_filenames));
     }
     std::sort(cam0_filenames.begin(), cam0_filenames.end());
 
     std::vector<std::string> cam1_filenames;
-    if (!GetFilesInPath("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames)) {
-        RETURN_FALSE_IF_FALSE(GetFilesInPath("D:/My_Github/Datasets/MH_05_difficult/mav0/cam1/data", cam1_filenames));
+    if (!SlamOperation::GetFilesNameInDirectory("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames)) {
+        RETURN_FALSE_IF_FALSE(SlamOperation::GetFilesNameInDirectory("D:/My_Github/Datasets/MH_05_difficult/mav0/cam1/data", cam1_filenames));
     }
     std::sort(cam1_filenames.begin(), cam1_filenames.end());
 
