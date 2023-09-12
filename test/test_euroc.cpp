@@ -19,9 +19,9 @@ namespace {
     using FeatureType = FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>;
     using KltType = FEATURE_TRACKER::OpticalFlowBasicKlt;
 
-    constexpr bool kEnableDrawingOutputResult = true;
+    constexpr bool kEnableDrawingOutputResult = false;
     constexpr bool kEnableRecordLog = false;
-    constexpr bool kEnableDrawingTrackingResult = false;
+    constexpr bool kEnableDrawingTrackingResult = true;
 }
 
 void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
@@ -74,9 +74,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     const float p2 = 1.76187114e-05f;
     frontend.camera_model() = std::make_unique<SENSOR_MODEL::Pinhole>();
     frontend.camera_model()->SetIntrinsicParameter(fx, fy, cx, cy);
-    Vec5 distort_param;
-    distort_param << k1, k2, k3, p1, p2;
-    frontend.camera_model()->SetDistortionParameter(distort_param);
+    frontend.camera_model()->SetDistortionParameter(std::vector<float>{k1, k2, k3, p1, p2});
 
     // Config image processor.
     // frontend.image_processor() = std::make_unique<IMAGE_PROCESSOR::CensusProcessor>();
@@ -170,9 +168,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     const float p2 = 1.76187114e-05f;
     frontend.camera_model() = std::make_unique<SENSOR_MODEL::Pinhole>();
     frontend.camera_model()->SetIntrinsicParameter(fx, fy, cx, cy);
-    Vec5 distort_param;
-    distort_param << k1, k2, k3, p1, p2;
-    frontend.camera_model()->SetDistortionParameter(distort_param);
+    frontend.camera_model()->SetDistortionParameter(std::vector<float>{k1, k2, k3, p1, p2});
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FeatureType>();
