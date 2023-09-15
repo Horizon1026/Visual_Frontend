@@ -27,10 +27,10 @@ bool Frontend::Initialize(const std::string &log_file_name) {
     output_data_.observes_per_frame.reserve(options_.kMaxStoredFeaturePointsNumber);
 
     // Register packages for log file.
-    if (options_.kEnableRecordBinaryLog) {
+    if (options_.kEnableRecordBinaryCurveLog) {
         if (!logger_.CreateLogFile(log_file_name)) {
             ReportError("Visual frontend cannot create log file.");
-            options_.kEnableRecordBinaryLog = false;
+            options_.kEnableRecordBinaryCurveLog = false;
             return false;
         }
 

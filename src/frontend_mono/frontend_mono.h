@@ -15,6 +15,7 @@ struct FrontendMonoLog {
     uint32_t num_of_inliers = 0;
     uint32_t num_of_inliers_after_filter = 0;
     uint32_t num_of_new_features = 0;
+    float cost_time_ms_of_loop = 0.0f;
 };
 
 #pragma pack()

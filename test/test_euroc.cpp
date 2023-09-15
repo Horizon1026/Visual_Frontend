@@ -20,8 +20,9 @@ namespace {
     using KltType = FEATURE_TRACKER::OpticalFlowBasicKlt;
 
     constexpr bool kEnableDrawingOutputResult = false;
-    constexpr bool kEnableRecordLog = false;
-    constexpr bool kEnableDrawingTrackingResult = true;
+    constexpr bool kEnableRecordCurveLog = true;
+    constexpr bool kEnableRecordImageLog = true;
+    constexpr bool kEnableDrawingTrackingResult = false;
 }
 
 void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
@@ -55,8 +56,9 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     GrayImage image;
     Visualizor::LoadImage(cam0_filenames.front(), image);
     VISUAL_FRONTEND::FrontendMono frontend(image.rows(), image.cols());
-    frontend.options().kEnableRecordBinaryLog = kEnableRecordLog;
-    frontend.options().kEnableVisualizeResult = kEnableDrawingTrackingResult;
+    frontend.options().kEnableRecordBinaryCurveLog = kEnableRecordCurveLog;
+    frontend.options().kEnableRecordBinaryImageLog = kEnableRecordImageLog;
+    frontend.options().kEnableShowVisualizeResult = kEnableDrawingTrackingResult;
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 40;
@@ -149,8 +151,9 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     GrayImage image;
     Visualizor::LoadImage(cam0_filenames.front(), image);
     VISUAL_FRONTEND::FrontendStereo frontend(image.rows(), image.cols());
-    frontend.options().kEnableRecordBinaryLog = kEnableRecordLog;
-    frontend.options().kEnableVisualizeResult = kEnableDrawingTrackingResult;
+    frontend.options().kEnableRecordBinaryCurveLog = kEnableRecordCurveLog;
+    frontend.options().kEnableRecordBinaryImageLog = kEnableRecordImageLog;
+    frontend.options().kEnableShowVisualizeResult = kEnableDrawingTrackingResult;
     frontend.options().kSelfSelectKeyframe = true;
     frontend.options().kMaxStoredFeaturePointsNumber = 100;
     frontend.options().kMinDetectedFeaturePointsNumberInCurrentImage = 30;

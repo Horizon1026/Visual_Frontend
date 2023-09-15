@@ -17,6 +17,7 @@ struct FrontendStereoLog {
     uint32_t num_of_tracked_feature_from_left_to_right = 0;
     uint32_t num_of_inliers_from_left_to_right = 0;
     uint32_t num_of_new_features_in_only_left = 0;
+    float cost_time_ms_of_loop = 0.0f;
 };
 
 #pragma pack()

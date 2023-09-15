@@ -30,8 +30,9 @@ struct FrontendOptions {
     bool kSelfSelectKeyframe = true;
     uint32_t kMinDetectedFeaturePointsNumberInCurrentImage = 60;
     float kMaxValidTrackBackPixelResidual = 1.0f;
-    bool kEnableRecordBinaryLog = false;
-    bool kEnableVisualizeResult = true;
+    bool kEnableRecordBinaryCurveLog = false;
+    bool kEnableRecordBinaryImageLog = false;
+    bool kEnableShowVisualizeResult = true;
 };
 
 /* Class Frontend Declaration. */
