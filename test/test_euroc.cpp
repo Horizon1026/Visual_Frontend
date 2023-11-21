@@ -19,7 +19,7 @@ namespace {
     using FeatureType = FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>;
     using KltType = FEATURE_TRACKER::OpticalFlowBasicKlt;
 
-    constexpr bool kEnableDrawingOutputResult = false;
+    constexpr bool kEnableDrawingOutputResult = true;
     constexpr bool kEnableRecordCurveLog = true;
     constexpr bool kEnableRecordImageLog = true;
     constexpr bool kEnableDrawingTrackingResult = false;
@@ -115,9 +115,13 @@ void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
         const auto &output = frontend.output_data();
         std::vector<Vec2> pixel_uv_left;
         std::vector<Vec2> pixel_uv_right;
+        std::vector<Vec2> rectify_uv_left;
+        std::vector<Vec2> rectify_uv_right;
         std::vector<uint8_t> status;
         pixel_uv_left.reserve(output.features_id.size());
         pixel_uv_right.reserve(output.features_id.size());
+        rectify_uv_left.reserve(output.features_id.size());
+        rectify_uv_right.reserve(output.features_id.size());
         status.reserve(output.features_id.size());
 
         for (uint32_t i = 0; i < output.observes_per_frame.size(); ++i) {
@@ -125,22 +129,41 @@ void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
                 break;
             }
 
+            Vec2 pixel_uv = Vec2::Zero();
+
             const auto &observe_per_view = output.observes_per_frame[i];
+            frontend.camera_model()->LiftFromNormalizedPlaneToImagePlane(observe_per_view[0].rectified_norm_xy, pixel_uv);
+            rectify_uv_left.emplace_back(pixel_uv);
             pixel_uv_left.emplace_back(observe_per_view[0].raw_pixel_uv);
+
             if (observe_per_view.size() > 1) {
-                pixel_uv_right.emplace_back(observe_per_view[1].raw_pixel_uv);
+                frontend.camera_model()->LiftFromNormalizedPlaneToImagePlane(observe_per_view[1].rectified_norm_xy, pixel_uv);
+                rectify_uv_right.emplace_back(pixel_uv);
+                pixel_uv_right.emplace_back(observe_per_view[0].raw_pixel_uv);
+
                 status.emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
             } else {
+                rectify_uv_right.emplace_back(Vec2::Zero());
                 pixel_uv_right.emplace_back(Vec2::Zero());
                 status.emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual));
             }
         }
 
+        MatImg mat_image_left, mat_image_right;
+        mat_image_left.resize(image_left.rows(), image_left.cols());
+        mat_image_right.resize(image_left.rows(), image_left.cols());
+        GrayImage rectify_left(mat_image_left);
+        GrayImage rectify_right(mat_image_right);
+        frontend.camera_model()->CorrectDistortedImage(image_left, rectify_left);
+        frontend.camera_model()->CorrectDistortedImage(image_right, rectify_right);
+
         Visualizor::ShowImageWithTrackedFeatures(
-            "Mono frontend output", image_left, image_right, pixel_uv_left, pixel_uv_right, status,
-            static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)
-        );
-        Visualizor::WaitKey(1);
+            "Stereo frontend rectify output", rectify_left, rectify_right, rectify_uv_left, rectify_uv_right, status,
+            static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+        Visualizor::ShowImageWithTrackedFeatures(
+            "Stereo frontend raw output", image_left, image_right, pixel_uv_left, pixel_uv_right, status,
+            static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+        Visualizor::WaitKey(0);
     }
 }
 
@@ -207,13 +230,13 @@ int main(int argc, char **argv) {
     std::vector<std::string> cam0_filenames;
 
     if (!SlamOperation::GetFilesNameInDirectory("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames)) {
-        RETURN_FALSE_IF_FALSE(SlamOperation::GetFilesNameInDirectory("D:/My_Github/Datasets/MH_05_difficult/mav0/cam0/data", cam0_filenames));
+        RETURN_FALSE_IF_FALSE(SlamOperation::GetFilesNameInDirectory("D:/My_Github/Datasets/MH_01_easy/mav0/cam0/data", cam0_filenames));
     }
     std::sort(cam0_filenames.begin(), cam0_filenames.end());
 
     std::vector<std::string> cam1_filenames;
     if (!SlamOperation::GetFilesNameInDirectory("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames)) {
-        RETURN_FALSE_IF_FALSE(SlamOperation::GetFilesNameInDirectory("D:/My_Github/Datasets/MH_05_difficult/mav0/cam1/data", cam1_filenames));
+        RETURN_FALSE_IF_FALSE(SlamOperation::GetFilesNameInDirectory("D:/My_Github/Datasets/MH_01_easy/mav0/cam1/data", cam1_filenames));
     }
     std::sort(cam1_filenames.begin(), cam1_filenames.end());
 
