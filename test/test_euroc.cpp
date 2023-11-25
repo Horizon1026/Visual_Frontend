@@ -33,10 +33,6 @@ void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
         std::vector<Vec2> pixel_uv;
         pixel_uv.reserve(output.features_id.size());
         for (uint32_t i = 0; i < output.observes_per_frame.size(); ++i) {
-            if (output.tracked_cnt[i] < 2) {
-                break;
-            }
-
             const auto &observe_per_view = output.observes_per_frame[i];
             pixel_uv.emplace_back(observe_per_view[0].raw_pixel_uv);
         }
@@ -45,7 +41,7 @@ void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
             "Mono frontend output", image, pixel_uv, pixel_uv, status,
             static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)
         );
-        Visualizor::WaitKey(1);
+        Visualizor::WaitKey(0);
     }
 }
 
@@ -125,10 +121,6 @@ void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
         status.reserve(output.features_id.size());
 
         for (uint32_t i = 0; i < output.observes_per_frame.size(); ++i) {
-            if (output.tracked_cnt[i] < 2) {
-                break;
-            }
-
             Vec2 pixel_uv = Vec2::Zero();
 
             const auto &observe_per_view = output.observes_per_frame[i];

@@ -328,6 +328,11 @@ void FrontendMono::UpdateFrontendOutputData() {
                 .rectified_norm_xy = (*cur_norm_xy_left())[i],
             }});
         }
+
+        // The untracked features should not be pulished.
+        SlamOperation::ReduceVectorByStatus(tracked_status(), output_data().features_id);
+        SlamOperation::ReduceVectorByStatus(tracked_status(), output_data().tracked_cnt);
+        SlamOperation::ReduceVectorByStatus(tracked_status(), output_data().observes_per_frame);
     }
 }
 
