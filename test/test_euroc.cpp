@@ -15,6 +15,8 @@
 #include "cstring"
 #include "unistd.h"
 
+using namespace SLAM_VISUALIZOR;
+
 namespace {
     using FeatureType = FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>;
     using KltType = FEATURE_TRACKER::OpticalFlowBasicKlt;

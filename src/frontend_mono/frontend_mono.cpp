@@ -4,6 +4,8 @@
 #include "tick_tock.h"
 #include "visualizor.h"
 
+using namespace SLAM_VISUALIZOR;
+
 namespace VISUAL_FRONTEND {
 
 constexpr uint32_t kFrontendMonoCurvesLogIndex = 1;
