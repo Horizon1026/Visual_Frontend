@@ -238,7 +238,7 @@ bool FrontendStereo::MakeCurrentFrameKeyframe() {
     return true;
 }
 
-bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &cur_image_right) {
+bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &cur_image_right, const float time_stamp_s) {
     TickTock timer;
 
     // If components is not valid, return false.
@@ -268,7 +268,7 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
     RETURN_FALSE_IF_FALSE(SelectKeyframe());
 
     // Visualize result when this API is defined.
-    DrawTrackingResults("Frontend Stereo Tracking Result");
+    DrawTrackingResults("Frontend Stereo Tracking Result", time_stamp_s);
 
     // If frontend is configured to select keyframe by itself, frontend will track features from fixed keyframe to current frame.
     if (is_cur_image_keyframe()) {
@@ -290,14 +290,14 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
     // Record package data.
     log_package_data_.cost_time_ms_of_loop = timer.TockInMillisecond();
     if (options().kEnableRecordBinaryCurveLog) {
-        logger().RecordPackage(kFrontendStereoCurvesLogIndex, reinterpret_cast<const char *>(&log_package_data_));
+        logger().RecordPackage(kFrontendStereoCurvesLogIndex, reinterpret_cast<const char *>(&log_package_data_), time_stamp_s);
     }
 
     return true;
 }
 
 // Draw tracking results.
-void FrontendStereo::DrawTrackingResults(const std::string &title) {
+void FrontendStereo::DrawTrackingResults(const std::string &title, const float time_stamp_s) {
     if (!options().kEnableShowVisualizeResult) {
         return;
     }

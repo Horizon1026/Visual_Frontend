@@ -97,11 +97,14 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     // frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
     // frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
+    float time_stamp_s = 0.0f;
     for (const auto &filename : cam0_filenames) {
         GrayImage image;
         Visualizor::LoadImage(filename, image);
-        frontend.RunOnce(image);
+        frontend.RunOnce(image, time_stamp_s);
         ShowFrontendMonoOutput(frontend, image);
+
+        time_stamp_s += 0.05f;
     }
 }
 
@@ -208,13 +211,16 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     // frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
     // frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
+    float time_stamp_s = 0.0f;
     for (unsigned i = 0; i < cam0_filenames.size(); ++i) {
         GrayImage image_left;
         GrayImage image_right;
         Visualizor::LoadImage(cam0_filenames[i], image_left);
         Visualizor::LoadImage(cam1_filenames[i], image_right);
-        frontend.RunOnce(image_left, image_right);
+        frontend.RunOnce(image_left, image_right, time_stamp_s);
         ShowFrontendStereoOutput(frontend, image_left, image_right);
+
+        time_stamp_s += 0.05f;
     }
 }
 

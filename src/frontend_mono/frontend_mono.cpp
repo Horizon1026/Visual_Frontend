@@ -186,7 +186,7 @@ bool FrontendMono::MakeCurrentFrameKeyframe() {
     return true;
 }
 
-bool FrontendMono::RunOnce(const GrayImage &cur_image) {
+bool FrontendMono::RunOnce(const GrayImage &cur_image, const float time_stamp_s) {
     TickTock timer;
 
     // If components is not valid, return false.
@@ -221,7 +221,7 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
     RETURN_FALSE_IF_FALSE(SelectKeyframe());
 
     // Visualize result when this API is defined.
-    DrawTrackingResults("Frontend Mono Tracking Result");
+    DrawTrackingResults("Frontend Mono Tracking Result", time_stamp_s);
 
     // If frontend is configured to select keyframe by itself, frontend will track features from fixed keyframe to current frame.
     if (is_cur_image_keyframe()) {
@@ -242,14 +242,14 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image) {
     // Record package data.
     log_package_data_.cost_time_ms_of_loop = timer.TockInMillisecond();
     if (options().kEnableRecordBinaryCurveLog) {
-        logger().RecordPackage(kFrontendMonoCurvesLogIndex, reinterpret_cast<const char *>(&log_package_data_));
+        logger().RecordPackage(kFrontendMonoCurvesLogIndex, reinterpret_cast<const char *>(&log_package_data_), time_stamp_s);
     }
 
     return true;
 }
 
 // Draw tracking results.
-void FrontendMono::DrawTrackingResults(const std::string &title) {
+void FrontendMono::DrawTrackingResults(const std::string &title, const float time_stamp_s) {
     if (!options().kEnableShowVisualizeResult) {
         return;
     }
@@ -267,7 +267,7 @@ void FrontendMono::DrawTrackingResults(const std::string &title) {
 
 
     if (options().kEnableRecordBinaryImageLog) {
-        logger().RecordPackage(kFrontendMonoTrackingResultIndex, show_image);
+        logger().RecordPackage(kFrontendMonoTrackingResultIndex, show_image, time_stamp_s);
     }
 }
 

@@ -48,10 +48,10 @@ public:
     bool Initialize(const std::string &log_file_name = "./frontend_log.binlog");
 
     // Frontend is driven by mono image or stereo images.
-    virtual bool RunOnce(const GrayImage &image) { return false; }
-    virtual bool RunOnce(const GrayImage &image_left, const GrayImage &image_right) { return false; }
+    virtual bool RunOnce(const GrayImage &image, const float time_stamp_s) { return false; }
+    virtual bool RunOnce(const GrayImage &image_left, const GrayImage &image_right, const float time_stamp_s) { return false; }
     // Draw tracking results.
-    virtual void DrawTrackingResults(const std::string &title) = 0;
+    virtual void DrawTrackingResults(const std::string &title, const float time_stamp_s) = 0;
     // Support for log recording.
     virtual void RegisterLogPackages() = 0;
     // Update frontend result.
