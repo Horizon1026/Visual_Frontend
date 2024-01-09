@@ -394,29 +394,28 @@ void FrontendStereo::UpdateFrontendOutputData() {
 
     } else {
         // If current frame is not keyframe, tracking result will be stored in cur_info.
-        output_data().features_id = *cur_ids();
-        output_data().tracked_cnt = *cur_tracked_cnt();
-        for (uint32_t i = 0; i < cur_ids()->size(); ++i) {
-            output_data().observes_per_frame.emplace_back(ObservePerFrame { ObservePerView {
-                .id = 0,
-                .raw_pixel_uv = (*cur_pixel_uv_left())[i],
-                .rectified_norm_xy = (*cur_norm_xy_left())[i],
-            }});
-        }
-        for (uint32_t i = 0; i < cur_stereo_tracked_status_->size(); ++i) {
-            if ((*cur_stereo_tracked_status_)[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
-                output_data().observes_per_frame[i].emplace_back(ObservePerView {
-                    .id = 1,
-                    .raw_pixel_uv = (*cur_pixel_uv_right())[i],
-                    .rectified_norm_xy = (*cur_norm_xy_right())[i],
-                });
+        output_data().features_id.clear();
+        output_data().tracked_cnt.clear();
+        output_data().observes_per_frame.clear();
+        for (uint32_t i = 0; i < cur_pixel_uv_left()->size(); ++i) {
+            if (tracked_status()[i]) {
+                output_data().features_id.emplace_back((*cur_ids())[i]);
+                output_data().tracked_cnt.emplace_back((*cur_tracked_cnt())[i]);
+                output_data().observes_per_frame.emplace_back(ObservePerFrame { ObservePerView {
+                    .id = 0,
+                    .raw_pixel_uv = (*cur_pixel_uv_left())[i],
+                    .rectified_norm_xy = (*cur_norm_xy_left())[i],
+                }});
+
+                if ((*cur_stereo_tracked_status_)[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+                    output_data().observes_per_frame[i].emplace_back(ObservePerView {
+                        .id = 1,
+                        .raw_pixel_uv = (*cur_pixel_uv_right())[i],
+                        .rectified_norm_xy = (*cur_norm_xy_right())[i],
+                    });
+                }
             }
         }
-
-        // The untracked features should not be pulished.
-        SlamOperation::ReduceVectorByStatus(tracked_status(), output_data().features_id);
-        SlamOperation::ReduceVectorByStatus(tracked_status(), output_data().tracked_cnt);
-        SlamOperation::ReduceVectorByStatus(tracked_status(), output_data().observes_per_frame);
     }
 }
 
