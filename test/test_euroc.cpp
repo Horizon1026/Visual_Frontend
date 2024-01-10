@@ -6,6 +6,7 @@
 #include "optical_flow_lssd_klt.h"
 #include "census.h"
 #include "log_report.h"
+#include "slam_memory.h"
 
 #include "visualizor.h"
 
@@ -114,52 +115,51 @@ void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
     // Show output data.
     if (kEnableDrawingOutputResult) {
         const auto &output = frontend.output_data();
-        std::vector<Vec2> pixel_uv_left;
-        std::vector<Vec2> pixel_uv_right;
-        std::vector<Vec2> rectify_uv_left;
-        std::vector<Vec2> rectify_uv_right;
-        std::vector<uint8_t> status;
-        pixel_uv_left.reserve(output.features_id.size());
-        pixel_uv_right.reserve(output.features_id.size());
-        rectify_uv_left.reserve(output.features_id.size());
-        rectify_uv_right.reserve(output.features_id.size());
-        status.reserve(output.features_id.size());
 
-        for (uint32_t i = 0; i < output.observes_per_frame.size(); ++i) {
-            Vec2 pixel_uv = Vec2::Zero();
+        // Camera name of each camera is camera_name[camera_id].
+        std::vector<std::string> camera_name = {"left", "right"};
 
-            const auto &observe_per_view = output.observes_per_frame[i];
-            frontend.camera_model()->LiftFromNormalizedPlaneToImagePlane(observe_per_view[0].rectified_norm_xy, pixel_uv);
-            rectify_uv_left.emplace_back(pixel_uv);
-            pixel_uv_left.emplace_back(observe_per_view[0].raw_pixel_uv);
+        if (image_left.data() != nullptr) {
+            // Convert gray image to rgb image.
+            RgbImage rgb_image;
+            uint8_t *rgb_buf = (uint8_t *)SlamMemory::Malloc(image_left.rows() * image_left.cols() * 3 * sizeof(uint8_t));
+            rgb_image.SetImage(rgb_buf, image_left.rows(), image_left.cols(), true);
+            Visualizor::ConvertUint8ToRgb(image_left.data(), rgb_image.data(), image_left.rows() * image_left.cols());
 
-            if (observe_per_view.size() > 1) {
-                frontend.camera_model()->LiftFromNormalizedPlaneToImagePlane(observe_per_view[1].rectified_norm_xy, pixel_uv);
-                rectify_uv_right.emplace_back(pixel_uv);
-                pixel_uv_right.emplace_back(observe_per_view[0].raw_pixel_uv);
-
-                status.emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
-            } else {
-                rectify_uv_right.emplace_back(Vec2::Zero());
-                pixel_uv_right.emplace_back(Vec2::Zero());
-                status.emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual));
+            // Draw all observed features in this frame and this camera image.
+            for (uint32_t i = 0; i < output.features_id.size(); ++i) {
+                const Vec2 pixel_uv = output.observes_per_frame[i][0].raw_pixel_uv;
+                const RgbPixel pixel_color = RgbPixel{.r = 0, .g = 255, .b = 255};
+                Visualizor::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
+                Visualizor::DrawString(rgb_image, std::to_string(output.features_id[i]),
+                    pixel_uv.x(), pixel_uv.y(), pixel_color);
             }
+
+            // Draw image to show.
+            Visualizor::ShowImage(std::string("frame ") + camera_name[0], rgb_image);
         }
 
-        MatImg mat_image_left, mat_image_right;
-        mat_image_left.resize(image_left.rows(), image_left.cols());
-        mat_image_right.resize(image_left.rows(), image_left.cols());
-        GrayImage rectify_left(mat_image_left);
-        GrayImage rectify_right(mat_image_right);
-        frontend.camera_model()->CorrectDistortedImage(image_left, rectify_left);
-        frontend.camera_model()->CorrectDistortedImage(image_right, rectify_right);
+        if (image_right.data() != nullptr) {
+            // Convert gray image to rgb image.
+            RgbImage rgb_image;
+            uint8_t *rgb_buf = (uint8_t *)SlamMemory::Malloc(image_right.rows() * image_right.cols() * 3 * sizeof(uint8_t));
+            rgb_image.SetImage(rgb_buf, image_right.rows(), image_right.cols(), true);
+            Visualizor::ConvertUint8ToRgb(image_right.data(), rgb_image.data(), image_right.rows() * image_right.cols());
 
-        Visualizor::ShowImageWithTrackedFeatures(
-            "Stereo frontend rectify output", rectify_left, rectify_right, rectify_uv_left, rectify_uv_right, status,
-            static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
-        Visualizor::ShowImageWithTrackedFeatures(
-            "Stereo frontend raw output", image_left, image_right, pixel_uv_left, pixel_uv_right, status,
-            static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+            // Draw all observed features in this frame and this camera image.
+            for (uint32_t i = 0; i < output.features_id.size(); ++i) {
+                CONTINUE_IF(output.observes_per_frame[i].size() < 2);
+                const Vec2 pixel_uv = output.observes_per_frame[i][1].raw_pixel_uv;
+                const RgbPixel pixel_color = RgbPixel{.r = 0, .g = 255, .b = 255};
+                Visualizor::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
+                Visualizor::DrawString(rgb_image, std::to_string(output.features_id[i]),
+                    pixel_uv.x(), pixel_uv.y(), pixel_color);
+            }
+
+            // Draw image to show.
+            Visualizor::ShowImage(std::string("frame ") + camera_name[1], rgb_image);
+        }
+
         Visualizor::WaitKey(0);
     }
 }

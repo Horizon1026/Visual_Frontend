@@ -369,8 +369,9 @@ void FrontendStereo::RegisterLogPackages() {
 void FrontendStereo::UpdateFrontendOutputData() {
     output_data().features_id.clear();
     output_data().observes_per_frame.clear();
-
+    output_data().tracked_cnt.clear();
     output_data().is_current_keyframe = is_cur_image_keyframe();
+
     if (output_data().is_current_keyframe) {
         // If current frame is keyframe, tracking result will be stored in ref_info.
         output_data().features_id = *ref_ids();
@@ -394,13 +395,10 @@ void FrontendStereo::UpdateFrontendOutputData() {
 
     } else {
         // If current frame is not keyframe, tracking result will be stored in cur_info.
-        output_data().features_id.clear();
-        output_data().tracked_cnt.clear();
-        output_data().observes_per_frame.clear();
         for (uint32_t i = 0; i < cur_pixel_uv_left()->size(); ++i) {
             if (tracked_status()[i]) {
                 output_data().features_id.emplace_back((*cur_ids())[i]);
-                output_data().tracked_cnt.emplace_back((*cur_tracked_cnt())[i]);
+                output_data().tracked_cnt.emplace_back((*ref_tracked_cnt())[i]);
                 output_data().observes_per_frame.emplace_back(ObservePerFrame { ObservePerView {
                     .id = 0,
                     .raw_pixel_uv = (*cur_pixel_uv_left())[i],
@@ -408,7 +406,7 @@ void FrontendStereo::UpdateFrontendOutputData() {
                 }});
 
                 if ((*cur_stereo_tracked_status_)[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
-                    output_data().observes_per_frame[i].emplace_back(ObservePerView {
+                    output_data().observes_per_frame.back().emplace_back(ObservePerView {
                         .id = 1,
                         .raw_pixel_uv = (*cur_pixel_uv_right())[i],
                         .rectified_norm_xy = (*cur_norm_xy_right())[i],
