@@ -25,7 +25,7 @@ namespace {
     constexpr bool kEnableDrawingOutputResult = true;
     constexpr bool kEnableRecordCurveLog = true;
     constexpr bool kEnableRecordImageLog = true;
-    constexpr bool kEnableDrawingTrackingResult = false;
+    constexpr bool kEnableDrawingTrackingResult = true;
 }
 
 void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
