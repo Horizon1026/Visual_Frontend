@@ -212,6 +212,7 @@ bool FrontendStereo::SupplememtNewFeatures(const GrayImage &cur_image_left) {
         camera_model()->LiftFromCameraFrameToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i + old_features_num], temp_cur_norm_xy_left);
         cur_norm_xy_left()->emplace_back(temp_cur_norm_xy_left);
         ref_tracked_cnt()->emplace_back(1);
+        tracked_status().emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
         cur_stereo_tracked_status_->emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kNotTracked));
 
         ++feature_id_cnt();
