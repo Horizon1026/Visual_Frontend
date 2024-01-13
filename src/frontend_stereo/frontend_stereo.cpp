@@ -56,7 +56,7 @@ bool FrontendStereo::RejectOutliersBetweenRefernceLeftAndCurrentLeftImage() {
     Mat3 essential;
     cur_norm_xy_left()->resize(cur_pixel_uv_left()->size());
     for (uint32_t i = 0; i < cur_pixel_uv_left()->size(); ++i) {
-        camera_model()->LiftFromCameraFrameToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i], (*cur_norm_xy_left())[i]);
+        camera_models()[0]->LiftFromCameraFrameToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i], (*cur_norm_xy_left())[i]);
     }
 
     if (epipolar_solver() == nullptr) {
@@ -141,7 +141,7 @@ bool FrontendStereo::TrackFeaturesFromCurrentLeftToCurrentRightImage(const GrayI
 bool FrontendStereo::RejectOutliersBetweenCurrentLeftToCurrentRightImage() {
     cur_norm_xy_right()->resize(cur_pixel_uv_right()->size());
     for (uint32_t i = 0; i < cur_pixel_uv_right()->size(); ++i) {
-        camera_model()->LiftFromCameraFrameToNormalizedPlaneAndUndistort((*cur_pixel_uv_right())[i], (*cur_norm_xy_right())[i]);
+        camera_models()[1]->LiftFromCameraFrameToNormalizedPlaneAndUndistort((*cur_pixel_uv_right())[i], (*cur_norm_xy_right())[i]);
     }
 
     if (epipolar_solver() == nullptr) {
@@ -149,7 +149,7 @@ bool FrontendStereo::RejectOutliersBetweenCurrentLeftToCurrentRightImage() {
         RETURN_FALSE_IF(cur_norm_xy_left()->size() != cur_norm_xy_right()->size());
         RETURN_FALSE_IF(cur_stereo_tracked_status_->size() != cur_norm_xy_right()->size());
         for (uint32_t i = 0; i < cur_stereo_tracked_status_->size(); ++i) {
-            if (std::fabs((*cur_norm_xy_left())[i].y() - (*cur_norm_xy_right())[i].y()) > kMaxAllowedNonEpipolarDirectionPixelResidual / camera_model()->fy()) {
+            if (std::fabs((*cur_norm_xy_left())[i].y() - (*cur_norm_xy_right())[i].y()) > kMaxAllowedNonEpipolarDirectionPixelResidual / camera_models()[0]->fy()) {
                 (*cur_stereo_tracked_status_)[i] = static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual);
             }
         }
@@ -209,7 +209,7 @@ bool FrontendStereo::SupplememtNewFeatures(const GrayImage &cur_image_left) {
 
     for (uint32_t i = 0; i < new_features_num; ++i) {
         cur_ids()->emplace_back(feature_id_cnt());
-        camera_model()->LiftFromCameraFrameToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i + old_features_num], temp_cur_norm_xy_left);
+        camera_models()[0]->LiftFromCameraFrameToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i + old_features_num], temp_cur_norm_xy_left);
         cur_norm_xy_left()->emplace_back(temp_cur_norm_xy_left);
         ref_tracked_cnt()->emplace_back(1);
         tracked_status().emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));

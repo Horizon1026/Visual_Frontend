@@ -33,17 +33,30 @@ void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
     // Show output data.
     if (kEnableDrawingOutputResult) {
         const auto &output = frontend.output_data();
-        std::vector<Vec2> pixel_uv;
-        pixel_uv.reserve(output.features_id.size());
-        for (uint32_t i = 0; i < output.observes_per_frame.size(); ++i) {
-            const auto &observe_per_view = output.observes_per_frame[i];
-            pixel_uv.emplace_back(observe_per_view[0].raw_pixel_uv);
+
+        // Camera name of each camera is camera_name[camera_id].
+        std::vector<std::string> camera_name = {"left", "right"};
+
+        if (image.data() != nullptr) {
+            // Convert gray image to rgb image.
+            RgbImage rgb_image;
+            uint8_t *rgb_buf = (uint8_t *)SlamMemory::Malloc(image.rows() * image.cols() * 3 * sizeof(uint8_t));
+            rgb_image.SetImage(rgb_buf, image.rows(), image.cols(), true);
+            Visualizor::ConvertUint8ToRgb(image.data(), rgb_image.data(), image.rows() * image.cols());
+
+            // Draw all observed features in this frame and this camera image.
+            for (uint32_t i = 0; i < output.features_id.size(); ++i) {
+                const Vec2 pixel_uv = output.observes_per_frame[i][0].raw_pixel_uv;
+                const RgbPixel pixel_color = RgbPixel{.r = 0, .g = 255, .b = 255};
+                Visualizor::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
+                Visualizor::DrawString(rgb_image, std::to_string(output.features_id[i]),
+                    pixel_uv.x(), pixel_uv.y(), pixel_color);
+            }
+
+            // Draw image to show.
+            Visualizor::ShowImage(std::string("frame ") + camera_name[0], rgb_image);
         }
-        std::vector<uint8_t> status(pixel_uv.size(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
-        Visualizor::ShowImageWithTrackedFeatures(
-            "Mono frontend output", image, pixel_uv, pixel_uv, status,
-            static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)
-        );
+
         Visualizor::WaitKey(0);
     }
 }
@@ -73,9 +86,9 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     const float k3 = 0.0f;
     const float p1 = 0.00019359f;
     const float p2 = 1.76187114e-05f;
-    frontend.camera_model() = std::make_unique<SENSOR_MODEL::Pinhole>();
-    frontend.camera_model()->SetIntrinsicParameter(fx, fy, cx, cy);
-    frontend.camera_model()->SetDistortionParameter(std::vector<float>{k1, k2, k3, p1, p2});
+    frontend.camera_models().emplace_back(std::make_unique<SENSOR_MODEL::Pinhole>());
+    frontend.camera_models().back()->SetIntrinsicParameter(fx, fy, cx, cy);
+    frontend.camera_models().back()->SetDistortionParameter(std::vector<float>{k1, k2, k3, p1, p2});
 
     // Config image processor.
     // frontend.image_processor() = std::make_unique<IMAGE_PROCESSOR::CensusProcessor>();
@@ -189,9 +202,14 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     const float k3 = 0.0f;
     const float p1 = 0.00019359f;
     const float p2 = 1.76187114e-05f;
-    frontend.camera_model() = std::make_unique<SENSOR_MODEL::Pinhole>();
-    frontend.camera_model()->SetIntrinsicParameter(fx, fy, cx, cy);
-    frontend.camera_model()->SetDistortionParameter(std::vector<float>{k1, k2, k3, p1, p2});
+    // Left camera model.
+    frontend.camera_models().emplace_back(std::make_unique<SENSOR_MODEL::Pinhole>());
+    frontend.camera_models().back()->SetIntrinsicParameter(fx, fy, cx, cy);
+    frontend.camera_models().back()->SetDistortionParameter(std::vector<float>{k1, k2, k3, p1, p2});
+    // Right camera model.
+    frontend.camera_models().emplace_back(std::make_unique<SENSOR_MODEL::Pinhole>());
+    frontend.camera_models().back()->SetIntrinsicParameter(fx, fy, cx, cy);
+    frontend.camera_models().back()->SetDistortionParameter(std::vector<float>{k1, k2, k3, p1, p2});
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FeatureType>();
