@@ -37,7 +37,7 @@ public:
     // Support for log recording.
     virtual void RegisterLogPackages() override;
     // Update frontend result.
-    virtual void UpdateFrontendOutputData() override;
+    virtual void UpdateFrontendOutputData(const float time_stamp_s) override;
 
     // Reference for member variables.
     Pixel &half_patch_size_for_stereo_tracking() { return half_patch_size_for_stereo_tracking_; }

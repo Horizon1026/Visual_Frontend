@@ -35,7 +35,7 @@ public:
     // Support for log recording.
     virtual void RegisterLogPackages() override;
     // Update frontend result.
-    virtual void UpdateFrontendOutputData() override;
+    virtual void UpdateFrontendOutputData(const float time_stamp_s) override;
 
 private:
     bool ProcessSourceImage(const GrayImage &cur_image);

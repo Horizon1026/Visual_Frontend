@@ -55,7 +55,7 @@ public:
     // Support for log recording.
     virtual void RegisterLogPackages() = 0;
     // Update frontend result.
-    virtual void UpdateFrontendOutputData() = 0;
+    virtual void UpdateFrontendOutputData(const float time_stamp_s) = 0;
 
     // Reference for member variables.
     FrontendOptions &options() { return options_; }

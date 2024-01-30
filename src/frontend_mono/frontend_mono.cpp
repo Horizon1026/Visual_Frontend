@@ -237,7 +237,7 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image, const float time_stamp_s)
     }
 
     // Update frontend output data.
-    UpdateFrontendOutputData();
+    UpdateFrontendOutputData(time_stamp_s);
 
     // Record package data.
     log_package_data_.cost_time_ms_of_loop = timer.TockInMillisecond();
@@ -303,7 +303,7 @@ void FrontendMono::RegisterLogPackages() {
 }
 
 // Update frontend result.
-void FrontendMono::UpdateFrontendOutputData() {
+void FrontendMono::UpdateFrontendOutputData(const float time_stamp_s) {
     output_data().features_id.clear();
     output_data().observes_per_frame.clear();
     output_data().tracked_cnt.clear();
@@ -314,7 +314,7 @@ void FrontendMono::UpdateFrontendOutputData() {
             output_data().features_id.emplace_back((*ref_ids())[i]);
             output_data().tracked_cnt.emplace_back((*ref_tracked_cnt())[i]);
             output_data().observes_per_frame.emplace_back(ObservePerFrame { ObservePerView {
-                .id = 0,
+                .frame_time_stamp_s = time_stamp_s,
                 .raw_pixel_uv = (*ref_pixel_uv_left())[i],
                 .rectified_norm_xy = (*ref_norm_xy_left())[i],
             }});
@@ -326,7 +326,7 @@ void FrontendMono::UpdateFrontendOutputData() {
                 output_data().features_id.emplace_back((*cur_ids())[i]);
                 output_data().tracked_cnt.emplace_back((*ref_tracked_cnt())[i]);
                 output_data().observes_per_frame.emplace_back(ObservePerFrame { ObservePerView {
-                    .id = 0,
+                    .frame_time_stamp_s = time_stamp_s,
                     .raw_pixel_uv = (*cur_pixel_uv_left())[i],
                     .rectified_norm_xy = (*cur_norm_xy_left())[i],
                 }});

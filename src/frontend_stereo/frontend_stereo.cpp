@@ -288,7 +288,7 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
     }
 
     // Update frontend output data.
-    UpdateFrontendOutputData();
+    UpdateFrontendOutputData(time_stamp_s);
 
     // Record package data.
     log_package_data_.cost_time_ms_of_loop = timer.TockInMillisecond();
@@ -369,7 +369,7 @@ void FrontendStereo::RegisterLogPackages() {
 }
 
 // Update frontend result.
-void FrontendStereo::UpdateFrontendOutputData() {
+void FrontendStereo::UpdateFrontendOutputData(const float time_stamp_s) {
     output_data().features_id.clear();
     output_data().observes_per_frame.clear();
     output_data().tracked_cnt.clear();
@@ -380,14 +380,14 @@ void FrontendStereo::UpdateFrontendOutputData() {
             output_data().features_id.emplace_back((*ref_ids())[i]);
             output_data().tracked_cnt.emplace_back((*ref_tracked_cnt())[i]);
             output_data().observes_per_frame.emplace_back(ObservePerFrame { ObservePerView {
-                .id = 0,
+                .frame_time_stamp_s = time_stamp_s,
                 .raw_pixel_uv = (*ref_pixel_uv_left())[i],
                 .rectified_norm_xy = (*ref_norm_xy_left())[i],
             }});
 
             if ((*ref_stereo_tracked_status_)[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
                 output_data().observes_per_frame.back().emplace_back(ObservePerView {
-                    .id = 1,
+                    .frame_time_stamp_s = time_stamp_s,
                     .raw_pixel_uv = (*ref_pixel_uv_right())[i],
                     .rectified_norm_xy = (*ref_norm_xy_right())[i],
                 });
@@ -400,14 +400,14 @@ void FrontendStereo::UpdateFrontendOutputData() {
                 output_data().features_id.emplace_back((*cur_ids())[i]);
                 output_data().tracked_cnt.emplace_back((*ref_tracked_cnt())[i]);
                 output_data().observes_per_frame.emplace_back(ObservePerFrame { ObservePerView {
-                    .id = 0,
+                    .frame_time_stamp_s = time_stamp_s,
                     .raw_pixel_uv = (*cur_pixel_uv_left())[i],
                     .rectified_norm_xy = (*cur_norm_xy_left())[i],
                 }});
 
                 if ((*cur_stereo_tracked_status_)[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
                     output_data().observes_per_frame.back().emplace_back(ObservePerView {
-                        .id = 1,
+                        .frame_time_stamp_s = time_stamp_s,
                         .raw_pixel_uv = (*cur_pixel_uv_right())[i],
                         .rectified_norm_xy = (*cur_norm_xy_right())[i],
                     });

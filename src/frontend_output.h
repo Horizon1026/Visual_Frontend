@@ -6,7 +6,10 @@
 namespace VISUAL_FRONTEND {
 
 struct ObservePerView {
-    uint32_t id = 0;    // Camera id. Used to differentiate like left and right camera.
+    // Timestamp of observor frame. Used to self check.
+    float frame_time_stamp_s = 0.0f;
+
+    // Observation.
     Vec2 raw_pixel_uv = Vec2::Zero();
     Vec2 rectified_norm_xy = Vec2::Zero();
 };
