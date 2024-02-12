@@ -47,7 +47,7 @@ void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
             // Draw all observed features in this frame and this camera image.
             for (uint32_t i = 0; i < output.features_id.size(); ++i) {
                 const Vec2 pixel_uv = output.observes_per_frame[i][0].raw_pixel_uv;
-                const RgbPixel pixel_color = RgbPixel{.r = 0, .g = 255, .b = 255};
+                const RgbPixel pixel_color = RgbColor::kCyan;
                 Visualizor::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
                 Visualizor::DrawString(rgb_image, std::to_string(output.features_id[i]),
                     pixel_uv.x(), pixel_uv.y(), pixel_color);
@@ -142,7 +142,7 @@ void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
             // Draw all observed features in this frame and this camera image.
             for (uint32_t i = 0; i < output.features_id.size(); ++i) {
                 const Vec2 pixel_uv = output.observes_per_frame[i][0].raw_pixel_uv;
-                const RgbPixel pixel_color = RgbPixel{.r = 0, .g = 255, .b = 255};
+                const RgbPixel pixel_color = RgbColor::kCyan;
                 Visualizor::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
                 Visualizor::DrawString(rgb_image, std::to_string(output.features_id[i]),
                     pixel_uv.x(), pixel_uv.y(), pixel_color);
@@ -163,7 +163,7 @@ void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
             for (uint32_t i = 0; i < output.features_id.size(); ++i) {
                 CONTINUE_IF(output.observes_per_frame[i].size() < 2);
                 const Vec2 pixel_uv = output.observes_per_frame[i][1].raw_pixel_uv;
-                const RgbPixel pixel_color = RgbPixel{.r = 0, .g = 255, .b = 255};
+                const RgbPixel pixel_color = RgbColor::kCyan;
                 Visualizor::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
                 Visualizor::DrawString(rgb_image, std::to_string(output.features_id[i]),
                     pixel_uv.x(), pixel_uv.y(), pixel_color);
