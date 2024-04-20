@@ -8,6 +8,7 @@
 #include "log_report.h"
 #include "slam_memory.h"
 
+#include "image_painter.h"
 #include "visualizor.h"
 
 #include "iostream"
@@ -17,6 +18,7 @@
 #include "unistd.h"
 
 using namespace SLAM_VISUALIZOR;
+using namespace IMAGE_PAINTER;
 
 namespace {
     using FeatureType = FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>;
@@ -42,14 +44,14 @@ void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
             RgbImage rgb_image;
             uint8_t *rgb_buf = (uint8_t *)SlamMemory::Malloc(image.rows() * image.cols() * 3 * sizeof(uint8_t));
             rgb_image.SetImage(rgb_buf, image.rows(), image.cols(), true);
-            Visualizor::ConvertUint8ToRgb(image.data(), rgb_image.data(), image.rows() * image.cols());
+            ImagePainter::ConvertUint8ToRgb(image.data(), rgb_image.data(), image.rows() * image.cols());
 
             // Draw all observed features in this frame and this camera image.
             for (uint32_t i = 0; i < output.features_id.size(); ++i) {
                 const Vec2 pixel_uv = output.observes_per_frame[i][0].raw_pixel_uv;
                 const RgbPixel pixel_color = RgbColor::kCyan;
-                Visualizor::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
-                Visualizor::DrawString(rgb_image, std::to_string(output.features_id[i]),
+                ImagePainter::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
+                ImagePainter::DrawString(rgb_image, std::to_string(output.features_id[i]),
                     pixel_uv.x(), pixel_uv.y(), pixel_color);
             }
 
@@ -137,14 +139,14 @@ void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
             RgbImage rgb_image;
             uint8_t *rgb_buf = (uint8_t *)SlamMemory::Malloc(image_left.rows() * image_left.cols() * 3 * sizeof(uint8_t));
             rgb_image.SetImage(rgb_buf, image_left.rows(), image_left.cols(), true);
-            Visualizor::ConvertUint8ToRgb(image_left.data(), rgb_image.data(), image_left.rows() * image_left.cols());
+            ImagePainter::ConvertUint8ToRgb(image_left.data(), rgb_image.data(), image_left.rows() * image_left.cols());
 
             // Draw all observed features in this frame and this camera image.
             for (uint32_t i = 0; i < output.features_id.size(); ++i) {
                 const Vec2 pixel_uv = output.observes_per_frame[i][0].raw_pixel_uv;
                 const RgbPixel pixel_color = RgbColor::kCyan;
-                Visualizor::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
-                Visualizor::DrawString(rgb_image, std::to_string(output.features_id[i]),
+                ImagePainter::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
+                ImagePainter::DrawString(rgb_image, std::to_string(output.features_id[i]),
                     pixel_uv.x(), pixel_uv.y(), pixel_color);
             }
 
@@ -157,15 +159,15 @@ void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
             RgbImage rgb_image;
             uint8_t *rgb_buf = (uint8_t *)SlamMemory::Malloc(image_right.rows() * image_right.cols() * 3 * sizeof(uint8_t));
             rgb_image.SetImage(rgb_buf, image_right.rows(), image_right.cols(), true);
-            Visualizor::ConvertUint8ToRgb(image_right.data(), rgb_image.data(), image_right.rows() * image_right.cols());
+            ImagePainter::ConvertUint8ToRgb(image_right.data(), rgb_image.data(), image_right.rows() * image_right.cols());
 
             // Draw all observed features in this frame and this camera image.
             for (uint32_t i = 0; i < output.features_id.size(); ++i) {
                 CONTINUE_IF(output.observes_per_frame[i].size() < 2);
                 const Vec2 pixel_uv = output.observes_per_frame[i][1].raw_pixel_uv;
                 const RgbPixel pixel_color = RgbColor::kCyan;
-                Visualizor::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
-                Visualizor::DrawString(rgb_image, std::to_string(output.features_id[i]),
+                ImagePainter::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
+                ImagePainter::DrawString(rgb_image, std::to_string(output.features_id[i]),
                     pixel_uv.x(), pixel_uv.y(), pixel_color);
             }
 
@@ -248,13 +250,17 @@ int main(int argc, char **argv) {
     std::vector<std::string> cam0_filenames;
 
     if (!SlamOperation::GetFilesNameInDirectory("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames)) {
-        RETURN_FALSE_IF_FALSE(SlamOperation::GetFilesNameInDirectory("D:/My_Github/Datasets/MH_01_easy/mav0/cam0/data", cam0_filenames));
+        if (!SlamOperation::GetFilesNameInDirectory("/mnt/d/My_Github/Datasets/MH_01_easy/mav0/cam0/data", cam0_filenames)) {
+            RETURN_FALSE_IF_FALSE(SlamOperation::GetFilesNameInDirectory("D:/My_Github/Datasets/MH_01_easy/mav0/cam0/data", cam0_filenames));
+        }
     }
     std::sort(cam0_filenames.begin(), cam0_filenames.end());
 
     std::vector<std::string> cam1_filenames;
     if (!SlamOperation::GetFilesNameInDirectory("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames)) {
-        RETURN_FALSE_IF_FALSE(SlamOperation::GetFilesNameInDirectory("D:/My_Github/Datasets/MH_01_easy/mav0/cam1/data", cam1_filenames));
+        if (!SlamOperation::GetFilesNameInDirectory("/mnt/d/My_Github/Datasets/MH_01_easy/mav0/cam1/data", cam1_filenames)) {
+            RETURN_FALSE_IF_FALSE(SlamOperation::GetFilesNameInDirectory("D:/My_Github/Datasets/MH_01_easy/mav0/cam1/data", cam1_filenames));
+        }
     }
     std::sort(cam1_filenames.begin(), cam1_filenames.end());
 

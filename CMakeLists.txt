@@ -15,6 +15,12 @@ if ( NOT TARGET lib_visual_frontend_stereo )
     add_subdirectory( src/frontend_stereo ${PROJECT_SOURCE_DIR}/build/lib_visual_frontend_stereo )
 endif()
 
+# Add image painter.
+set( IMAGE_PAINTER_PATH ${PROJECT_SOURCE_DIR}/../Image_Painter/src )
+if ( NOT TARGET lib_image_painter )
+    add_subdirectory( ${IMAGE_PAINTER_PATH} ${PROJECT_SOURCE_DIR}/build/lib_image_painter )
+endif()
+
 # Add test_euroc
 add_executable( test_euroc
     test/test_euroc.cpp
@@ -22,4 +28,5 @@ add_executable( test_euroc
 target_link_libraries( test_euroc
     lib_visual_frontend_mono
     lib_visual_frontend_stereo
+    lib_image_painter
 )
