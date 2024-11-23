@@ -5,7 +5,7 @@
 #include "optical_flow_affine_klt.h"
 #include "optical_flow_lssd_klt.h"
 #include "census.h"
-#include "log_report.h"
+#include "slam_log_reporter.h"
 #include "slam_memory.h"
 
 #include "image_painter.h"

@@ -1,6 +1,6 @@
 #include "frontend_mono.h"
 #include "slam_operations.h"
-#include "log_report.h"
+#include "slam_log_reporter.h"
 #include "tick_tock.h"
 #include "visualizor.h"
 
