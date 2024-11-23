@@ -1,7 +1,7 @@
 #ifndef _VISUAL_FRONTEND_H_
 #define _VISUAL_FRONTEND_H_
 
-#include "datatype_basic.h"
+#include "basic_type.h"
 #include "datatype_image.h"
 #include "datatype_image_pyramid.h"
 

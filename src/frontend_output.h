@@ -1,7 +1,7 @@
 #ifndef _VISUAL_FRONTEND_OUTPUT_H_
 #define _VISUAL_FRONTEND_OUTPUT_H_
 
-#include "datatype_basic.h"
+#include "basic_type.h"
 
 namespace VISUAL_FRONTEND {
 
