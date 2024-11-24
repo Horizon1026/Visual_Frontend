@@ -9,7 +9,7 @@
 #include "slam_memory.h"
 
 #include "image_painter.h"
-#include "visualizor.h"
+#include "visualizor_2d.h"
 
 #include "iostream"
 #include "dirent.h"
