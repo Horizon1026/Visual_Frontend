@@ -255,15 +255,15 @@ void FrontendMono::DrawTrackingResults(const std::string &title, const float tim
     }
 
     RgbImage show_image;
-    Visualizor::DrawImageWithTrackedFeaturesWithId(
+    Visualizor2D::DrawImageWithTrackedFeaturesWithId(
         ref_pyramid_left()->GetImage(0),
         cur_pyramid_left()->GetImage(0),
         *ref_pixel_uv_left(), *cur_pixel_uv_left(),
         *ref_ids(), *cur_ids(), tracked_status(),
         static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked),
         *ref_tracked_cnt(), *cur_vel(), show_image);
-    Visualizor::ShowImage(title, show_image);
-    Visualizor::WaitKey(1);
+    Visualizor2D::ShowImage(title, show_image);
+    Visualizor2D::WaitKey(1);
 
 
     if (options().kEnableRecordBinaryImageLog) {

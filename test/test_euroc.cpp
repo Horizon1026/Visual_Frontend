@@ -56,10 +56,10 @@ void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
             }
 
             // Draw image to show.
-            Visualizor::ShowImage(std::string("frame ") + camera_name[0], rgb_image);
+            Visualizor2D::ShowImage(std::string("frame ") + camera_name[0], rgb_image);
         }
 
-        Visualizor::WaitKey(0);
+        Visualizor2D::WaitKey(0);
     }
 }
 
@@ -68,7 +68,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
 
     // Config frontend.
     GrayImage image;
-    Visualizor::LoadImage(cam0_filenames.front(), image);
+    Visualizor2D::LoadImage(cam0_filenames.front(), image);
     VISUAL_FRONTEND::FrontendMono frontend(image.rows(), image.cols());
     frontend.options().kEnableRecordBinaryCurveLog = kEnableRecordCurveLog;
     frontend.options().kEnableRecordBinaryImageLog = kEnableRecordImageLog;
@@ -116,7 +116,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     float time_stamp_s = 0.0f;
     for (const auto &filename : cam0_filenames) {
         GrayImage image;
-        Visualizor::LoadImage(filename, image);
+        Visualizor2D::LoadImage(filename, image);
         frontend.RunOnce(image, time_stamp_s);
         ShowFrontendMonoOutput(frontend, image);
 
@@ -151,7 +151,7 @@ void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
             }
 
             // Draw image to show.
-            Visualizor::ShowImage(std::string("frame ") + camera_name[0], rgb_image);
+            Visualizor2D::ShowImage(std::string("frame ") + camera_name[0], rgb_image);
         }
 
         if (image_right.data() != nullptr) {
@@ -172,10 +172,10 @@ void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
             }
 
             // Draw image to show.
-            Visualizor::ShowImage(std::string("frame ") + camera_name[1], rgb_image);
+            Visualizor2D::ShowImage(std::string("frame ") + camera_name[1], rgb_image);
         }
 
-        Visualizor::WaitKey(0);
+        Visualizor2D::WaitKey(0);
     }
 }
 
@@ -184,7 +184,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
 
     // Config frontend.
     GrayImage image;
-    Visualizor::LoadImage(cam0_filenames.front(), image);
+    Visualizor2D::LoadImage(cam0_filenames.front(), image);
     VISUAL_FRONTEND::FrontendStereo frontend(image.rows(), image.cols());
     frontend.options().kEnableRecordBinaryCurveLog = kEnableRecordCurveLog;
     frontend.options().kEnableRecordBinaryImageLog = kEnableRecordImageLog;
@@ -235,8 +235,8 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     for (unsigned i = 0; i < cam0_filenames.size(); ++i) {
         GrayImage image_left;
         GrayImage image_right;
-        Visualizor::LoadImage(cam0_filenames[i], image_left);
-        Visualizor::LoadImage(cam1_filenames[i], image_right);
+        Visualizor2D::LoadImage(cam0_filenames[i], image_left);
+        Visualizor2D::LoadImage(cam1_filenames[i], image_right);
         frontend.RunOnce(image_left, image_right, time_stamp_s);
         ShowFrontendStereoOutput(frontend, image_left, image_right);
 

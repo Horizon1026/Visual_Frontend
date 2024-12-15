@@ -306,7 +306,7 @@ void FrontendStereo::DrawTrackingResults(const std::string &title, const float t
     }
 
     RgbImage show_image;
-    Visualizor::DrawImageWithTrackedFeaturesWithId(
+    Visualizor2D::DrawImageWithTrackedFeaturesWithId(
         ref_pyramid_left()->GetImage(0),
         ref_pyramid_right()->GetImage(0),
         cur_pyramid_left()->GetImage(0),
@@ -327,8 +327,8 @@ void FrontendStereo::DrawTrackingResults(const std::string &title, const float t
         *cur_vel(),
         show_image
     );
-    Visualizor::ShowImage(title, show_image);
-    Visualizor::WaitKey(1);
+    Visualizor2D::ShowImage(title, show_image);
+    Visualizor2D::WaitKey(1);
 
     if (options().kEnableRecordBinaryImageLog) {
         logger().RecordPackage(kFrontendStereoTrackingResultIndex, show_image);
