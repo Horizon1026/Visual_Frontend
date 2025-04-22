@@ -18,7 +18,9 @@ using ObservePerFrame = std::vector<ObservePerView>;
 
 struct FrontendOutputData {
     bool is_current_keyframe = true;
+    int32_t direction_id = 0;
     std::vector<uint32_t> features_id;
+    // observes_per_frame[feature_id][camera_id] -> ObservePerView.
     std::vector<ObservePerFrame> observes_per_frame;
     std::vector<uint32_t> tracked_cnt;
 };
