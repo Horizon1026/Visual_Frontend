@@ -18,6 +18,7 @@ using ObservePerFrame = std::vector<ObservePerView>;
 
 struct FrontendOutputData {
     bool is_current_keyframe = true;
+    float time_stamp_s = 0.0f;
     int32_t direction_id = 0;
     std::vector<uint32_t> features_id;
     // observes_per_frame[feature_id][camera_id] -> ObservePerView.
