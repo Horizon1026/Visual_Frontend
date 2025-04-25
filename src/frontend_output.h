@@ -7,7 +7,7 @@ namespace VISUAL_FRONTEND {
 
 struct ObservePerView {
     // Timestamp of observor frame. Used to self check.
-    float frame_time_stamp_s = 0.0f;
+    float frame_time_stamp_s = -1.0f;
 
     // Observation.
     Vec2 raw_pixel_uv = Vec2::Zero();
@@ -18,7 +18,7 @@ using ObservePerFrame = std::vector<ObservePerView>;
 
 struct FrontendOutputData {
     bool is_current_keyframe = true;
-    float time_stamp_s = 0.0f;
+    float time_stamp_s = -1.0f;
     int32_t direction_id = 0;
     std::vector<uint32_t> features_id;
     // observes_per_frame[feature_id][camera_id] -> ObservePerView.
