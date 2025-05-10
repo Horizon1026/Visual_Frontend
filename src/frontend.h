@@ -93,7 +93,7 @@ public:
 
     uint32_t &feature_id_cnt() { return feature_id_cnt_; }
     bool &is_cur_image_keyframe() { return is_cur_image_keyframe_; }
-    FrontendOutputData &output_data() { return output_data_; }
+    VisualPointsMeasure &output_data() { return output_data_; }
     SLAM_DATA_LOG::BinaryDataLog &logger() { return logger_; }
 
     // Const reference for member variables.
@@ -132,7 +132,7 @@ public:
 
     const uint32_t &feature_id_cnt() const { return feature_id_cnt_; }
     const bool &is_cur_image_keyframe() const { return is_cur_image_keyframe_; }
-    const FrontendOutputData &output_data() const { return output_data_; }
+    const VisualPointsMeasure &output_data() const { return output_data_; }
     const SLAM_DATA_LOG::BinaryDataLog &logger() const { return logger_; }
 
     // Check every components.
@@ -188,7 +188,7 @@ private:
 
     // Outpu data.
     bool is_cur_image_keyframe_ = false;
-    FrontendOutputData output_data_;
+    VisualPointsMeasure output_data_;
 
     // Record log.
     SLAM_DATA_LOG::BinaryDataLog logger_;

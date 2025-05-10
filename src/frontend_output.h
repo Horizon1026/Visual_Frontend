@@ -5,25 +5,39 @@
 
 namespace VISUAL_FRONTEND {
 
-struct ObservePerView {
+/* Visual measurements of points. */
+struct PointsObservePerView {
     // Timestamp of observor frame. Used to self check.
     float frame_time_stamp_s = -1.0f;
-
     // Observation.
     Vec2 raw_pixel_uv = Vec2::Zero();
     Vec2 rectified_norm_xy = Vec2::Zero();
 };
-
-using ObservePerFrame = std::vector<ObservePerView>;
-
-struct FrontendOutputData {
+using PointsObservePerFrame = std::vector<PointsObservePerView>;
+struct VisualPointsMeasure {
     bool is_current_keyframe = true;
     float time_stamp_s = -1.0f;
     int32_t direction_id = 0;
     std::vector<uint32_t> features_id;
-    // observes_per_frame[feature_id][camera_id] -> ObservePerView.
-    std::vector<ObservePerFrame> observes_per_frame;
+    // observes_per_frame[feature_id][camera_id] -> PointsObservePerView.
+    std::vector<PointsObservePerFrame> observes_per_frame;
     std::vector<uint32_t> tracked_cnt;
+};
+
+/* Visual measurements of lines. */
+struct LinesObservePerView {
+    float frame_time_stamp_s = -1.0f;
+    Vec4 raw_pixel_uv = Vec4::Zero();
+    Vec4 rectified_norm_xy = Vec4::Zero();
+};
+using LinesObservePerFrame = std::vector<LinesObservePerView>;
+struct VisualLinesMeasure {
+    bool is_current_keyframe = true;
+    float time_stamp_s = -1.0f;
+    int32_t direction_id = 0;
+    std::vector<uint32_t> features_id;
+    // observes_per_frame[feature_id][camera_id] -> PointsObservePerView.
+    std::vector<PointsObservePerFrame> observes_per_frame;
 };
 
 }
