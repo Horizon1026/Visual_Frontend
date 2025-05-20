@@ -8,16 +8,16 @@ set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 set( CMAKE_CXX_STANDARD 20 )
 
 # Add visual frontend
-if ( NOT TARGET lib_visual_frontend_mono )
+if( NOT TARGET lib_visual_frontend_mono )
     add_subdirectory( src/frontend_mono ${PROJECT_SOURCE_DIR}/build/lib_visual_frontend_mono )
 endif()
-if ( NOT TARGET lib_visual_frontend_stereo )
+if( NOT TARGET lib_visual_frontend_stereo )
     add_subdirectory( src/frontend_stereo ${PROJECT_SOURCE_DIR}/build/lib_visual_frontend_stereo )
 endif()
 
 # Add image painter.
 set( IMAGE_PAINTER_PATH ${PROJECT_SOURCE_DIR}/../Image_Painter/src )
-if ( NOT TARGET lib_image_painter )
+if( NOT TARGET lib_image_painter )
     add_subdirectory( ${IMAGE_PAINTER_PATH} ${PROJECT_SOURCE_DIR}/build/lib_image_painter )
 endif()
 
