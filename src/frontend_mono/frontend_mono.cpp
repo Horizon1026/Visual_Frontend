@@ -20,7 +20,7 @@ bool FrontendMono::ProcessSourceImage(const GrayImage &cur_image) {
         image_processor()->Process(cur_image, cur_pyramid_left()->GetImage(0));
     }
 
-    cur_pyramid_left()->CreateImagePyramid(4);
+    cur_pyramid_left()->CreateImagePyramid(options().kImagePyramidLevels);
     return true;
 }
 
@@ -307,6 +307,7 @@ void FrontendMono::UpdateFrontendOutputData(const float time_stamp_s) {
     output_data().features_id.clear();
     output_data().observes_per_frame.clear();
     output_data().is_current_keyframe = is_cur_image_keyframe();
+    output_data().time_stamp_s = time_stamp_s;
 
     if (output_data().is_current_keyframe) {
         for (uint32_t i = 0; i < ref_pixel_uv_left()->size(); ++i) {

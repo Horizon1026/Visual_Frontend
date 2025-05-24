@@ -29,6 +29,7 @@ struct FrontendOptions {
     uint32_t kMaxStoredFeaturePointsNumber = 120;
     bool kSelfSelectKeyframe = true;
     uint32_t kMinDetectedFeaturePointsNumberInCurrentImage = 60;
+    uint32_t kImagePyramidLevels = 4;
     float kMaxValidTrackBackPixelResidual = 1.0f;
     bool kEnableRecordBinaryCurveLog = false;
     bool kEnableRecordBinaryImageLog = false;

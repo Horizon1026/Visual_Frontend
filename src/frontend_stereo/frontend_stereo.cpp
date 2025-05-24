@@ -23,8 +23,8 @@ bool FrontendStereo::ProcessSourceImage(const GrayImage &cur_image_left, const G
         image_processor()->Process(cur_image_right, cur_pyramid_right()->GetImage(0));
     }
 
-    cur_pyramid_left()->CreateImagePyramid(4);
-    cur_pyramid_right()->CreateImagePyramid(4);
+    cur_pyramid_left()->CreateImagePyramid(options().kImagePyramidLevels);
+    cur_pyramid_right()->CreateImagePyramid(options().kImagePyramidLevels);
 
     return true;
 }
@@ -373,6 +373,7 @@ void FrontendStereo::UpdateFrontendOutputData(const float time_stamp_s) {
     output_data().features_id.clear();
     output_data().observes_per_frame.clear();
     output_data().is_current_keyframe = is_cur_image_keyframe();
+    output_data().time_stamp_s = time_stamp_s;
 
     if (output_data().is_current_keyframe) {
         for (uint32_t i = 0; i < ref_pixel_uv_left()->size(); ++i) {
