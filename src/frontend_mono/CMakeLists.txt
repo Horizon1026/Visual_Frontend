@@ -27,6 +27,12 @@ if( NOT TARGET lib_image_pyramid )
     add_subdirectory( ${SLAM_UTILITY_PATH}/src/data_type/image_pyramid ${PROJECT_SOURCE_DIR}/build/lib_image_pyramid )
 endif()
 
+# Add visual frontend output.
+set( VISUAL_FRONTEND_PATH ${PROJECT_SOURCE_DIR}/../Visual_Frontend )
+if( NOT TARGET lib_visual_frontend_output )
+    add_subdirectory( ${VISUAL_FRONTEND_PATH}/src/frontend_output ${PROJECT_SOURCE_DIR}/build/lib_visual_frontend_output )
+endif()
+
 # Add visualizor.
 set( VISUALIZOR_PATH ${PROJECT_SOURCE_DIR}/../Visualizor2D )
 if( NOT TARGET lib_2d_visualizor )
@@ -90,11 +96,12 @@ target_link_libraries( lib_visual_frontend_mono
     lib_slam_utility_log
     lib_slam_utility_memory
 
+    lib_visual_frontend_output
+
     lib_image
     lib_image_pyramid
 
     lib_2d_visualizor
-
     lib_feature_point_detector
     lib_optical_flow_tracker
 
@@ -103,8 +110,6 @@ target_link_libraries( lib_visual_frontend_mono
     lib_vision_geometry_point_triangulator
 
     lib_camera_model
-
     lib_image_processor
-
     lib_binary_data_log
 )
