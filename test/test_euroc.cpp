@@ -114,7 +114,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     // frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
     float time_stamp_s = 0.0f;
-    for (const auto &filename : cam0_filenames) {
+    for (const auto &filename: cam0_filenames) {
         GrayImage image;
         Visualizor2D::LoadImage(filename, image);
         frontend.RunOnce(image, time_stamp_s);
