@@ -64,9 +64,9 @@ if( NOT TARGET lib_vision_geometry_point_triangulator )
 endif()
 
 # Add camera model.
-set( SENSOR_CAMERA_MODEL_PATH ${PROJECT_SOURCE_DIR}/../Sensor_Model )
+set( SENSOR_MODEL_PATH ${PROJECT_SOURCE_DIR}/../Sensor_Model )
 if( NOT TARGET lib_camera_model )
-    add_subdirectory( ${SENSOR_CAMERA_MODEL_PATH}/src/camera ${PROJECT_SOURCE_DIR}/build/lib_camera_model )
+    add_subdirectory( ${SENSOR_MODEL_PATH}/src/camera ${PROJECT_SOURCE_DIR}/build/lib_camera_model )
 endif()
 
 # Add image processor.
