@@ -49,7 +49,7 @@ bool FrontendMono::TrackFeatures() {
 bool FrontendMono::LiftAllPointsFromPixelToNormalizedPlaneAndUndistortThem() {
     cur_norm_xy_left()->resize(cur_pixel_uv_left()->size());
     for (uint32_t i = 0; i < cur_pixel_uv_left()->size(); ++i) {
-        camera_models()[0]->LiftFromCameraFrameToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i], (*cur_norm_xy_left())[i]);
+        camera_models()[0]->LiftFromImagePlaneToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i], (*cur_norm_xy_left())[i]);
     }
 
     return true;
@@ -160,7 +160,7 @@ bool FrontendMono::SupplementNewFeatures(const GrayImage &cur_image_left) {
     for (uint32_t i = 0; i < new_features_num; ++i) {
         cur_ids()->emplace_back(feature_id_cnt());
 
-        camera_models()[0]->LiftFromCameraFrameToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i + old_features_num], temp_cur_norm_xy_left);
+        camera_models()[0]->LiftFromImagePlaneToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i + old_features_num], temp_cur_norm_xy_left);
         cur_norm_xy_left()->emplace_back(temp_cur_norm_xy_left);
 
         ref_tracked_cnt()->emplace_back(1);
