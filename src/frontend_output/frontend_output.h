@@ -9,7 +9,7 @@ namespace VISUAL_FRONTEND {
 struct PointsObservePerView {
     Vec2 raw_pixel_uv = Vec2::Zero();
     Vec2 rectified_norm_xy = Vec2::Zero();
-    Vec3 sphere_xyz = Vec3::Zero();
+    Vec3 bearing_xyz = Vec3::Zero();
 };
 using PointsObservePerFrame = std::vector<PointsObservePerView>;
 struct VisualPointsMeasure {

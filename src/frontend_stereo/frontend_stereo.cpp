@@ -381,12 +381,14 @@ void FrontendStereo::UpdateFrontendOutputData(const float time_stamp_s) {
             output_data().observes_per_frame.emplace_back(PointsObservePerFrame { PointsObservePerView {
                 .raw_pixel_uv = (*ref_pixel_uv_left())[i],
                 .rectified_norm_xy = (*ref_norm_xy_left())[i],
+                .bearing_xyz = Vec3((*ref_norm_xy_left())[i].x(), (*ref_norm_xy_left())[i].y(), 1.0f).normalized(),
             }});
 
             if ((*ref_stereo_tracked_status_)[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
                 output_data().observes_per_frame.back().emplace_back(PointsObservePerView {
                     .raw_pixel_uv = (*ref_pixel_uv_right())[i],
                     .rectified_norm_xy = (*ref_norm_xy_right())[i],
+                    .bearing_xyz = Vec3((*ref_norm_xy_right())[i].x(), (*ref_norm_xy_right())[i].y(), 1.0f).normalized(),
                 });
             }
         }
@@ -398,12 +400,14 @@ void FrontendStereo::UpdateFrontendOutputData(const float time_stamp_s) {
                 output_data().observes_per_frame.emplace_back(PointsObservePerFrame { PointsObservePerView {
                     .raw_pixel_uv = (*cur_pixel_uv_left())[i],
                     .rectified_norm_xy = (*cur_norm_xy_left())[i],
+                    .bearing_xyz = Vec3((*cur_norm_xy_left())[i].x(), (*cur_norm_xy_left())[i].y(), 1.0f).normalized(),
                 }});
 
                 if ((*cur_stereo_tracked_status_)[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
                     output_data().observes_per_frame.back().emplace_back(PointsObservePerView {
                         .raw_pixel_uv = (*cur_pixel_uv_right())[i],
                         .rectified_norm_xy = (*cur_norm_xy_right())[i],
+                        .bearing_xyz = Vec3((*cur_norm_xy_right())[i].x(), (*cur_norm_xy_right())[i].y(), 1.0f).normalized(),
                     });
                 }
             }

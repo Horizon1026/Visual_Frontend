@@ -315,6 +315,7 @@ void FrontendMono::UpdateFrontendOutputData(const float time_stamp_s) {
             output_data().observes_per_frame.emplace_back(PointsObservePerFrame { PointsObservePerView {
                 .raw_pixel_uv = (*ref_pixel_uv_left())[i],
                 .rectified_norm_xy = (*ref_norm_xy_left())[i],
+                .bearing_xyz = Vec3((*ref_norm_xy_left())[i].x(), (*ref_norm_xy_left())[i].y(), 1.0f).normalized(),
             }});
         }
     } else {
@@ -325,6 +326,7 @@ void FrontendMono::UpdateFrontendOutputData(const float time_stamp_s) {
                 output_data().observes_per_frame.emplace_back(PointsObservePerFrame { PointsObservePerView {
                     .raw_pixel_uv = (*cur_pixel_uv_left())[i],
                     .rectified_norm_xy = (*cur_norm_xy_left())[i],
+                    .bearing_xyz = Vec3((*cur_norm_xy_left())[i].x(), (*cur_norm_xy_left())[i].y(), 1.0f).normalized(),
                 }});
             }
         }
