@@ -21,12 +21,11 @@ struct FrontendMonoLog {
 #pragma pack()
 
 /* Class FrontendMono Declaration. */
-class FrontendMono : public Frontend {
+class FrontendMono: public Frontend {
 
 public:
     FrontendMono() = delete;
-    FrontendMono(const uint32_t image_rows, const uint32_t image_cols)
-        : Frontend(image_rows, image_cols) {}
+    FrontendMono(const uint32_t image_rows, const uint32_t image_cols): Frontend(image_rows, image_cols) {}
     virtual ~FrontendMono() = default;
 
     // Frontend is driven by mono image.

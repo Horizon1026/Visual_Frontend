@@ -7,9 +7,9 @@
 
 #include "frontend_output.h"
 
+#include "feature_point_detector.h"
 #include "feature_point_fast_detector.h"
 #include "feature_point_harris_detector.h"
-#include "feature_point_detector.h"
 
 #include "camera_basic.h"
 #include "geometry_epipolar.h"

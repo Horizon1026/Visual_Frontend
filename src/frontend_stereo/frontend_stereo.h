@@ -23,12 +23,11 @@ struct FrontendStereoLog {
 #pragma pack()
 
 /* Class FrontendStereo Declaration. */
-class FrontendStereo : public Frontend {
+class FrontendStereo: public Frontend {
 
 public:
     FrontendStereo() = delete;
-    FrontendStereo(const uint32_t image_rows, const uint32_t image_cols)
-        : Frontend(image_rows, image_cols) {}
+    FrontendStereo(const uint32_t image_rows, const uint32_t image_cols): Frontend(image_rows, image_cols) {}
     virtual ~FrontendStereo() = default;
 
     // Frontend is driven by mono image or stereo images.
