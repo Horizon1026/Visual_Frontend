@@ -1,37 +1,36 @@
+#include "census.h"
 #include "frontend_mono.h"
 #include "frontend_stereo.h"
-#include "pinhole.h"
-#include "optical_flow_basic_klt.h"
 #include "optical_flow_affine_klt.h"
+#include "optical_flow_basic_klt.h"
 #include "optical_flow_lssd_klt.h"
-#include "census.h"
+#include "pinhole.h"
 #include "slam_log_reporter.h"
 #include "slam_memory.h"
 
 #include "image_painter.h"
 #include "visualizor_2d.h"
 
-#include "iostream"
-#include "dirent.h"
-#include "vector"
 #include "cstring"
+#include "dirent.h"
+#include "iostream"
 #include "unistd.h"
+#include "vector"
 
 using namespace SLAM_VISUALIZOR;
 using namespace IMAGE_PAINTER;
 
 namespace {
-    using FeatureType = FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>;
-    using KltType = FEATURE_TRACKER::OpticalFlowBasicKlt;
+using FeatureType = FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>;
+using KltType = FEATURE_TRACKER::OpticalFlowBasicKlt;
 
-    constexpr bool kEnableDrawingOutputResult = true;
-    constexpr bool kEnableRecordCurveLog = true;
-    constexpr bool kEnableRecordImageLog = true;
-    constexpr bool kEnableDrawingTrackingResult = true;
-}
+constexpr bool kEnableDrawingOutputResult = true;
+constexpr bool kEnableRecordCurveLog = true;
+constexpr bool kEnableRecordImageLog = true;
+constexpr bool kEnableDrawingTrackingResult = true;
+}  // namespace
 
-void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
-                            const GrayImage &image) {
+void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend, const GrayImage &image) {
     // Show output data.
     if (kEnableDrawingOutputResult) {
         const auto &output = frontend.output_data();
@@ -51,8 +50,7 @@ void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend,
                 const Vec2 pixel_uv = output.observes_per_frame[i][0].raw_pixel_uv;
                 const RgbPixel pixel_color = RgbColor::kCyan;
                 ImagePainter::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
-                ImagePainter::DrawString(rgb_image, std::to_string(output.features_id[i]),
-                    pixel_uv.x(), pixel_uv.y(), pixel_color);
+                ImagePainter::DrawString(rgb_image, std::to_string(output.features_id[i]), pixel_uv.x(), pixel_uv.y(), pixel_color);
             }
 
             // Draw image to show.
@@ -90,7 +88,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     const float p2 = 1.76187114e-05f;
     frontend.camera_models().emplace_back(std::make_unique<SENSOR_MODEL::Pinhole>());
     frontend.camera_models().back()->SetIntrinsicParameter(fx, fy, cx, cy);
-    frontend.camera_models().back()->SetDistortionParameter(std::vector<float>{k1, k2, k3, p1, p2});
+    frontend.camera_models().back()->SetDistortionParameter(std::vector<float> {k1, k2, k3, p1, p2});
 
     // Config image processor.
     // frontend.image_processor() = std::make_unique<IMAGE_PROCESSOR::CensusProcessor>();
@@ -124,9 +122,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     }
 }
 
-void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
-                              const GrayImage &image_left,
-                              const GrayImage &image_right) {
+void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend, const GrayImage &image_left, const GrayImage &image_right) {
     // Show output data.
     if (kEnableDrawingOutputResult) {
         const auto &output = frontend.output_data();
@@ -146,8 +142,7 @@ void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
                 const Vec2 pixel_uv = output.observes_per_frame[i][0].raw_pixel_uv;
                 const RgbPixel pixel_color = RgbColor::kCyan;
                 ImagePainter::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
-                ImagePainter::DrawString(rgb_image, std::to_string(output.features_id[i]),
-                    pixel_uv.x(), pixel_uv.y(), pixel_color);
+                ImagePainter::DrawString(rgb_image, std::to_string(output.features_id[i]), pixel_uv.x(), pixel_uv.y(), pixel_color);
             }
 
             // Draw image to show.
@@ -167,8 +162,7 @@ void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend,
                 const Vec2 pixel_uv = output.observes_per_frame[i][1].raw_pixel_uv;
                 const RgbPixel pixel_color = RgbColor::kCyan;
                 ImagePainter::DrawSolidCircle(rgb_image, pixel_uv.x(), pixel_uv.y(), 3, pixel_color);
-                ImagePainter::DrawString(rgb_image, std::to_string(output.features_id[i]),
-                    pixel_uv.x(), pixel_uv.y(), pixel_color);
+                ImagePainter::DrawString(rgb_image, std::to_string(output.features_id[i]), pixel_uv.x(), pixel_uv.y(), pixel_color);
             }
 
             // Draw image to show.
@@ -207,11 +201,11 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     // Left camera model.
     frontend.camera_models().emplace_back(std::make_unique<SENSOR_MODEL::Pinhole>());
     frontend.camera_models().back()->SetIntrinsicParameter(fx, fy, cx, cy);
-    frontend.camera_models().back()->SetDistortionParameter(std::vector<float>{k1, k2, k3, p1, p2});
+    frontend.camera_models().back()->SetDistortionParameter(std::vector<float> {k1, k2, k3, p1, p2});
     // Right camera model.
     frontend.camera_models().emplace_back(std::make_unique<SENSOR_MODEL::Pinhole>());
     frontend.camera_models().back()->SetIntrinsicParameter(fx, fy, cx, cy);
-    frontend.camera_models().back()->SetDistortionParameter(std::vector<float>{k1, k2, k3, p1, p2});
+    frontend.camera_models().back()->SetDistortionParameter(std::vector<float> {k1, k2, k3, p1, p2});
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FeatureType>();

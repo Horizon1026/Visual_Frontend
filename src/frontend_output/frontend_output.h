@@ -47,6 +47,6 @@ struct VisualMixMeasure {
     std::vector<LinesObservePerFrame> lines_observes_per_frame;
 };
 
-}
+}  // namespace VISUAL_FRONTEND
 
-#endif // end of _VISUAL_FRONTEND_OUTPUT_H_
+#endif  // end of _VISUAL_FRONTEND_OUTPUT_H_

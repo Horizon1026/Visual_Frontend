@@ -57,4 +57,4 @@ bool Frontend::CheckAllComponents() {
     return true;
 }
 
-}
+}  // namespace VISUAL_FRONTEND

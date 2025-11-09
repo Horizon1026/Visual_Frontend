@@ -24,8 +24,9 @@ struct FrontendMonoLog {
 class FrontendMono : public Frontend {
 
 public:
-	FrontendMono() = delete;
-    FrontendMono(const uint32_t image_rows, const uint32_t image_cols) : Frontend(image_rows, image_cols) {}
+    FrontendMono() = delete;
+    FrontendMono(const uint32_t image_rows, const uint32_t image_cols)
+        : Frontend(image_rows, image_cols) {}
     virtual ~FrontendMono() = default;
 
     // Frontend is driven by mono image.
@@ -58,6 +59,6 @@ private:
     FrontendMonoLog log_package_data_;
 };
 
-}
+}  // namespace VISUAL_FRONTEND
 
-#endif // end of _VISUAL_FRONTEND_MONO_H_
+#endif  // end of _VISUAL_FRONTEND_MONO_H_

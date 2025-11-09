@@ -7,14 +7,14 @@
 
 #include "frontend_output.h"
 
-#include "feature_point_detector.h"
-#include "feature_harris.h"
 #include "feature_fast.h"
+#include "feature_harris.h"
+#include "feature_point_detector.h"
 
-#include "optical_flow.h"
 #include "camera_basic.h"
 #include "geometry_epipolar.h"
 #include "image_processor.h"
+#include "optical_flow.h"
 
 #include "binary_data_log.h"
 
@@ -40,7 +40,7 @@ struct FrontendOptions {
 class Frontend {
 
 public:
-	Frontend() = delete;
+    Frontend() = delete;
     Frontend(const uint32_t image_rows, const uint32_t image_cols);
     virtual ~Frontend();
     Frontend(const Frontend &frontend) = delete;
@@ -193,9 +193,8 @@ private:
 
     // Record log.
     SLAM_DATA_LOG::BinaryDataLog logger_;
-
 };
 
-}
+}  // namespace VISUAL_FRONTEND
 
-#endif // end of _VISUAL_FRONTEND_H_
+#endif  // end of _VISUAL_FRONTEND_H_

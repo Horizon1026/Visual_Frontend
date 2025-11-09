@@ -26,8 +26,9 @@ struct FrontendStereoLog {
 class FrontendStereo : public Frontend {
 
 public:
-	FrontendStereo() = delete;
-    FrontendStereo(const uint32_t image_rows, const uint32_t image_cols) : Frontend(image_rows, image_cols) {}
+    FrontendStereo() = delete;
+    FrontendStereo(const uint32_t image_rows, const uint32_t image_cols)
+        : Frontend(image_rows, image_cols) {}
     virtual ~FrontendStereo() = default;
 
     // Frontend is driven by mono image or stereo images.
@@ -68,6 +69,6 @@ private:
     FrontendStereoLog log_package_data_;
 };
 
-}
+}  // namespace VISUAL_FRONTEND
 
-#endif // end of _VISUAL_FRONTEND_STEREO_H_
+#endif  // end of _VISUAL_FRONTEND_STEREO_H_

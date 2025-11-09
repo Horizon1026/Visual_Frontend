@@ -1,6 +1,6 @@
 #include "frontend_mono.h"
-#include "slam_operations.h"
 #include "slam_log_reporter.h"
+#include "slam_operations.h"
 #include "tick_tock.h"
 #include "visualizor_2d.h"
 
@@ -25,7 +25,7 @@ bool FrontendMono::ProcessSourceImage(const GrayImage &cur_image) {
 }
 
 bool FrontendMono::PredictPixelLocation() {
-    *cur_pixel_uv_left() = *ref_pixel_uv_left();    // Deep copy.
+    *cur_pixel_uv_left() = *ref_pixel_uv_left();  // Deep copy.
     for (uint32_t i = 0; i < ref_vel()->size(); ++i) {
         (*cur_pixel_uv_left())[i] += (*ref_vel())[i];
     }
@@ -42,7 +42,8 @@ bool FrontendMono::TrackFeatures() {
 
     // Record log data.
     log_package_data_.num_of_old_features = tracked_status().size();
-    log_package_data_.num_of_tracked_features = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    log_package_data_.num_of_tracked_features =
+        SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
     return true;
 }
 
@@ -107,22 +108,19 @@ bool FrontendMono::ComputeOpticalFlowVelocity() {
 }
 
 bool FrontendMono::SparsifyTrackedFeatures() {
-    feature_detector()->SparsifyFeatures(*cur_pixel_uv_left(),
-                                         cur_pyramid_left()->GetImage(0).rows(),
-                                         cur_pyramid_left()->GetImage(0).cols(),
+    feature_detector()->SparsifyFeatures(*cur_pixel_uv_left(), cur_pyramid_left()->GetImage(0).rows(), cur_pyramid_left()->GetImage(0).cols(),
                                          static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked),
-                                         static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kNotTracked),
-                                         tracked_status());
+                                         static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kNotTracked), tracked_status());
 
     // Record log data.
-    log_package_data_.num_of_inliers_after_filter = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    log_package_data_.num_of_inliers_after_filter =
+        SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
     return true;
 }
 
 bool FrontendMono::SelectKeyframe() {
     const uint32_t tracked_num = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
-    is_cur_image_keyframe() = tracked_num < options().kMinDetectedFeaturePointsNumberInCurrentImage
-                          || !options().kSelfSelectKeyframe;
+    is_cur_image_keyframe() = tracked_num < options().kMinDetectedFeaturePointsNumberInCurrentImage || !options().kSelfSelectKeyframe;
 
     // Record log data.
     log_package_data_.is_keyframe = static_cast<uint8_t>(is_cur_image_keyframe());
@@ -149,9 +147,7 @@ bool FrontendMono::AdjustTrackingResultByStatus() {
 }
 
 bool FrontendMono::SupplementNewFeatures(const GrayImage &cur_image_left) {
-    feature_detector()->DetectGoodFeatures(cur_image_left,
-                                           options().kMaxStoredFeaturePointsNumber,
-                                           *cur_pixel_uv_left());
+    feature_detector()->DetectGoodFeatures(cur_image_left, options().kMaxStoredFeaturePointsNumber, *cur_pixel_uv_left());
 
     const uint32_t old_features_num = cur_ids()->size();
     const uint32_t new_features_num = cur_pixel_uv_left()->size() - old_features_num;
@@ -223,7 +219,8 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image, const float time_stamp_s)
     // Visualize result when this API is defined.
     DrawTrackingResults("Frontend Mono Tracking Result", time_stamp_s);
 
-    // If frontend is configured to select keyframe by itself, frontend will track features from fixed keyframe to current frame.
+    // If frontend is configured to select keyframe by itself, frontend will track features from fixed keyframe to
+    // current frame.
     if (is_cur_image_keyframe()) {
         // Prepare to make current frame to be reference frame (keyframe).
         RETURN_FALSE_IF_FALSE(AdjustTrackingResultByStatus());
@@ -255,13 +252,9 @@ void FrontendMono::DrawTrackingResults(const std::string &title, const float tim
     }
 
     RgbImage show_image;
-    Visualizor2D::DrawImageWithTrackedFeaturesWithId(
-        ref_pyramid_left()->GetImage(0),
-        cur_pyramid_left()->GetImage(0),
-        *ref_pixel_uv_left(), *cur_pixel_uv_left(),
-        *ref_ids(), *cur_ids(), tracked_status(),
-        static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked),
-        *ref_tracked_cnt(), *cur_vel(), show_image);
+    Visualizor2D::DrawImageWithTrackedFeaturesWithId(ref_pyramid_left()->GetImage(0), cur_pyramid_left()->GetImage(0), *ref_pixel_uv_left(),
+                                                     *cur_pixel_uv_left(), *ref_ids(), *cur_ids(), tracked_status(),
+                                                     static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked), *ref_tracked_cnt(), *cur_vel(), show_image);
     Visualizor2D::ShowImage(title, show_image);
     Visualizor2D::WaitKey(1);
 
@@ -279,13 +272,13 @@ void FrontendMono::RegisterLogPackages() {
         std::unique_ptr<PackageInfo> package_ptr = std::make_unique<PackageInfo>();
         package_ptr->id = kFrontendMonoCurvesLogIndex;
         package_ptr->name = "frontend_mono";
-        package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint8, .name = "is_keyframe"});
-        package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_old_features"});
-        package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_tracked_features"});
-        package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_inliers"});
-        package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_inliers_after_filter"});
-        package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kUint32, .name = "num_of_new_features"});
-        package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kFloat, .name = "cost_time_ms_of_loop"});
+        package_ptr->items.emplace_back(PackageItemInfo {.type = ItemType::kUint8, .name = "is_keyframe"});
+        package_ptr->items.emplace_back(PackageItemInfo {.type = ItemType::kUint32, .name = "num_of_old_features"});
+        package_ptr->items.emplace_back(PackageItemInfo {.type = ItemType::kUint32, .name = "num_of_tracked_features"});
+        package_ptr->items.emplace_back(PackageItemInfo {.type = ItemType::kUint32, .name = "num_of_inliers"});
+        package_ptr->items.emplace_back(PackageItemInfo {.type = ItemType::kUint32, .name = "num_of_inliers_after_filter"});
+        package_ptr->items.emplace_back(PackageItemInfo {.type = ItemType::kUint32, .name = "num_of_new_features"});
+        package_ptr->items.emplace_back(PackageItemInfo {.type = ItemType::kFloat, .name = "cost_time_ms_of_loop"});
         if (!logger().RegisterPackage(package_ptr)) {
             ReportError("Failed to register package.");
         }
@@ -295,7 +288,7 @@ void FrontendMono::RegisterLogPackages() {
         std::unique_ptr<PackageInfo> package_ptr = std::make_unique<PackageInfo>();
         package_ptr->id = kFrontendMonoTrackingResultIndex;
         package_ptr->name = "frontend_mono_result";
-        package_ptr->items.emplace_back(PackageItemInfo{.type = ItemType::kImage, .name = "track_result"});
+        package_ptr->items.emplace_back(PackageItemInfo {.type = ItemType::kImage, .name = "track_result"});
         if (!logger().RegisterPackage(package_ptr)) {
             ReportError("Failed to register package.");
         }
@@ -312,7 +305,7 @@ void FrontendMono::UpdateFrontendOutputData(const float time_stamp_s) {
     if (output_data().is_current_keyframe) {
         for (uint32_t i = 0; i < ref_pixel_uv_left()->size(); ++i) {
             output_data().features_id.emplace_back((*ref_ids())[i]);
-            output_data().observes_per_frame.emplace_back(PointsObservePerFrame { PointsObservePerView {
+            output_data().observes_per_frame.emplace_back(PointsObservePerFrame {PointsObservePerView {
                 .raw_pixel_uv = (*ref_pixel_uv_left())[i],
                 .rectified_norm_xy = (*ref_norm_xy_left())[i],
                 .bearing_xyz = Vec3((*ref_norm_xy_left())[i].x(), (*ref_norm_xy_left())[i].y(), 1.0f).normalized(),
@@ -323,7 +316,7 @@ void FrontendMono::UpdateFrontendOutputData(const float time_stamp_s) {
         for (uint32_t i = 0; i < cur_pixel_uv_left()->size(); ++i) {
             if (tracked_status()[i] <= static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
                 output_data().features_id.emplace_back((*cur_ids())[i]);
-                output_data().observes_per_frame.emplace_back(PointsObservePerFrame { PointsObservePerView {
+                output_data().observes_per_frame.emplace_back(PointsObservePerFrame {PointsObservePerView {
                     .raw_pixel_uv = (*cur_pixel_uv_left())[i],
                     .rectified_norm_xy = (*cur_norm_xy_left())[i],
                     .bearing_xyz = Vec3((*cur_norm_xy_left())[i].x(), (*cur_norm_xy_left())[i].y(), 1.0f).normalized(),
@@ -333,4 +326,4 @@ void FrontendMono::UpdateFrontendOutputData(const float time_stamp_s) {
     }
 }
 
-}
+}  // namespace VISUAL_FRONTEND
