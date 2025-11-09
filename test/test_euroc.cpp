@@ -21,7 +21,7 @@ using namespace slam_visualizor;
 using namespace image_painter;
 
 namespace {
-using FeatureType = feature_detector::FeaturePointDetector<feature_detector::FastFeature>;
+using FeatureType = feature_detector::FeaturePointFastDetector;
 using KltType = feature_tracker::OpticalFlowBasicKlt;
 
 constexpr bool kEnableDrawingOutputResult = true;
@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
 
     std::vector<std::string> cam0_filenames;
 
-    if (!SlamOperation::GetFilesNameInDirectory("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam0/data", cam0_filenames)) {
+    if (!SlamOperation::GetFilesNameInDirectory("/media/horizon/Database/robotic_datasets/slam/Euroc/MH_01_easy/camera0", cam0_filenames)) {
         if (!SlamOperation::GetFilesNameInDirectory("/mnt/d/My_Github/Datasets/Euroc/MH_01_easy/mav0/cam0/data", cam0_filenames)) {
             RETURN_FALSE_IF_FALSE(SlamOperation::GetFilesNameInDirectory("D:/My_Github/Datasets/Euroc/MH_01_easy/mav0/cam0/data", cam0_filenames));
         }
@@ -251,7 +251,7 @@ int main(int argc, char **argv) {
     std::sort(cam0_filenames.begin(), cam0_filenames.end());
 
     std::vector<std::string> cam1_filenames;
-    if (!SlamOperation::GetFilesNameInDirectory("/home/horizon/Desktop/date_sets/euroc/MH_01_easy/mav0/cam1/data", cam1_filenames)) {
+    if (!SlamOperation::GetFilesNameInDirectory("/media/horizon/Database/robotic_datasets/slam/Euroc/MH_01_easy/camera1", cam1_filenames)) {
         if (!SlamOperation::GetFilesNameInDirectory("/mnt/d/My_Github/Datasets/Euroc/MH_01_easy/mav0/cam1/data", cam1_filenames)) {
             RETURN_FALSE_IF_FALSE(SlamOperation::GetFilesNameInDirectory("D:/My_Github/Datasets/Euroc/MH_01_easy/mav0/cam1/data", cam1_filenames));
         }
