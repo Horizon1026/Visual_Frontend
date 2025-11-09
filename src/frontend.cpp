@@ -2,7 +2,7 @@
 #include "slam_memory.h"
 #include "slam_operations.h"
 
-namespace VISUAL_FRONTEND {
+namespace visual_frontend {
 
 Frontend::Frontend(const uint32_t image_rows, const uint32_t image_cols) {
     options_.kImageRows = image_rows;
@@ -57,4 +57,4 @@ bool Frontend::CheckAllComponents() {
     return true;
 }
 
-}  // namespace VISUAL_FRONTEND
+}  // namespace visual_frontend

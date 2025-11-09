@@ -3,7 +3,7 @@
 
 #include "basic_type.h"
 
-namespace VISUAL_FRONTEND {
+namespace visual_frontend {
 
 /* Visual measurements of points. */
 struct PointsObservePerView {
@@ -47,6 +47,6 @@ struct VisualMixMeasure {
     std::vector<LinesObservePerFrame> lines_observes_per_frame;
 };
 
-}  // namespace VISUAL_FRONTEND
+}  // namespace visual_frontend
 
 #endif  // end of _VISUAL_FRONTEND_OUTPUT_H_

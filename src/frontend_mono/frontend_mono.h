@@ -3,7 +3,7 @@
 
 #include "frontend.h"
 
-namespace VISUAL_FRONTEND {
+namespace visual_frontend {
 
 /* Packages of log to be recorded. */
 #pragma pack(1)
@@ -59,6 +59,6 @@ private:
     FrontendMonoLog log_package_data_;
 };
 
-}  // namespace VISUAL_FRONTEND
+}  // namespace visual_frontend
 
 #endif  // end of _VISUAL_FRONTEND_MONO_H_

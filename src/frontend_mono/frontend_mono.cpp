@@ -4,9 +4,9 @@
 #include "tick_tock.h"
 #include "visualizor_2d.h"
 
-using namespace SLAM_VISUALIZOR;
+using namespace slam_visualizor;
 
-namespace VISUAL_FRONTEND {
+namespace visual_frontend {
 
 constexpr uint32_t kFrontendMonoCurvesLogIndex = 1;
 constexpr uint32_t kFrontendMonoTrackingResultIndex = 2;
@@ -43,7 +43,7 @@ bool FrontendMono::TrackFeatures() {
     // Record log data.
     log_package_data_.num_of_old_features = tracked_status().size();
     log_package_data_.num_of_tracked_features =
-        SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+        SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
     return true;
 }
 
@@ -64,7 +64,7 @@ bool FrontendMono::RejectOutliersByEpipolarConstrain() {
     }
 
     // Record log data.
-    log_package_data_.num_of_inliers = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    log_package_data_.num_of_inliers = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
     return true;
 }
 
@@ -80,22 +80,22 @@ bool FrontendMono::RejectOutliersByTrackingBack() {
     }
 
     for (uint32_t i = 0; i < tracked_status().size(); ++i) {
-        if (tracked_status()[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+        if (tracked_status()[i] == static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked)) {
             if (((*ref_pixel_uv_left())[i] - ref_pixel_uv_left_tracked_back_[i]).squaredNorm() > options().kMaxValidTrackBackPixelResidual) {
-                tracked_status()[i] = static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual);
+                tracked_status()[i] = static_cast<uint8_t>(feature_tracker::TrackStatus::kLargeResidual);
             }
         }
     }
 
     // Record log data.
-    log_package_data_.num_of_inliers = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    log_package_data_.num_of_inliers = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
     return true;
 }
 
 bool FrontendMono::ComputeOpticalFlowVelocity() {
     cur_vel()->resize(ref_pixel_uv_left()->size());
     for (uint32_t i = 0; i < ref_pixel_uv_left()->size(); ++i) {
-        if (tracked_status()[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+        if (tracked_status()[i] == static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked)) {
             (*cur_vel())[i] = (*cur_pixel_uv_left())[i] - (*ref_pixel_uv_left())[i];
         } else {
             (*cur_vel())[i].setZero();
@@ -109,17 +109,17 @@ bool FrontendMono::ComputeOpticalFlowVelocity() {
 
 bool FrontendMono::SparsifyTrackedFeatures() {
     feature_detector()->SparsifyFeatures(*cur_pixel_uv_left(), cur_pyramid_left()->GetImage(0).rows(), cur_pyramid_left()->GetImage(0).cols(),
-                                         static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked),
-                                         static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kNotTracked), tracked_status());
+                                         static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked),
+                                         static_cast<uint8_t>(feature_tracker::TrackStatus::kNotTracked), tracked_status());
 
     // Record log data.
     log_package_data_.num_of_inliers_after_filter =
-        SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+        SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
     return true;
 }
 
 bool FrontendMono::SelectKeyframe() {
-    const uint32_t tracked_num = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    const uint32_t tracked_num = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
     is_cur_image_keyframe() = tracked_num < options().kMinDetectedFeaturePointsNumberInCurrentImage || !options().kSelfSelectKeyframe;
 
     // Record log data.
@@ -130,7 +130,7 @@ bool FrontendMono::SelectKeyframe() {
 bool FrontendMono::AdjustTrackingResultByStatus() {
     // Update tracked statis result.
     for (uint32_t i = 0; i < tracked_status().size(); ++i) {
-        if (tracked_status()[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+        if (tracked_status()[i] == static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked)) {
             ++(*ref_tracked_cnt())[i];
         }
     }
@@ -141,7 +141,7 @@ bool FrontendMono::AdjustTrackingResultByStatus() {
     SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_norm_xy_left());
     SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_vel());
     SlamOperation::ReduceVectorByStatus(tracked_status(), *ref_tracked_cnt());
-    tracked_status().resize(cur_pixel_uv_left()->size(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    tracked_status().resize(cur_pixel_uv_left()->size(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
 
     return true;
 }
@@ -254,7 +254,7 @@ void FrontendMono::DrawTrackingResults(const std::string &title, const float tim
     RgbImage show_image;
     Visualizor2D::DrawImageWithTrackedFeaturesWithId(ref_pyramid_left()->GetImage(0), cur_pyramid_left()->GetImage(0), *ref_pixel_uv_left(),
                                                      *cur_pixel_uv_left(), *ref_ids(), *cur_ids(), tracked_status(),
-                                                     static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked), *ref_tracked_cnt(), *cur_vel(), show_image);
+                                                     static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked), *ref_tracked_cnt(), *cur_vel(), show_image);
     Visualizor2D::ShowImage(title, show_image);
     Visualizor2D::WaitKey(1);
 
@@ -266,7 +266,7 @@ void FrontendMono::DrawTrackingResults(const std::string &title, const float tim
 
 // Support for log recording.
 void FrontendMono::RegisterLogPackages() {
-    using namespace SLAM_DATA_LOG;
+    using namespace slam_data_log;
 
     if (options().kEnableRecordBinaryCurveLog) {
         std::unique_ptr<PackageInfo> package_ptr = std::make_unique<PackageInfo>();
@@ -314,7 +314,7 @@ void FrontendMono::UpdateFrontendOutputData(const float time_stamp_s) {
     } else {
         // If current frame is not keyframe, tracking result will be stored in cur_info.
         for (uint32_t i = 0; i < cur_pixel_uv_left()->size(); ++i) {
-            if (tracked_status()[i] <= static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+            if (tracked_status()[i] <= static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked)) {
                 output_data().features_id.emplace_back((*cur_ids())[i]);
                 output_data().observes_per_frame.emplace_back(PointsObservePerFrame {PointsObservePerView {
                     .raw_pixel_uv = (*cur_pixel_uv_left())[i],
@@ -326,4 +326,4 @@ void FrontendMono::UpdateFrontendOutputData(const float time_stamp_s) {
     }
 }
 
-}  // namespace VISUAL_FRONTEND
+}  // namespace visual_frontend

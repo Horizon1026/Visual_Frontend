@@ -20,7 +20,7 @@
 
 #include "memory"
 
-namespace VISUAL_FRONTEND {
+namespace visual_frontend {
 
 /* Options for Class Frontend. */
 struct FrontendOptions {
@@ -61,11 +61,11 @@ public:
     // Reference for member variables.
     FrontendOptions &options() { return options_; }
 
-    std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>> &feature_detector() { return feature_detector_; }
-    std::unique_ptr<FEATURE_TRACKER::OpticalFlow> &feature_tracker() { return feature_tracker_; }
-    std::vector<std::unique_ptr<SENSOR_MODEL::CameraBasic>> &camera_models() { return camera_models_; }
-    std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() { return epipolar_solver_; }
-    std::unique_ptr<IMAGE_PROCESSOR::ImageProcessor> &image_processor() { return image_processor_; }
+    std::unique_ptr<feature_detector::FeaturePointDetector<feature_detector::FastFeature>> &feature_detector() { return feature_detector_; }
+    std::unique_ptr<feature_tracker::OpticalFlow> &feature_tracker() { return feature_tracker_; }
+    std::vector<std::unique_ptr<sensor_model::CameraBasic>> &camera_models() { return camera_models_; }
+    std::unique_ptr<vision_geometry::EpipolarSolver> &epipolar_solver() { return epipolar_solver_; }
+    std::unique_ptr<image_processor::ImageProcessor> &image_processor() { return image_processor_; }
 
     uint8_t *&stored_buff() { return stored_buff_; }
     std::vector<uint8_t> &tracked_status() { return tracked_status_; }
@@ -95,16 +95,16 @@ public:
     uint32_t &feature_id_cnt() { return feature_id_cnt_; }
     bool &is_cur_image_keyframe() { return is_cur_image_keyframe_; }
     VisualPointsMeasure &output_data() { return output_data_; }
-    SLAM_DATA_LOG::BinaryDataLog &logger() { return logger_; }
+    slam_data_log::BinaryDataLog &logger() { return logger_; }
 
     // Const reference for member variables.
     const FrontendOptions &options() const { return options_; }
 
-    const std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>> &feature_detector() const { return feature_detector_; }
-    const std::unique_ptr<FEATURE_TRACKER::OpticalFlow> &feature_tracker() const { return feature_tracker_; }
-    const std::vector<std::unique_ptr<SENSOR_MODEL::CameraBasic>> &camera_models() const { return camera_models_; }
-    const std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> &epipolar_solver() const { return epipolar_solver_; }
-    const std::unique_ptr<IMAGE_PROCESSOR::ImageProcessor> &image_processor() const { return image_processor_; }
+    const std::unique_ptr<feature_detector::FeaturePointDetector<feature_detector::FastFeature>> &feature_detector() const { return feature_detector_; }
+    const std::unique_ptr<feature_tracker::OpticalFlow> &feature_tracker() const { return feature_tracker_; }
+    const std::vector<std::unique_ptr<sensor_model::CameraBasic>> &camera_models() const { return camera_models_; }
+    const std::unique_ptr<vision_geometry::EpipolarSolver> &epipolar_solver() const { return epipolar_solver_; }
+    const std::unique_ptr<image_processor::ImageProcessor> &image_processor() const { return image_processor_; }
 
     const uint8_t *stored_buff() const { return stored_buff_; }
     const std::vector<uint8_t> &tracked_status() const { return tracked_status_; }
@@ -134,7 +134,7 @@ public:
     const uint32_t &feature_id_cnt() const { return feature_id_cnt_; }
     const bool &is_cur_image_keyframe() const { return is_cur_image_keyframe_; }
     const VisualPointsMeasure &output_data() const { return output_data_; }
-    const SLAM_DATA_LOG::BinaryDataLog &logger() const { return logger_; }
+    const slam_data_log::BinaryDataLog &logger() const { return logger_; }
 
     // Check every components.
     virtual bool CheckAllComponents();
@@ -144,11 +144,11 @@ private:
     FrontendOptions options_;
 
     // Components.
-    std::unique_ptr<FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>> feature_detector_ = nullptr;
-    std::unique_ptr<FEATURE_TRACKER::OpticalFlow> feature_tracker_ = nullptr;
-    std::vector<std::unique_ptr<SENSOR_MODEL::CameraBasic>> camera_models_;
-    std::unique_ptr<VISION_GEOMETRY::EpipolarSolver> epipolar_solver_ = nullptr;
-    std::unique_ptr<IMAGE_PROCESSOR::ImageProcessor> image_processor_ = nullptr;
+    std::unique_ptr<feature_detector::FeaturePointDetector<feature_detector::FastFeature>> feature_detector_ = nullptr;
+    std::unique_ptr<feature_tracker::OpticalFlow> feature_tracker_ = nullptr;
+    std::vector<std::unique_ptr<sensor_model::CameraBasic>> camera_models_;
+    std::unique_ptr<vision_geometry::EpipolarSolver> epipolar_solver_ = nullptr;
+    std::unique_ptr<image_processor::ImageProcessor> image_processor_ = nullptr;
 
     // Buffer allocated for visual frontend.
     uint8_t *stored_buff_ = nullptr;
@@ -192,9 +192,9 @@ private:
     VisualPointsMeasure output_data_;
 
     // Record log.
-    SLAM_DATA_LOG::BinaryDataLog logger_;
+    slam_data_log::BinaryDataLog logger_;
 };
 
-}  // namespace VISUAL_FRONTEND
+}  // namespace visual_frontend
 
 #endif  // end of _VISUAL_FRONTEND_H_

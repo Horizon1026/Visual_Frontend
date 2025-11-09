@@ -4,9 +4,9 @@
 #include "tick_tock.h"
 #include "visualizor_2d.h"
 
-using namespace SLAM_VISUALIZOR;
+using namespace slam_visualizor;
 
-namespace VISUAL_FRONTEND {
+namespace visual_frontend {
 
 constexpr uint32_t kFrontendStereoCurvesLogIndex = 1;
 constexpr uint32_t kFrontendStereoTrackingResultIndex = 2;
@@ -48,7 +48,7 @@ bool FrontendStereo::TrackFeaturesFromRefernceLeftToCurrentLeftImage() {
     // Record log data.
     log_package_data_.num_of_old_features_in_only_left = ref_pixel_uv_left()->size();
     log_package_data_.num_of_tracked_features_in_only_left =
-        SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+        SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
 
     return true;
 }
@@ -74,9 +74,9 @@ bool FrontendStereo::RejectOutliersBetweenRefernceLeftAndCurrentLeftImage() {
         }
 
         for (uint32_t i = 0; i < tracked_status().size(); ++i) {
-            if (tracked_status()[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+            if (tracked_status()[i] == static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked)) {
                 if (((*ref_pixel_uv_left())[i] - ref_pixel_uv_left_tracked_back_[i]).squaredNorm() > options().kMaxValidTrackBackPixelResidual) {
-                    tracked_status()[i] = static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual);
+                    tracked_status()[i] = static_cast<uint8_t>(feature_tracker::TrackStatus::kLargeResidual);
                 }
             }
         }
@@ -90,14 +90,14 @@ bool FrontendStereo::RejectOutliersBetweenRefernceLeftAndCurrentLeftImage() {
 
     // Record log data.
     log_package_data_.num_of_inliers_in_only_left =
-        SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+        SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
     return true;
 }
 
 bool FrontendStereo::ComputeOpticalFlowVelocity() {
     cur_vel()->resize(ref_pixel_uv_left()->size());
     for (uint32_t i = 0; i < ref_pixel_uv_left()->size(); ++i) {
-        if (tracked_status()[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+        if (tracked_status()[i] == static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked)) {
             (*cur_vel())[i] = (*cur_pixel_uv_left())[i] - (*ref_pixel_uv_left())[i];
         } else {
             (*cur_vel())[i].setZero();
@@ -109,10 +109,10 @@ bool FrontendStereo::ComputeOpticalFlowVelocity() {
 
 bool FrontendStereo::SparsifyTrackedFeaturesInLeft() {
     feature_detector()->SparsifyFeatures(*cur_pixel_uv_left(), cur_pyramid_left()->GetImage(0).rows(), cur_pyramid_left()->GetImage(0).cols(),
-                                         static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked),
-                                         static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kNotTracked), tracked_status());
+                                         static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked),
+                                         static_cast<uint8_t>(feature_tracker::TrackStatus::kNotTracked), tracked_status());
     const int32_t num_of_inliers_after_filter_in_only_left =
-        SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+        SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
 
     // Record log data.
     log_package_data_.num_of_inliers_after_filter_in_only_left = num_of_inliers_after_filter_in_only_left;
@@ -137,7 +137,7 @@ bool FrontendStereo::TrackFeaturesFromCurrentLeftToCurrentRightImage(const GrayI
 
     // Record log data.
     log_package_data_.num_of_tracked_feature_from_left_to_right =
-        SlamOperation::StatisItemInVector(*cur_stereo_tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+        SlamOperation::StatisItemInVector(*cur_stereo_tracked_status_, static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
     return true;
 }
 
@@ -154,7 +154,7 @@ bool FrontendStereo::RejectOutliersBetweenCurrentLeftToCurrentRightImage() {
         for (uint32_t i = 0; i < cur_stereo_tracked_status_->size(); ++i) {
             if (std::fabs((*cur_norm_xy_left())[i].y() - (*cur_norm_xy_right())[i].y()) >
                 kMaxAllowedNonEpipolarDirectionPixelResidual / camera_models()[0]->fy()) {
-                (*cur_stereo_tracked_status_)[i] = static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kLargeResidual);
+                (*cur_stereo_tracked_status_)[i] = static_cast<uint8_t>(feature_tracker::TrackStatus::kLargeResidual);
             }
         }
     } else {
@@ -168,12 +168,12 @@ bool FrontendStereo::RejectOutliersBetweenCurrentLeftToCurrentRightImage() {
 
     // Record log data.
     log_package_data_.num_of_inliers_from_left_to_right =
-        SlamOperation::StatisItemInVector(*cur_stereo_tracked_status_, static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+        SlamOperation::StatisItemInVector(*cur_stereo_tracked_status_, static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
     return true;
 }
 
 bool FrontendStereo::SelectKeyframe() {
-    const uint32_t tracked_num = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    const uint32_t tracked_num = SlamOperation::StatisItemInVector(tracked_status(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
     is_cur_image_keyframe() = tracked_num < options().kMinDetectedFeaturePointsNumberInCurrentImage || !options().kSelfSelectKeyframe;
     // Record log data.
     log_package_data_.is_keyframe = is_cur_image_keyframe();
@@ -183,7 +183,7 @@ bool FrontendStereo::SelectKeyframe() {
 bool FrontendStereo::AdjustTrackingResultByStatus() {
     // Update tracked statis result.
     for (uint32_t i = 0; i < tracked_status().size(); ++i) {
-        if (tracked_status()[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+        if (tracked_status()[i] == static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked)) {
             ++(*ref_tracked_cnt())[i];
         }
     }
@@ -197,7 +197,7 @@ bool FrontendStereo::AdjustTrackingResultByStatus() {
     SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_vel());
     SlamOperation::ReduceVectorByStatus(tracked_status(), *ref_tracked_cnt());
     SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_stereo_tracked_status_);
-    tracked_status().resize(cur_pixel_uv_left()->size(), static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
+    tracked_status().resize(cur_pixel_uv_left()->size(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
 
     return true;
 }
@@ -214,8 +214,8 @@ bool FrontendStereo::SupplememtNewFeatures(const GrayImage &cur_image_left) {
         camera_models()[0]->LiftFromImagePlaneToNormalizedPlaneAndUndistort((*cur_pixel_uv_left())[i + old_features_num], temp_cur_norm_xy_left);
         cur_norm_xy_left()->emplace_back(temp_cur_norm_xy_left);
         ref_tracked_cnt()->emplace_back(1);
-        tracked_status().emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked));
-        cur_stereo_tracked_status_->emplace_back(static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kNotTracked));
+        tracked_status().emplace_back(static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
+        cur_stereo_tracked_status_->emplace_back(static_cast<uint8_t>(feature_tracker::TrackStatus::kNotTracked));
 
         ++feature_id_cnt();
     }
@@ -313,7 +313,7 @@ void FrontendStereo::DrawTrackingResults(const std::string &title, const float t
                                                      cur_pyramid_right()->GetImage(0), *ref_pixel_uv_left(), *ref_pixel_uv_right(), *cur_pixel_uv_left(),
                                                      *cur_pixel_uv_right(), *ref_ids(), *ref_ids(), *cur_ids(), *cur_ids(), tracked_status(),
                                                      *ref_stereo_tracked_status_, *cur_stereo_tracked_status_,
-                                                     static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked), *ref_tracked_cnt(), *cur_vel(), show_image);
+                                                     static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked), *ref_tracked_cnt(), *cur_vel(), show_image);
     Visualizor2D::ShowImage(title, show_image);
     Visualizor2D::WaitKey(1);
 
@@ -324,7 +324,7 @@ void FrontendStereo::DrawTrackingResults(const std::string &title, const float t
 
 // Support for log recording.
 void FrontendStereo::RegisterLogPackages() {
-    using namespace SLAM_DATA_LOG;
+    using namespace slam_data_log;
 
     if (options().kEnableRecordBinaryCurveLog) {
         std::unique_ptr<PackageInfo> package_ptr = std::make_unique<PackageInfo>();
@@ -371,7 +371,7 @@ void FrontendStereo::UpdateFrontendOutputData(const float time_stamp_s) {
                 .bearing_xyz = Vec3((*ref_norm_xy_left())[i].x(), (*ref_norm_xy_left())[i].y(), 1.0f).normalized(),
             }});
 
-            if ((*ref_stereo_tracked_status_)[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+            if ((*ref_stereo_tracked_status_)[i] == static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked)) {
                 output_data().observes_per_frame.back().emplace_back(PointsObservePerView {
                     .raw_pixel_uv = (*ref_pixel_uv_right())[i],
                     .rectified_norm_xy = (*ref_norm_xy_right())[i],
@@ -382,7 +382,7 @@ void FrontendStereo::UpdateFrontendOutputData(const float time_stamp_s) {
     } else {
         // If current frame is not keyframe, tracking result will be stored in cur_info.
         for (uint32_t i = 0; i < cur_pixel_uv_left()->size(); ++i) {
-            if (tracked_status()[i] <= static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+            if (tracked_status()[i] <= static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked)) {
                 output_data().features_id.emplace_back((*cur_ids())[i]);
                 output_data().observes_per_frame.emplace_back(PointsObservePerFrame {PointsObservePerView {
                     .raw_pixel_uv = (*cur_pixel_uv_left())[i],
@@ -390,7 +390,7 @@ void FrontendStereo::UpdateFrontendOutputData(const float time_stamp_s) {
                     .bearing_xyz = Vec3((*cur_norm_xy_left())[i].x(), (*cur_norm_xy_left())[i].y(), 1.0f).normalized(),
                 }});
 
-                if ((*cur_stereo_tracked_status_)[i] == static_cast<uint8_t>(FEATURE_TRACKER::TrackStatus::kTracked)) {
+                if ((*cur_stereo_tracked_status_)[i] == static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked)) {
                     output_data().observes_per_frame.back().emplace_back(PointsObservePerView {
                         .raw_pixel_uv = (*cur_pixel_uv_right())[i],
                         .rectified_norm_xy = (*cur_norm_xy_right())[i],
@@ -402,4 +402,4 @@ void FrontendStereo::UpdateFrontendOutputData(const float time_stamp_s) {
     }
 }
 
-}  // namespace VISUAL_FRONTEND
+}  // namespace visual_frontend

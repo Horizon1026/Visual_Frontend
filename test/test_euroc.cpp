@@ -17,12 +17,12 @@
 #include "unistd.h"
 #include "vector"
 
-using namespace SLAM_VISUALIZOR;
-using namespace IMAGE_PAINTER;
+using namespace slam_visualizor;
+using namespace image_painter;
 
 namespace {
-using FeatureType = FEATURE_DETECTOR::FeaturePointDetector<FEATURE_DETECTOR::FastFeature>;
-using KltType = FEATURE_TRACKER::OpticalFlowBasicKlt;
+using FeatureType = feature_detector::FeaturePointDetector<feature_detector::FastFeature>;
+using KltType = feature_tracker::OpticalFlowBasicKlt;
 
 constexpr bool kEnableDrawingOutputResult = true;
 constexpr bool kEnableRecordCurveLog = true;
@@ -30,7 +30,7 @@ constexpr bool kEnableRecordImageLog = true;
 constexpr bool kEnableDrawingTrackingResult = true;
 }  // namespace
 
-void ShowFrontendMonoOutput(const VISUAL_FRONTEND::FrontendMono &frontend, const GrayImage &image) {
+void ShowFrontendMonoOutput(const visual_frontend::FrontendMono &frontend, const GrayImage &image) {
     // Show output data.
     if (kEnableDrawingOutputResult) {
         const auto &output = frontend.output_data();
@@ -67,7 +67,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     // Config frontend.
     GrayImage image;
     Visualizor2D::LoadImage(cam0_filenames.front(), image);
-    VISUAL_FRONTEND::FrontendMono frontend(image.rows(), image.cols());
+    visual_frontend::FrontendMono frontend(image.rows(), image.cols());
     frontend.options().kEnableRecordBinaryCurveLog = kEnableRecordCurveLog;
     frontend.options().kEnableRecordBinaryImageLog = kEnableRecordImageLog;
     frontend.options().kEnableShowVisualizeResult = kEnableDrawingTrackingResult;
@@ -86,12 +86,12 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     const float k3 = 0.0f;
     const float p1 = 0.00019359f;
     const float p2 = 1.76187114e-05f;
-    frontend.camera_models().emplace_back(std::make_unique<SENSOR_MODEL::Pinhole>());
+    frontend.camera_models().emplace_back(std::make_unique<sensor_model::Pinhole>());
     frontend.camera_models().back()->SetIntrinsicParameter(fx, fy, cx, cy);
     frontend.camera_models().back()->SetDistortionParameter(std::vector<float> {k1, k2, k3, p1, p2});
 
     // Config image processor.
-    // frontend.image_processor() = std::make_unique<IMAGE_PROCESSOR::CensusProcessor>();
+    // frontend.image_processor() = std::make_unique<image_processor::CensusProcessor>();
 
     // Config feature detector.
     frontend.feature_detector() = std::make_unique<FeatureType>();
@@ -101,14 +101,14 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
 
     // Config optical flow tracker.
     frontend.feature_tracker() = std::make_unique<KltType>();
-    frontend.feature_tracker()->options().kMethod = FEATURE_TRACKER::OpticalFlowMethod::kFast;
+    frontend.feature_tracker()->options().kMethod = feature_tracker::OpticalFlowMethod::kFast;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
     frontend.feature_tracker()->options().kPatchColHalfSize = 6;
     frontend.feature_tracker()->options().kMaxIteration = 15;
 
     // Config epipolar solver. Disable it for better performance.
-    // frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
-    // frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
+    // frontend.epipolar_solver() = std::make_unique<vision_geometry::EpipolarSolver>();
+    // frontend.epipolar_solver()->options().kMethod = vision_geometry::EpipolarSolver::EpipolarMethod::kRansac;
     // frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
     float time_stamp_s = 0.0f;
@@ -122,7 +122,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     }
 }
 
-void ShowFrontendStereoOutput(const VISUAL_FRONTEND::FrontendStereo &frontend, const GrayImage &image_left, const GrayImage &image_right) {
+void ShowFrontendStereoOutput(const visual_frontend::FrontendStereo &frontend, const GrayImage &image_left, const GrayImage &image_right) {
     // Show output data.
     if (kEnableDrawingOutputResult) {
         const auto &output = frontend.output_data();
@@ -179,7 +179,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     // Config frontend.
     GrayImage image;
     Visualizor2D::LoadImage(cam0_filenames.front(), image);
-    VISUAL_FRONTEND::FrontendStereo frontend(image.rows(), image.cols());
+    visual_frontend::FrontendStereo frontend(image.rows(), image.cols());
     frontend.options().kEnableRecordBinaryCurveLog = kEnableRecordCurveLog;
     frontend.options().kEnableRecordBinaryImageLog = kEnableRecordImageLog;
     frontend.options().kEnableShowVisualizeResult = kEnableDrawingTrackingResult;
@@ -199,11 +199,11 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     const float p1 = 0.00019359f;
     const float p2 = 1.76187114e-05f;
     // Left camera model.
-    frontend.camera_models().emplace_back(std::make_unique<SENSOR_MODEL::Pinhole>());
+    frontend.camera_models().emplace_back(std::make_unique<sensor_model::Pinhole>());
     frontend.camera_models().back()->SetIntrinsicParameter(fx, fy, cx, cy);
     frontend.camera_models().back()->SetDistortionParameter(std::vector<float> {k1, k2, k3, p1, p2});
     // Right camera model.
-    frontend.camera_models().emplace_back(std::make_unique<SENSOR_MODEL::Pinhole>());
+    frontend.camera_models().emplace_back(std::make_unique<sensor_model::Pinhole>());
     frontend.camera_models().back()->SetIntrinsicParameter(fx, fy, cx, cy);
     frontend.camera_models().back()->SetDistortionParameter(std::vector<float> {k1, k2, k3, p1, p2});
 
@@ -215,14 +215,14 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
 
     // Config optical flow tracker.
     frontend.feature_tracker() = std::make_unique<KltType>();
-    frontend.feature_tracker()->options().kMethod = FEATURE_TRACKER::OpticalFlowMethod::kFast;
+    frontend.feature_tracker()->options().kMethod = feature_tracker::OpticalFlowMethod::kFast;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
     frontend.feature_tracker()->options().kPatchColHalfSize = 6;
     frontend.feature_tracker()->options().kMaxIteration = 15;
 
     // Config epipolar solver.
-    // frontend.epipolar_solver() = std::make_unique<VISION_GEOMETRY::EpipolarSolver>();
-    // frontend.epipolar_solver()->options().kMethod = VISION_GEOMETRY::EpipolarSolver::EpipolarMethod::kRansac;
+    // frontend.epipolar_solver() = std::make_unique<vision_geometry::EpipolarSolver>();
+    // frontend.epipolar_solver()->options().kMethod = vision_geometry::EpipolarSolver::EpipolarMethod::kRansac;
     // frontend.epipolar_solver()->options().kMaxEpipolarResidual = 3e-2f;
 
     float time_stamp_s = 0.0f;
