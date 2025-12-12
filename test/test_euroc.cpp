@@ -4,7 +4,7 @@
 #include "optical_flow_affine_klt.h"
 #include "optical_flow_basic_klt.h"
 #include "optical_flow_lssd_klt.h"
-#include "pinhole.h"
+#include "camera_model.h"
 #include "slam_log_reporter.h"
 #include "slam_memory.h"
 
@@ -86,7 +86,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
     const float k3 = 0.0f;
     const float p1 = 0.00019359f;
     const float p2 = 1.76187114e-05f;
-    frontend.camera_models().emplace_back(std::make_unique<sensor_model::Pinhole>());
+    frontend.camera_models().emplace_back(std::make_unique<sensor_model::CameraPinholeRadtan>());
     frontend.camera_models().back()->SetIntrinsicParameter(fx, fy, cx, cy);
     frontend.camera_models().back()->SetDistortionParameter(std::vector<float> {k1, k2, k3, p1, p2});
 
@@ -199,11 +199,11 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
     const float p1 = 0.00019359f;
     const float p2 = 1.76187114e-05f;
     // Left camera model.
-    frontend.camera_models().emplace_back(std::make_unique<sensor_model::Pinhole>());
+    frontend.camera_models().emplace_back(std::make_unique<sensor_model::CameraPinholeRadtan>());
     frontend.camera_models().back()->SetIntrinsicParameter(fx, fy, cx, cy);
     frontend.camera_models().back()->SetDistortionParameter(std::vector<float> {k1, k2, k3, p1, p2});
     // Right camera model.
-    frontend.camera_models().emplace_back(std::make_unique<sensor_model::Pinhole>());
+    frontend.camera_models().emplace_back(std::make_unique<sensor_model::CameraPinholeRadtan>());
     frontend.camera_models().back()->SetIntrinsicParameter(fx, fy, cx, cy);
     frontend.camera_models().back()->SetDistortionParameter(std::vector<float> {k1, k2, k3, p1, p2});
 
