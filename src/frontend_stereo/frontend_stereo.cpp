@@ -197,7 +197,7 @@ bool FrontendStereo::AdjustTrackingResultByStatus() {
     SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_vel());
     SlamOperation::ReduceVectorByStatus(tracked_status(), *ref_tracked_cnt());
     SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_stereo_tracked_status_);
-    tracked_status().resize(cur_pixel_uv_left()->size(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
+    tracked_status().assign(cur_pixel_uv_left()->size(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
 
     return true;
 }

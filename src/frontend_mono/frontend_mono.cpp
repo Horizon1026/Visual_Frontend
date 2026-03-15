@@ -141,7 +141,7 @@ bool FrontendMono::AdjustTrackingResultByStatus() {
     SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_norm_xy_left());
     SlamOperation::ReduceVectorByStatus(tracked_status(), *cur_vel());
     SlamOperation::ReduceVectorByStatus(tracked_status(), *ref_tracked_cnt());
-    tracked_status().resize(cur_pixel_uv_left()->size(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
+    tracked_status().assign(cur_pixel_uv_left()->size(), static_cast<uint8_t>(feature_tracker::TrackStatus::kTracked));
 
     return true;
 }
