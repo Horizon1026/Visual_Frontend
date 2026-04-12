@@ -19,6 +19,8 @@ struct VisualPointsMeasure {
     std::vector<uint32_t> features_id;
     // observes_per_frame[feature_id][camera_id] -> PointsObservePerView.
     std::vector<PointsObservePerFrame> observes_per_frame;
+    std::vector<Vec> feature_descriptors;
+    Vec image_descriptor;
 };
 
 /* Visual measurements of lines. */
@@ -34,6 +36,8 @@ struct VisualLinesMeasure {
     std::vector<uint32_t> features_id;
     // observes_per_frame[feature_id][camera_id] -> PointsObservePerView.
     std::vector<LinesObservePerFrame> observes_per_frame;
+    std::vector<Vec> feature_descriptors;
+    Vec image_descriptor;
 };
 
 /* Visual measurements of all types. */
@@ -43,8 +47,11 @@ struct VisualMixMeasure {
     int32_t direction_id = 0;
     std::vector<uint32_t> points_id;
     std::vector<PointsObservePerFrame> points_observes_per_frame;
+    std::vector<Vec> point_descriptors;
     std::vector<uint32_t> lines_id;
     std::vector<LinesObservePerFrame> lines_observes_per_frame;
+    std::vector<Vec> line_descriptors;
+    Vec image_descriptor;
 };
 
 }  // namespace visual_frontend
