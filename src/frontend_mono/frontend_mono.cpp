@@ -182,7 +182,7 @@ bool FrontendMono::MakeCurrentFrameKeyframe() {
     return true;
 }
 
-bool FrontendMono::RunOnce(const GrayImage &cur_image, const float time_stamp_s) {
+bool FrontendMono::RunOnce(const GrayImage &cur_image, const double time_stamp_s) {
     TickTock timer;
 
     // If components is not valid, return false.
@@ -246,7 +246,7 @@ bool FrontendMono::RunOnce(const GrayImage &cur_image, const float time_stamp_s)
 }
 
 // Draw tracking results.
-void FrontendMono::DrawTrackingResults(const std::string &title, const float time_stamp_s) {
+void FrontendMono::DrawTrackingResults(const std::string &title, const double time_stamp_s) {
     if (!options().kEnableShowVisualizeResult) {
         return;
     }
@@ -296,7 +296,7 @@ void FrontendMono::RegisterLogPackages() {
 }
 
 // Update frontend result.
-void FrontendMono::UpdateFrontendOutputData(const float time_stamp_s) {
+void FrontendMono::UpdateFrontendOutputData(const double time_stamp_s) {
     output_data().features_id.clear();
     output_data().observes_per_frame.clear();
     output_data().is_current_keyframe = is_cur_image_keyframe();

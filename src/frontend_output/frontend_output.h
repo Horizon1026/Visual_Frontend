@@ -14,7 +14,7 @@ struct PointsObservePerView {
 using PointsObservePerFrame = std::vector<PointsObservePerView>;
 struct VisualPointsMeasure {
     bool is_current_keyframe = true;
-    float time_stamp_s = -1.0f;
+    double time_stamp_s = -1.0;
     int32_t direction_id = 0;
     std::vector<uint32_t> features_id;
     // observes_per_frame[feature_id][camera_id] -> PointsObservePerView.
@@ -31,7 +31,7 @@ struct LinesObservePerView {
 using LinesObservePerFrame = std::vector<LinesObservePerView>;
 struct VisualLinesMeasure {
     bool is_current_keyframe = true;
-    float time_stamp_s = -1.0f;
+    double time_stamp_s = -1.0;
     int32_t direction_id = 0;
     std::vector<uint32_t> features_id;
     // observes_per_frame[feature_id][camera_id] -> PointsObservePerView.
@@ -43,7 +43,7 @@ struct VisualLinesMeasure {
 /* Visual measurements of all types. */
 struct VisualMixMeasure {
     bool is_current_keyframe = true;
-    float time_stamp_s = -1.0f;
+    double time_stamp_s = -1.0;
     int32_t direction_id = 0;
     std::vector<uint32_t> points_id;
     std::vector<PointsObservePerFrame> points_observes_per_frame;

@@ -244,7 +244,7 @@ bool FrontendStereo::MakeCurrentFrameKeyframe() {
     return true;
 }
 
-bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &cur_image_right, const float time_stamp_s) {
+bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &cur_image_right, const double time_stamp_s) {
     TickTock timer;
 
     // If components is not valid, return false.
@@ -303,7 +303,7 @@ bool FrontendStereo::RunOnce(const GrayImage &cur_image_left, const GrayImage &c
 }
 
 // Draw tracking results.
-void FrontendStereo::DrawTrackingResults(const std::string &title, const float time_stamp_s) {
+void FrontendStereo::DrawTrackingResults(const std::string &title, const double time_stamp_s) {
     if (!options().kEnableShowVisualizeResult) {
         return;
     }
@@ -356,7 +356,7 @@ void FrontendStereo::RegisterLogPackages() {
 }
 
 // Update frontend result.
-void FrontendStereo::UpdateFrontendOutputData(const float time_stamp_s) {
+void FrontendStereo::UpdateFrontendOutputData(const double time_stamp_s) {
     output_data().features_id.clear();
     output_data().observes_per_frame.clear();
     output_data().is_current_keyframe = is_cur_image_keyframe();

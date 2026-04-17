@@ -31,13 +31,13 @@ public:
     virtual ~FrontendStereo() = default;
 
     // Frontend is driven by mono image or stereo images.
-    virtual bool RunOnce(const GrayImage &image_left, const GrayImage &image_right, const float time_stamp_s) override;
+    virtual bool RunOnce(const GrayImage &image_left, const GrayImage &image_right, const double time_stamp_s) override;
     // Draw tracking results.
-    virtual void DrawTrackingResults(const std::string &title, const float time_stamp_s) override;
+    virtual void DrawTrackingResults(const std::string &title, const double time_stamp_s) override;
     // Support for log recording.
     virtual void RegisterLogPackages() override;
     // Update frontend result.
-    virtual void UpdateFrontendOutputData(const float time_stamp_s) override;
+    virtual void UpdateFrontendOutputData(const double time_stamp_s) override;
 
     // Reference for member variables.
     Pixel &half_patch_size_for_stereo_tracking() { return half_patch_size_for_stereo_tracking_; }

@@ -29,13 +29,13 @@ public:
     virtual ~FrontendMono() = default;
 
     // Frontend is driven by mono image.
-    virtual bool RunOnce(const GrayImage &image, const float time_stamp_s) override;
+    virtual bool RunOnce(const GrayImage &image, const double time_stamp_s) override;
     // Draw tracking results.
-    virtual void DrawTrackingResults(const std::string &title, const float time_stamp_s) override;
+    virtual void DrawTrackingResults(const std::string &title, const double time_stamp_s) override;
     // Support for log recording.
     virtual void RegisterLogPackages() override;
     // Update frontend result.
-    virtual void UpdateFrontendOutputData(const float time_stamp_s) override;
+    virtual void UpdateFrontendOutputData(const double time_stamp_s) override;
 
 private:
     bool ProcessSourceImage(const GrayImage &cur_image);
