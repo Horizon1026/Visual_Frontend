@@ -21,6 +21,7 @@ struct VisualPointsMeasure {
     std::vector<PointsObservePerFrame> observes_per_frame;
     std::vector<Vec> feature_descriptors;
     Vec image_descriptor;
+    MatImg image_mat;
 };
 
 /* Visual measurements of lines. */
@@ -38,6 +39,7 @@ struct VisualLinesMeasure {
     std::vector<LinesObservePerFrame> observes_per_frame;
     std::vector<Vec> feature_descriptors;
     Vec image_descriptor;
+    MatImg image_mat;
 };
 
 /* Visual measurements of all types. */
@@ -52,6 +54,7 @@ struct VisualMixMeasure {
     std::vector<LinesObservePerFrame> lines_observes_per_frame;
     std::vector<Vec> line_descriptors;
     Vec image_descriptor;
+    MatImg image_mat;
 };
 
 }  // namespace visual_frontend
