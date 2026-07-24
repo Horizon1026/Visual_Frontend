@@ -16,12 +16,18 @@ struct VisualPointsMeasure {
     bool is_current_keyframe = true;
     double time_stamp_s = -1.0;
     int32_t direction_id = 0;
+    // Basic visual measures.
     std::vector<uint32_t> features_id;
-    // observes_per_frame[feature_id][camera_id] -> PointsObservePerView.
-    std::vector<PointsObservePerFrame> observes_per_frame;
+    std::vector<PointsObservePerFrame> observes_per_frame;  // observes_per_frame[feature_id][camera_id] -> PointsObservePerView.
     std::vector<Vec> feature_descriptors;
+    // Measure for loop detection.
     Vec image_descriptor;
     MatImg image_mat;
+    // Measure from ToF.
+    float image_center_depth_m = 0;
+    // Params for rolling shutter camera.
+    double rs_read_out_time_s = 0.0;
+    int32_t rs_mid_row_index = 0;
 };
 
 /* Visual measurements of lines. */
@@ -34,12 +40,18 @@ struct VisualLinesMeasure {
     bool is_current_keyframe = true;
     double time_stamp_s = -1.0;
     int32_t direction_id = 0;
+    // Basic visual measures.
     std::vector<uint32_t> features_id;
-    // observes_per_frame[feature_id][camera_id] -> PointsObservePerView.
-    std::vector<LinesObservePerFrame> observes_per_frame;
+    std::vector<LinesObservePerFrame> observes_per_frame;   // observes_per_frame[feature_id][camera_id] -> PointsObservePerView.
     std::vector<Vec> feature_descriptors;
+    // Measure for loop detection.
     Vec image_descriptor;
     MatImg image_mat;
+    // Measure from ToF.
+    float image_center_depth_m = 0;
+    // Params for rolling shutter camera.
+    double rs_read_out_time_s = 0.0;
+    int32_t rs_mid_row_index = 0;
 };
 
 /* Visual measurements of all types. */
@@ -47,14 +59,21 @@ struct VisualMixMeasure {
     bool is_current_keyframe = true;
     double time_stamp_s = -1.0;
     int32_t direction_id = 0;
+    // Basic visual measures.
     std::vector<uint32_t> points_id;
-    std::vector<PointsObservePerFrame> points_observes_per_frame;
+    std::vector<PointsObservePerFrame> points_observes_per_frame;   // points_observes_per_frame[feature_id][camera_id] -> PointsObservePerView.
     std::vector<Vec> point_descriptors;
     std::vector<uint32_t> lines_id;
-    std::vector<LinesObservePerFrame> lines_observes_per_frame;
+    std::vector<LinesObservePerFrame> lines_observes_per_frame;     // lines_observes_per_frame[feature_id][camera_id] -> LinesObservePerView.
     std::vector<Vec> line_descriptors;
+    // Measure for loop detection.
     Vec image_descriptor;
     MatImg image_mat;
+    // Measure from ToF.
+    float image_center_depth_m = 0;
+    // Params for rolling shutter camera.
+    double rs_read_out_time_s = 0.0;
+    int32_t rs_mid_row_index = 0;
 };
 
 }  // namespace visual_frontend
