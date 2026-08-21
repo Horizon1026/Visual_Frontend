@@ -26,10 +26,10 @@ A general and simple visual frontend consulting VINS-Mono.
 - Image_Processor
 - Binary_Data_Log
 - Visualizor2D
+- Image_Painter
 
 ### Third-party repositories
 - Eigen3 (>= 3.3.7)（`sudo apt install libeigen3-dev`）
-- dw (`sudo apt install libdw-dev`)
 
 # Compile and Run
 - 第三方仓库的话需要自行 apt-get install 安装
