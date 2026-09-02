@@ -1,4 +1,5 @@
 #include "frontend.h"
+
 #include "slam_memory.h"
 #include "slam_operations.h"
 

@@ -1,20 +1,20 @@
-#include "census.h"
 #include "frontend_mono.h"
 #include "frontend_stereo.h"
+
+#include "census.h"
 #include "optical_flow_affine_klt.h"
 #include "optical_flow_basic_klt.h"
 #include "optical_flow_lssd_klt.h"
 #include "camera_model.h"
 #include "slam_log_reporter.h"
 #include "slam_memory.h"
-
 #include "image_painter.h"
 #include "visualizor_2d.h"
+#include "dirent.h"
+#include "unistd.h"
 
 #include "cstring"
-#include "dirent.h"
 #include "iostream"
-#include "unistd.h"
 #include "vector"
 
 using namespace slam_visualizor;

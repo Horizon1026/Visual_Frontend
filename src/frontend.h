@@ -1,21 +1,18 @@
 #ifndef _VISUAL_FRONTEND_H_
 #define _VISUAL_FRONTEND_H_
 
+#include "frontend_output.h"
+
 #include "basic_type.h"
 #include "datatype_image.h"
 #include "datatype_image_pyramid.h"
-
-#include "frontend_output.h"
-
 #include "feature_point_detector.h"
 #include "feature_point_fast_detector.h"
 #include "feature_point_harris_detector.h"
-
 #include "camera_pinhole.h"
 #include "geometry_epipolar.h"
 #include "image_processor.h"
 #include "optical_flow.h"
-
 #include "binary_data_log.h"
 
 #include "memory"

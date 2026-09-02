@@ -1,4 +1,5 @@
 #include "frontend_stereo.h"
+
 #include "slam_log_reporter.h"
 #include "slam_operations.h"
 #include "tick_tock.h"
