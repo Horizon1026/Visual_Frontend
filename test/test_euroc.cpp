@@ -101,7 +101,7 @@ void TestFrontendMono(const std::vector<std::string> &cam0_filenames) {
 
     // Config optical flow tracker.
     frontend.feature_tracker() = std::make_unique<KltType>();
-    frontend.feature_tracker()->options().kMethod = feature_tracker::OpticalFlowMethod::kFast;
+    frontend.feature_tracker()->options().kMethod = feature_tracker::OpticalFlow::Method::kFast;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
     frontend.feature_tracker()->options().kPatchColHalfSize = 6;
     frontend.feature_tracker()->options().kMaxIteration = 15;
@@ -215,7 +215,7 @@ void TestFrontendStereo(const std::vector<std::string> &cam0_filenames, const st
 
     // Config optical flow tracker.
     frontend.feature_tracker() = std::make_unique<KltType>();
-    frontend.feature_tracker()->options().kMethod = feature_tracker::OpticalFlowMethod::kFast;
+    frontend.feature_tracker()->options().kMethod = feature_tracker::OpticalFlow::Method::kFast;
     frontend.feature_tracker()->options().kPatchRowHalfSize = 6;
     frontend.feature_tracker()->options().kPatchColHalfSize = 6;
     frontend.feature_tracker()->options().kMaxIteration = 15;

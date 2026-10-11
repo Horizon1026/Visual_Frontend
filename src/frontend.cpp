@@ -46,7 +46,7 @@ bool Frontend::Initialize(const std::string &log_file_name) {
 }
 
 Frontend::~Frontend() {
-    if (stored_buff_ == nullptr) {
+    if (stored_buff_ != nullptr) {
         SlamMemory::Free(stored_buff_);
     }
 }
