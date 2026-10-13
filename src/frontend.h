@@ -60,7 +60,7 @@ public:
 
     std::unique_ptr<feature_detector::FeaturePointDetector> &feature_detector() { return feature_detector_; }
     std::unique_ptr<feature_tracker::OpticalFlow> &feature_tracker() { return feature_tracker_; }
-    std::vector<std::unique_ptr<sensor_model::CameraPinhole>> &camera_models() { return camera_models_; }
+    std::vector<std::unique_ptr<sensor_model::BasicCameraModel>> &camera_models() { return camera_models_; }
     std::unique_ptr<vision_geometry::EpipolarSolver> &epipolar_solver() { return epipolar_solver_; }
     std::unique_ptr<image_processor::ImageProcessor> &image_processor() { return image_processor_; }
 
@@ -99,7 +99,7 @@ public:
 
     const std::unique_ptr<feature_detector::FeaturePointDetector> &feature_detector() const { return feature_detector_; }
     const std::unique_ptr<feature_tracker::OpticalFlow> &feature_tracker() const { return feature_tracker_; }
-    const std::vector<std::unique_ptr<sensor_model::CameraPinhole>> &camera_models() const { return camera_models_; }
+    const std::vector<std::unique_ptr<sensor_model::BasicCameraModel>> &camera_models() const { return camera_models_; }
     const std::unique_ptr<vision_geometry::EpipolarSolver> &epipolar_solver() const { return epipolar_solver_; }
     const std::unique_ptr<image_processor::ImageProcessor> &image_processor() const { return image_processor_; }
 
@@ -143,7 +143,7 @@ private:
     // Components.
     std::unique_ptr<feature_detector::FeaturePointDetector> feature_detector_ = nullptr;
     std::unique_ptr<feature_tracker::OpticalFlow> feature_tracker_ = nullptr;
-    std::vector<std::unique_ptr<sensor_model::CameraPinhole>> camera_models_;
+    std::vector<std::unique_ptr<sensor_model::BasicCameraModel>> camera_models_;
     std::unique_ptr<vision_geometry::EpipolarSolver> epipolar_solver_ = nullptr;
     std::unique_ptr<image_processor::ImageProcessor> image_processor_ = nullptr;
 
